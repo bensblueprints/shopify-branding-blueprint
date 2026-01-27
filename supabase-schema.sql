@@ -322,7 +322,7 @@ INSERT INTO products (product_key, name, description, price_cents, compare_price
 -- Password will be set on first login
 -- =============================================
 INSERT INTO admin_users (email, full_name, role) VALUES
-('admin@advancedmarketingco', 'Admin', 'super_admin');
+('admin@advancedmarketing.co', 'Admin', 'super_admin');
 
 -- =============================================
 -- SEED DATA: Main Course
