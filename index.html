@@ -15,11 +15,11 @@
     <script>
         const GHL_CONFIG = {
             // Your GHL location URL
-            locationUrl: "https://fl5rL3eZQWBq2GYlDPkl.app.clientclub.net",
+            locationUrl: "https://api.loopflo.io",
 
             // Order Form IDs (create these in GHL: Payments > Order Forms)
             orderForms: {
-                mainCourse: "YOUR_MAIN_ORDER_FORM_ID",      // $27 course + $17 bump
+                mainCourse: "4x4DX4Z5ZmbrxTNXlodz",      // $27 course + $17 bump
                 canvaKit: "YOUR_CANVA_KIT_FORM_ID",         // $27 upsell
                 emailSwipe: "YOUR_EMAIL_SWIPE_FORM_ID",     // $19 upsell
                 fbAdsMasterclass: "YOUR_FB_ADS_FORM_ID",    // $97 upsell
@@ -1699,33 +1699,27 @@
                     <div class="ghl-checkout-container">
                         <h3>Complete Your Order</h3>
 
-                        <!--
-                            =====================================================
-                            GOHIGHLEVEL ORDER FORM EMBED
-                            =====================================================
-                            Replace this placeholder with your GHL order form.
-
-                            Option 1: iframe embed (recommended)
-                            <div class="ghl-order-form-wrapper">
-                                <iframe src="YOUR_GHL_LOCATION_URL/v2/preview/ORDER_FORM_ID"></iframe>
-                            </div>
-
-                            Option 2: JavaScript embed
-                            <div id="ghl-order-form"></div>
-                            <script src="YOUR_GHL_LOCATION_URL/js/form_embed.js"></script>
-                            =====================================================
-                        -->
-                        <div class="ghl-form-placeholder" id="ghl-main-form">
-                            <p><strong>GoHighLevel Order Form Placeholder</strong></p>
-                            <p>Replace this with your GHL order form embed code.</p>
-                            <p>Your form ID:</p>
-                            <code id="form-id-display">Loading...</code>
-                            <br>
-                            <a href="#" class="cta-button" onclick="openCheckout('main')" style="max-width: 300px; margin-top: 20px;">
-                                Proceed to Checkout →
-                            </a>
+                        <div class="ghl-order-form-wrapper">
+                            <iframe
+                                src="https://api.loopflo.io/widget/form/4x4DX4Z5ZmbrxTNXlodz"
+                                style="width:100%;height:700px;border:none;border-radius:12px"
+                                id="inline-4x4DX4Z5ZmbrxTNXlodz"
+                                data-layout="{'id':'INLINE'}"
+                                data-trigger-type="alwaysShow"
+                                data-trigger-value=""
+                                data-activation-type="alwaysActivated"
+                                data-activation-value=""
+                                data-deactivation-type="neverDeactivate"
+                                data-deactivation-value=""
+                                data-form-name="Shopify Blueprint Checkout"
+                                data-height="700"
+                                data-layout-iframe-id="inline-4x4DX4Z5ZmbrxTNXlodz"
+                                data-form-id="4x4DX4Z5ZmbrxTNXlodz"
+                                title="Shopify Blueprint Checkout"
+                            ></iframe>
                         </div>
                     </div>
+                    <script src="https://api.loopflo.io/js/form_embed.js"></script>
 
                     <p class="cta-subtext"><span>🔒</span> Secure checkout powered by Stripe • 30-Day Money Back Guarantee</p>
                 </div>
