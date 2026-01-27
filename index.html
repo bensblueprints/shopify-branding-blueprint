@@ -7,6 +7,41 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- ========================================
+         GOHIGHLEVEL CONFIGURATION
+         Replace these placeholder values with your actual GHL IDs
+         ======================================== -->
+    <script>
+        const GHL_CONFIG = {
+            // Your GHL location URL (e.g., "https://myagency.clientclub.net")
+            locationUrl: "YOUR_GHL_LOCATION_URL",
+
+            // Order Form IDs (get these from Payments > Order Forms in GHL)
+            orderForms: {
+                mainCourse: "YOUR_MAIN_ORDER_FORM_ID",           // $27 course with bumps
+                fbAdsMasterclass: "YOUR_FB_ADS_ORDER_FORM_ID",   // $97 upsell
+                innerCircle: "YOUR_INNER_CIRCLE_ORDER_FORM_ID"   // $47/mo upsell
+            },
+
+            // Product IDs (for tracking)
+            products: {
+                mainCourse: "prod_main_course",
+                brandNameGenerator: "prod_brand_name",
+                canvaBrandKit: "prod_canva_kit",
+                emailSwipeFile: "prod_email_swipe",
+                fbAdsMasterclass: "prod_fb_ads",
+                innerCircle: "prod_inner_circle"
+            },
+
+            // Thank you page URL after purchase
+            thankYouPage: "YOUR_THANK_YOU_PAGE_URL",
+
+            // Membership/Course access URL
+            courseAccessUrl: "YOUR_COURSE_ACCESS_URL"
+        };
+    </script>
+
     <style>
         :root {
             --bg-primary: #0a0a0a;
@@ -44,14 +79,12 @@
             overflow-x: hidden;
         }
 
-        /* Typography */
         h1, h2, h3, h4 {
             font-family: 'Instrument Serif', serif;
             font-weight: 400;
             line-height: 1.2;
         }
 
-        /* Noise texture overlay */
         body::before {
             content: '';
             position: fixed;
@@ -702,93 +735,65 @@
             flex-shrink: 0;
         }
 
-        /* Order Bumps */
-        .order-bumps {
+        /* GHL Order Form Embed Container */
+        .ghl-checkout-container {
             border-top: 1px solid var(--border-subtle);
             padding-top: 32px;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
         }
 
-        .bumps-title {
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            margin-bottom: 16px;
+        .ghl-checkout-container h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
         }
 
-        .bump-item {
+        /* Placeholder for GHL iframe */
+        .ghl-form-placeholder {
             background: var(--bg-primary);
             border: 2px dashed var(--border-gold);
             border-radius: 16px;
-            padding: 20px 24px;
-            margin-bottom: 12px;
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            align-items: center;
-            gap: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .bump-item:hover {
-            border-style: solid;
-            background: var(--bg-tertiary);
-        }
-
-        .bump-item.selected {
-            border-color: var(--gold-primary);
-            border-style: solid;
-            background: var(--bg-tertiary);
-        }
-
-        .bump-checkbox {
-            width: 24px;
-            height: 24px;
-            border: 2px solid var(--gold-primary);
-            border-radius: 6px;
+            padding: 40px;
+            text-align: center;
+            min-height: 400px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 16px;
+        }
+
+        .ghl-form-placeholder p {
+            color: var(--text-muted);
             font-size: 14px;
+        }
+
+        .ghl-form-placeholder code {
+            background: var(--bg-tertiary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
             color: var(--gold-primary);
-            transition: all 0.3s ease;
+            word-break: break-all;
         }
 
-        .bump-item.selected .bump-checkbox {
-            background: var(--gold-primary);
-            color: var(--bg-primary);
+        /* When GHL form is loaded */
+        .ghl-order-form-wrapper {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            overflow: hidden;
+            min-height: 500px;
         }
 
-        .bump-content h4 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 4px;
+        .ghl-order-form-wrapper iframe {
+            width: 100%;
+            min-height: 500px;
+            border: none;
         }
 
-        .bump-content p {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        .bump-price {
-            text-align: right;
-        }
-
-        .bump-price .original {
-            font-size: 13px;
-            color: var(--text-muted);
-            text-decoration: line-through;
-        }
-
-        .bump-price .current {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--gold-primary);
-        }
-
-        /* CTA Button */
+        /* CTA Button (fallback/direct link) */
         .cta-button {
             width: 100%;
             padding: 20px 32px;
@@ -803,6 +808,9 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            text-decoration: none;
+            display: block;
+            text-align: center;
         }
 
         .cta-button::before {
@@ -962,6 +970,7 @@
 
         .upsell-features {
             margin-bottom: 24px;
+            list-style: none;
         }
 
         .upsell-features li {
@@ -1009,6 +1018,9 @@
             color: var(--gold-primary);
             cursor: pointer;
             transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+            text-align: center;
         }
 
         .upsell-button:hover {
@@ -1223,10 +1235,78 @@
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
+            text-decoration: none;
         }
 
         .countdown-cta:hover {
             background: var(--gold-light);
+        }
+
+        /* Checkout Modal */
+        .checkout-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .checkout-modal.active {
+            display: flex;
+        }
+
+        .checkout-modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-gold);
+            border-radius: 24px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .checkout-modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .checkout-modal-header h3 {
+            font-size: 24px;
+        }
+
+        .checkout-modal-close {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 50%;
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .checkout-modal-close:hover {
+            background: var(--red-accent);
+            color: white;
+            border-color: var(--red-accent);
+        }
+
+        .checkout-modal-body {
+            padding: 24px;
         }
 
         /* Responsive */
@@ -1576,7 +1656,7 @@
         </div>
     </section>
 
-    <!-- Pricing Section -->
+    <!-- Pricing Section with GHL Integration -->
     <section class="pricing-section" id="pricing">
         <div class="container">
             <div class="pricing-wrapper">
@@ -1612,51 +1692,39 @@
                         </div>
                     </div>
 
-                    <!-- Order Bumps -->
-                    <div class="order-bumps">
-                        <div class="bumps-title">⚡ Recommended Add-Ons (One-Time Offer)</div>
+                    <!-- GHL Order Form Container -->
+                    <div class="ghl-checkout-container">
+                        <h3>Complete Your Order</h3>
 
-                        <div class="bump-item" onclick="toggleBump(this)">
-                            <div class="bump-checkbox">✓</div>
-                            <div class="bump-content">
-                                <h4>Brand Name Generator + Trademark Guide</h4>
-                                <p>AI-powered naming tool + step-by-step USPTO trademark filing guide. Never get stuck on naming again.</p>
-                            </div>
-                            <div class="bump-price">
-                                <div class="original">$47</div>
-                                <div class="current">$17</div>
-                            </div>
-                        </div>
+                        <!--
+                            =====================================================
+                            GOHIGHLEVEL ORDER FORM EMBED
+                            =====================================================
+                            Replace this placeholder with your GHL order form.
 
-                        <div class="bump-item" onclick="toggleBump(this)">
-                            <div class="bump-checkbox">✓</div>
-                            <div class="bump-content">
-                                <h4>Done-For-You Canva Brand Kit</h4>
-                                <p>50+ premium templates for logos, social posts, packaging labels, and email headers. Just customize colors.</p>
+                            Option 1: iframe embed (recommended)
+                            <div class="ghl-order-form-wrapper">
+                                <iframe src="YOUR_GHL_LOCATION_URL/v2/preview/ORDER_FORM_ID"></iframe>
                             </div>
-                            <div class="bump-price">
-                                <div class="original">$97</div>
-                                <div class="current">$27</div>
-                            </div>
-                        </div>
 
-                        <div class="bump-item" onclick="toggleBump(this)">
-                            <div class="bump-checkbox">✓</div>
-                            <div class="bump-content">
-                                <h4>Email Sequence Swipe File</h4>
-                                <p>Copy-paste welcome series, abandoned cart, and post-purchase sequences that convert at 35%+.</p>
-                            </div>
-                            <div class="bump-price">
-                                <div class="original">$67</div>
-                                <div class="current">$19</div>
-                            </div>
+                            Option 2: JavaScript embed
+                            <div id="ghl-order-form"></div>
+                            <script src="YOUR_GHL_LOCATION_URL/js/form_embed.js"></script>
+                            =====================================================
+                        -->
+                        <div class="ghl-form-placeholder" id="ghl-main-form">
+                            <p><strong>GoHighLevel Order Form Placeholder</strong></p>
+                            <p>Replace this with your GHL order form embed code.</p>
+                            <p>Your form ID:</p>
+                            <code id="form-id-display">Loading...</code>
+                            <br>
+                            <a href="#" class="cta-button" onclick="openCheckout('main')" style="max-width: 300px; margin-top: 20px;">
+                                Proceed to Checkout →
+                            </a>
                         </div>
                     </div>
 
-                    <button class="cta-button" onclick="checkout()">
-                        Get Instant Access Now →
-                    </button>
-                    <p class="cta-subtext"><span>🔒</span> Secure checkout • 30-Day Money Back Guarantee</p>
+                    <p class="cta-subtext"><span>🔒</span> Secure checkout powered by Stripe • 30-Day Money Back Guarantee</p>
                 </div>
             </div>
         </div>
@@ -1678,7 +1746,7 @@
         </div>
     </section>
 
-    <!-- Upsells -->
+    <!-- Upsells with GHL Integration -->
     <section class="upsell-section">
         <div class="container">
             <span class="section-label">Level Up</span>
@@ -1699,7 +1767,7 @@
                         <span class="old">$297</span>
                         <span class="current">$97</span>
                     </div>
-                    <button class="upsell-button">Add to Order</button>
+                    <a href="#" class="upsell-button" onclick="openCheckout('fbAds'); return false;">Add to Order</a>
                 </div>
 
                 <div class="upsell-card featured">
@@ -1716,7 +1784,7 @@
                         <span class="old">$97/mo</span>
                         <span class="current">$47/mo</span>
                     </div>
-                    <button class="upsell-button">Start 7-Day Trial</button>
+                    <a href="#" class="upsell-button" onclick="openCheckout('innerCircle'); return false;">Start 7-Day Trial</a>
                 </div>
             </div>
         </div>
@@ -1833,12 +1901,108 @@
                 <small>Secs</small>
             </div>
         </div>
-        <button class="countdown-cta" onclick="document.getElementById('pricing').scrollIntoView({behavior: 'smooth'})">
-            Claim 70% Off →
-        </button>
+        <a href="#pricing" class="countdown-cta">Claim 70% Off →</a>
+    </div>
+
+    <!-- Checkout Modal for GHL -->
+    <div class="checkout-modal" id="checkout-modal">
+        <div class="checkout-modal-content">
+            <div class="checkout-modal-header">
+                <h3 id="modal-title">Complete Your Purchase</h3>
+                <button class="checkout-modal-close" onclick="closeCheckout()">×</button>
+            </div>
+            <div class="checkout-modal-body" id="modal-body">
+                <!-- GHL form will be injected here -->
+            </div>
+        </div>
     </div>
 
     <script>
+        // =====================================================
+        // GOHIGHLEVEL INTEGRATION FUNCTIONS
+        // =====================================================
+
+        // Display current config
+        document.getElementById('form-id-display').textContent = GHL_CONFIG.orderForms.mainCourse;
+
+        // Open checkout modal with appropriate GHL form
+        function openCheckout(product) {
+            const modal = document.getElementById('checkout-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+
+            let formUrl = '';
+            let title = '';
+
+            switch(product) {
+                case 'main':
+                    formUrl = `${GHL_CONFIG.locationUrl}/v2/preview/${GHL_CONFIG.orderForms.mainCourse}`;
+                    title = '7-Day Shopify Branding Blueprint';
+                    break;
+                case 'fbAds':
+                    formUrl = `${GHL_CONFIG.locationUrl}/v2/preview/${GHL_CONFIG.orderForms.fbAdsMasterclass}`;
+                    title = 'Facebook Ads Masterclass';
+                    break;
+                case 'innerCircle':
+                    formUrl = `${GHL_CONFIG.locationUrl}/v2/preview/${GHL_CONFIG.orderForms.innerCircle}`;
+                    title = 'Brand Builder\'s Inner Circle';
+                    break;
+            }
+
+            modalTitle.textContent = title;
+
+            // Check if GHL is configured
+            if (GHL_CONFIG.locationUrl === 'YOUR_GHL_LOCATION_URL') {
+                modalBody.innerHTML = `
+                    <div style="text-align: center; padding: 40px;">
+                        <p style="color: var(--gold-primary); font-size: 18px; margin-bottom: 16px;">⚠️ GoHighLevel Not Configured</p>
+                        <p style="color: var(--text-secondary); margin-bottom: 24px;">To enable checkout, update the GHL_CONFIG in the HTML file with your:</p>
+                        <ul style="text-align: left; color: var(--text-muted); margin-bottom: 24px;">
+                            <li>GoHighLevel location URL</li>
+                            <li>Order form IDs</li>
+                            <li>Product IDs</li>
+                        </ul>
+                        <p style="color: var(--text-muted); font-size: 14px;">See the setup guide for detailed instructions.</p>
+                    </div>
+                `;
+            } else {
+                // Embed the GHL form
+                modalBody.innerHTML = `
+                    <iframe
+                        src="${formUrl}"
+                        style="width: 100%; min-height: 600px; border: none;"
+                        allow="payment"
+                    ></iframe>
+                `;
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCheckout() {
+            document.getElementById('checkout-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on backdrop click
+        document.getElementById('checkout-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCheckout();
+            }
+        });
+
+        // Close modal on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeCheckout();
+            }
+        });
+
+        // =====================================================
+        // OTHER FUNCTIONS
+        // =====================================================
+
         // Countdown Timer
         function updateCountdown() {
             const now = new Date();
@@ -1859,47 +2023,14 @@
         setInterval(updateCountdown, 1000);
         updateCountdown();
 
-        // Toggle Order Bump
-        function toggleBump(element) {
-            element.classList.toggle('selected');
-            updateTotal();
-        }
-
-        // Update Total Price
-        function updateTotal() {
-            let total = 27;
-            const selectedBumps = document.querySelectorAll('.bump-item.selected');
-            selectedBumps.forEach(bump => {
-                const priceText = bump.querySelector('.current').textContent;
-                total += parseInt(priceText.replace('$', ''));
-            });
-            // You could update a total display here
-        }
-
         // Toggle FAQ
         function toggleFaq(element) {
-            // Close all other FAQs
             document.querySelectorAll('.faq-item').forEach(item => {
                 if (item !== element) {
                     item.classList.remove('open');
                 }
             });
             element.classList.toggle('open');
-        }
-
-        // Checkout function placeholder
-        function checkout() {
-            const selectedBumps = document.querySelectorAll('.bump-item.selected');
-            let items = ['7-Day Shopify Branding Blueprint'];
-
-            selectedBumps.forEach(bump => {
-                const name = bump.querySelector('h4').textContent;
-                items.push(name);
-            });
-
-            console.log('Checkout items:', items);
-            alert('Redirecting to checkout with: ' + items.join(', '));
-            // In production, this would redirect to your payment processor
         }
 
         // Scroll animations
