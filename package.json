@@ -1,0 +1,8 @@
+{
+  "name": "shopify-blueprint-landing",
+  "version": "1.0.0",
+  "description": "7-Day Shopify Branding Blueprint Landing Page",
+  "dependencies": {
+    "stripe": "^14.0.0"
+  }
+}

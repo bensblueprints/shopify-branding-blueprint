@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Special One-Time Offer | Shopify Branding Blueprint</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: #141414;
+            --gold-primary: #d4a853;
+            --gold-light: #e8c47c;
+            --gold-dark: #b8923f;
+            --gold-glow: rgba(212, 168, 83, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --red-accent: #e74c3c;
+            --green-accent: #27ae60;
+            --border-subtle: rgba(255,255,255,0.06);
+            --border-gold: rgba(212, 168, 83, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Instrument Serif', serif;
+            font-weight: 400;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* Header */
+        .upsell-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .wait-badge {
+            display: inline-block;
+            background: var(--red-accent);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .upsell-header h1 {
+            font-size: clamp(32px, 5vw, 48px);
+            margin-bottom: 16px;
+        }
+
+        .upsell-header h1 em {
+            color: var(--gold-primary);
+            font-style: italic;
+        }
+
+        .upsell-header p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Upsell Card */
+        .upsell-card {
+            background: linear-gradient(145deg, var(--bg-tertiary), var(--bg-secondary));
+            border: 2px solid var(--gold-primary);
+            border-radius: 24px;
+            padding: 48px;
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upsell-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gold-dark), var(--gold-primary), var(--gold-light));
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--gold-primary);
+            color: var(--bg-primary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .upsell-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gold-glow);
+            border: 2px solid var(--border-gold);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 24px;
+        }
+
+        .upsell-card h2 {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+
+        .upsell-card > p {
+            color: var(--text-secondary);
+            font-size: 18px;
+            margin-bottom: 24px;
+        }
+
+        .features-list {
+            list-style: none;
+            margin-bottom: 32px;
+        }
+
+        .features-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            font-size: 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .features-list li:last-child {
+            border-bottom: none;
+        }
+
+        .features-list li::before {
+            content: '✓';
+            width: 28px;
+            height: 28px;
+            background: rgba(39, 174, 96, 0.15);
+            color: var(--green-accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* Pricing */
+        .pricing-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px;
+            background: var(--bg-primary);
+            border-radius: 16px;
+            margin-bottom: 24px;
+        }
+
+        .price-info {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+        }
+
+        .price-old {
+            font-size: 24px;
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+
+        .price-new {
+            font-family: 'Instrument Serif', serif;
+            font-size: 48px;
+            color: var(--gold-primary);
+        }
+
+        .price-new sup {
+            font-size: 24px;
+        }
+
+        .savings-badge {
+            background: var(--green-accent);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .btn-yes {
+            width: 100%;
+            padding: 20px 32px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
+            border: none;
+            border-radius: 16px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--bg-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-yes:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(212, 168, 83, 0.3);
+        }
+
+        .btn-yes:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-yes .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,0.2);
+            border-top-color: var(--bg-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        .btn-yes.loading .spinner {
+            display: inline-block;
+        }
+
+        .btn-yes.loading .btn-text {
+            opacity: 0.7;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-no {
+            width: 100%;
+            padding: 16px 32px;
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-no:hover {
+            border-color: var(--text-muted);
+            color: var(--text-secondary);
+        }
+
+        /* Guarantee */
+        .guarantee {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            margin-top: 24px;
+        }
+
+        .guarantee-icon {
+            font-size: 32px;
+        }
+
+        .guarantee p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Progress indicator */
+        .progress-bar {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 40px;
+        }
+
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-subtle);
+            transition: all 0.3s ease;
+        }
+
+        .progress-dot.active {
+            background: var(--gold-primary);
+            border-color: var(--gold-primary);
+        }
+
+        .progress-dot.completed {
+            background: var(--green-accent);
+            border-color: var(--green-accent);
+        }
+
+        /* Success State */
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(39, 174, 96, 0.15);
+            color: var(--green-accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 24px;
+        }
+
+        .success-message h3 {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        .success-message p {
+            color: var(--text-secondary);
+        }
+
+        /* Error message */
+        .error-message {
+            display: none;
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid var(--red-accent);
+            color: var(--red-accent);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .upsell-card {
+                padding: 32px 24px;
+            }
+
+            .pricing-row {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-dot completed"></div>
+            <div class="progress-dot active" id="dot-1"></div>
+            <div class="progress-dot" id="dot-2"></div>
+            <div class="progress-dot" id="dot-3"></div>
+            <div class="progress-dot" id="dot-4"></div>
+        </div>
+
+        <!-- Upsell Header -->
+        <div class="upsell-header">
+            <div class="wait-badge">Wait! Your Order Is Not Complete</div>
+            <h1 id="upsell-title">Add This to Your Order for <em>One Click</em></h1>
+            <p id="upsell-subtitle">Since you're already investing in your brand, here's a special one-time offer just for you.</p>
+        </div>
+
+        <!-- Upsell Card -->
+        <div class="upsell-card" id="upsell-card">
+            <div class="product-badge">ONE-TIME OFFER</div>
+
+            <div class="upsell-icon" id="upsell-icon">🎨</div>
+
+            <h2 id="product-name">Done-For-You Canva Brand Kit</h2>
+
+            <p id="product-description">Skip the design struggle. Get 50+ premium templates ready to customize with your brand colors and logo.</p>
+
+            <ul class="features-list" id="features-list">
+                <li>Logo templates & variations</li>
+                <li>Social media post templates</li>
+                <li>Packaging & label designs</li>
+                <li>Email header templates</li>
+            </ul>
+
+            <div class="pricing-row">
+                <div class="price-info">
+                    <span class="price-old" id="price-old">$97</span>
+                    <span class="price-new" id="price-new"><sup>$</sup>27</span>
+                </div>
+                <div class="savings-badge" id="savings-badge">Save 72%</div>
+            </div>
+
+            <div class="error-message" id="error-message"></div>
+
+            <div class="button-group">
+                <button class="btn-yes" id="btn-yes" onclick="acceptOffer()">
+                    <span class="spinner"></span>
+                    <span class="btn-text">Yes! Add This To My Order →</span>
+                </button>
+                <button class="btn-no" id="btn-no" onclick="declineOffer()">
+                    No thanks, I don't want to save time on design
+                </button>
+            </div>
+
+            <div class="guarantee">
+                <div class="guarantee-icon">🔒</div>
+                <p>Your card will be charged instantly. Same 30-day money-back guarantee applies to this purchase.</p>
+            </div>
+
+            <!-- Success State -->
+            <div class="success-message" id="success-message">
+                <div class="success-icon">✓</div>
+                <h3>Added to Your Order!</h3>
+                <p id="success-text">The Canva Brand Kit has been added. Check your email for access.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Upsell products in order
+        const UPSELLS = [
+            {
+                key: 'canva_kit',
+                icon: '🎨',
+                name: 'Done-For-You Canva Brand Kit',
+                description: 'Skip the design struggle. Get 50+ premium templates ready to customize with your brand colors and logo.',
+                features: [
+                    'Logo templates & variations',
+                    'Social media post templates',
+                    'Packaging & label designs',
+                    'Email header templates'
+                ],
+                priceOld: '$97',
+                priceNew: '27',
+                savings: 'Save 72%',
+                declineText: "No thanks, I don't want to save time on design"
+            },
+            {
+                key: 'email_swipe',
+                icon: '📧',
+                name: 'Email Sequence Swipe File',
+                description: 'Copy-paste email sequences that convert at 35%+. Welcome series, abandoned cart, and post-purchase flows ready to deploy.',
+                features: [
+                    '7-email welcome sequence',
+                    '3-email abandoned cart flow',
+                    'Post-purchase upsell sequence',
+                    'Win-back campaign templates'
+                ],
+                priceOld: '$67',
+                priceNew: '19',
+                savings: 'Save 71%',
+                declineText: "No thanks, I'll write my own emails"
+            },
+            {
+                key: 'fb_ads',
+                icon: '🎯',
+                name: 'Facebook Ads for Brands Masterclass',
+                description: 'The exact ad strategies that work for brand-building. Learn to acquire customers profitably while building long-term brand equity.',
+                features: [
+                    'Brand-first ad creative frameworks',
+                    'Retargeting sequences that build loyalty',
+                    'LTV-optimized campaign structures',
+                    '$0-$10K/month ad scaling roadmap'
+                ],
+                priceOld: '$297',
+                priceNew: '97',
+                savings: 'Save 67%',
+                declineText: "No thanks, I don't need help with ads"
+            },
+            {
+                key: 'inner_circle',
+                icon: '🚀',
+                name: "Brand Builder's Inner Circle",
+                description: 'Monthly coaching calls, private community, and direct access to 7-figure brand owners. Get your questions answered and your brand reviewed.',
+                features: [
+                    '2x monthly live coaching calls',
+                    'Private community access',
+                    'Monthly brand audits & feedback',
+                    'Supplier introductions & discounts'
+                ],
+                priceOld: '$97/mo',
+                priceNew: '47',
+                priceSuffix: '/mo',
+                savings: 'Save 51%',
+                declineText: "No thanks, I'll figure it out alone"
+            }
+        ];
+
+        let currentUpsell = 0;
+        let upsellToken = null;
+        let purchasedProducts = [];
+
+        // Get token from URL
+        function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            upsellToken = urlParams.get('token');
+
+            if (!upsellToken) {
+                // No token - redirect to main page
+                window.location.href = '/';
+                return;
+            }
+
+            // Check for starting upsell index
+            const startIndex = parseInt(urlParams.get('step')) || 0;
+            currentUpsell = Math.min(startIndex, UPSELLS.length - 1);
+
+            renderUpsell();
+        }
+
+        function renderUpsell() {
+            const upsell = UPSELLS[currentUpsell];
+
+            // Update progress dots
+            document.querySelectorAll('.progress-dot').forEach((dot, i) => {
+                dot.classList.remove('active', 'completed');
+                if (i === 0) {
+                    dot.classList.add('completed'); // Initial purchase
+                } else if (i - 1 < currentUpsell) {
+                    dot.classList.add('completed');
+                } else if (i - 1 === currentUpsell) {
+                    dot.classList.add('active');
+                }
+            });
+
+            // Update content
+            document.getElementById('upsell-icon').textContent = upsell.icon;
+            document.getElementById('product-name').textContent = upsell.name;
+            document.getElementById('product-description').textContent = upsell.description;
+            document.getElementById('price-old').textContent = upsell.priceOld;
+            document.getElementById('price-new').innerHTML = `<sup>$</sup>${upsell.priceNew}${upsell.priceSuffix || ''}`;
+            document.getElementById('savings-badge').textContent = upsell.savings;
+            document.getElementById('btn-no').textContent = upsell.declineText;
+
+            // Update features
+            const featuresList = document.getElementById('features-list');
+            featuresList.innerHTML = upsell.features.map(f => `<li>${f}</li>`).join('');
+
+            // Reset states
+            document.getElementById('error-message').classList.remove('show');
+            document.getElementById('success-message').classList.remove('show');
+            document.getElementById('btn-yes').disabled = false;
+            document.getElementById('btn-yes').classList.remove('loading');
+            document.getElementById('upsell-card').style.display = 'block';
+        }
+
+        async function acceptOffer() {
+            const btn = document.getElementById('btn-yes');
+            const errorEl = document.getElementById('error-message');
+
+            btn.disabled = true;
+            btn.classList.add('loading');
+            errorEl.classList.remove('show');
+
+            const upsell = UPSELLS[currentUpsell];
+
+            try {
+                const response = await fetch('/.netlify/functions/one-click-charge', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        token: upsellToken,
+                        productKey: upsell.key
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Show success
+                    purchasedProducts.push(upsell.key);
+                    document.getElementById('success-text').textContent =
+                        `${upsell.name} has been added to your order. Check your email for access.`;
+                    document.getElementById('success-message').classList.add('show');
+                    document.querySelector('.button-group').style.display = 'none';
+                    document.querySelector('.pricing-row').style.display = 'none';
+                    document.querySelector('.features-list').style.display = 'none';
+
+                    // Move to next upsell after delay
+                    setTimeout(() => {
+                        nextUpsell();
+                    }, 2000);
+                } else {
+                    errorEl.textContent = data.error || 'Payment failed. Please try again.';
+                    errorEl.classList.add('show');
+                    btn.disabled = false;
+                    btn.classList.remove('loading');
+                }
+            } catch (err) {
+                errorEl.textContent = 'Something went wrong. Please try again.';
+                errorEl.classList.add('show');
+                btn.disabled = false;
+                btn.classList.remove('loading');
+            }
+        }
+
+        function declineOffer() {
+            nextUpsell();
+        }
+
+        function nextUpsell() {
+            currentUpsell++;
+
+            if (currentUpsell >= UPSELLS.length) {
+                // All upsells shown - go to thank you
+                goToThankYou();
+            } else {
+                // Reset and show next upsell
+                document.querySelector('.button-group').style.display = 'flex';
+                document.querySelector('.pricing-row').style.display = 'flex';
+                document.querySelector('.features-list').style.display = 'block';
+                renderUpsell();
+
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function goToThankYou() {
+            // Redirect to thank you page
+            const purchased = purchasedProducts.join(',');
+            window.location.href = `/thank-you.html?purchased=${purchased}`;
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

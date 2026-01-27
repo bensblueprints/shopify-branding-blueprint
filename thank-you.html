@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You! | Shopify Branding Blueprint</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --gold-primary: #d4a853;
+            --gold-light: #e8c47c;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --green-accent: #27ae60;
+            --border-subtle: rgba(255,255,255,0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Instrument Serif', serif;
+            font-weight: 400;
+        }
+
+        .container {
+            max-width: 700px;
+            padding: 60px 24px;
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: rgba(39, 174, 96, 0.15);
+            color: var(--green-accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            margin: 0 auto 32px;
+            animation: scaleIn 0.5s ease;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        h1 {
+            font-size: clamp(36px, 5vw, 52px);
+            margin-bottom: 16px;
+        }
+
+        h1 em {
+            color: var(--gold-primary);
+            font-style: italic;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            color: var(--text-secondary);
+            margin-bottom: 48px;
+        }
+
+        .order-summary {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 40px;
+            text-align: left;
+        }
+
+        .order-summary h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+        }
+
+        .order-item .name {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .order-item .icon {
+            font-size: 24px;
+        }
+
+        .order-item .check {
+            color: var(--green-accent);
+        }
+
+        .next-steps {
+            background: var(--bg-tertiary);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 40px;
+            text-align: left;
+        }
+
+        .next-steps h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .step {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: var(--gold-primary);
+            color: var(--bg-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .step-content h4 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .step-content p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 18px 40px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--bg-primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(212, 168, 83, 0.3);
+        }
+
+        .support-note {
+            margin-top: 40px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .support-note a {
+            color: var(--gold-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-icon">✓</div>
+
+        <h1>Thank You for Your <em>Purchase!</em></h1>
+        <p class="subtitle">Your order is confirmed. Check your email for access details.</p>
+
+        <div class="order-summary">
+            <h3>Your Order</h3>
+            <div id="order-items">
+                <div class="order-item">
+                    <div class="name">
+                        <span class="icon">📚</span>
+                        <span>7-Day Shopify Branding Blueprint</span>
+                    </div>
+                    <span class="check">✓</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="next-steps">
+            <h3>What Happens Next</h3>
+
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Check Your Email</h4>
+                    <p>You'll receive login credentials and course access within 5 minutes.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Start Day 1 Today</h4>
+                    <p>Don't wait - the sooner you start, the sooner you'll have your brand.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Join the Community</h4>
+                    <p>Connect with other brand builders and get support along the way.</p>
+                </div>
+            </div>
+        </div>
+
+        <a href="#" class="cta-button" id="access-btn">Access Your Course →</a>
+
+        <p class="support-note">
+            Questions? Email us at <a href="mailto:support@example.com">support@example.com</a>
+        </p>
+    </div>
+
+    <script>
+        // Product mapping
+        const PRODUCTS = {
+            canva_kit: { name: 'Done-For-You Canva Brand Kit', icon: '🎨' },
+            email_swipe: { name: 'Email Sequence Swipe File', icon: '📧' },
+            fb_ads: { name: 'Facebook Ads Masterclass', icon: '🎯' },
+            inner_circle: { name: "Brand Builder's Inner Circle", icon: '🚀' }
+        };
+
+        // Get purchased products from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const purchased = urlParams.get('purchased');
+
+        if (purchased) {
+            const products = purchased.split(',');
+            const orderItems = document.getElementById('order-items');
+
+            products.forEach(key => {
+                const product = PRODUCTS[key];
+                if (product) {
+                    const item = document.createElement('div');
+                    item.className = 'order-item';
+                    item.innerHTML = `
+                        <div class="name">
+                            <span class="icon">${product.icon}</span>
+                            <span>${product.name}</span>
+                        </div>
+                        <span class="check">✓</span>
+                    `;
+                    orderItems.appendChild(item);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
