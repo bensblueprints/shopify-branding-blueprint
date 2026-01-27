@@ -14,24 +14,27 @@
          ======================================== -->
     <script>
         const GHL_CONFIG = {
-            // Your GHL location URL (e.g., "https://myagency.clientclub.net")
-            locationUrl: "YOUR_GHL_LOCATION_URL",
+            // Your GHL location URL
+            locationUrl: "https://fl5rL3eZQWBq2GYlDPkl.app.clientclub.net",
 
-            // Order Form IDs (get these from Payments > Order Forms in GHL)
+            // Order Form IDs (create these in GHL: Payments > Order Forms)
             orderForms: {
-                mainCourse: "YOUR_MAIN_ORDER_FORM_ID",           // $27 course with bumps
-                fbAdsMasterclass: "YOUR_FB_ADS_ORDER_FORM_ID",   // $97 upsell
-                innerCircle: "YOUR_INNER_CIRCLE_ORDER_FORM_ID"   // $47/mo upsell
+                mainCourse: "YOUR_MAIN_ORDER_FORM_ID",      // $27 course + $17 bump
+                canvaKit: "YOUR_CANVA_KIT_FORM_ID",         // $27 upsell
+                emailSwipe: "YOUR_EMAIL_SWIPE_FORM_ID",     // $19 upsell
+                fbAdsMasterclass: "YOUR_FB_ADS_FORM_ID",    // $97 upsell
+                innerCircle: "YOUR_INNER_CIRCLE_FORM_ID"    // $47/mo upsell
             },
 
-            // Product IDs (for tracking)
+            // Product IDs (already created in GHL)
             products: {
-                mainCourse: "prod_main_course",
-                brandNameGenerator: "prod_brand_name",
-                canvaBrandKit: "prod_canva_kit",
-                emailSwipeFile: "prod_email_swipe",
-                fbAdsMasterclass: "prod_fb_ads",
-                innerCircle: "prod_inner_circle"
+                mainCourse: "69781a502c050ecdd54a3e2f",           // $27
+                brandNameGenerator: "69781a637a096c6ec19ce108",   // $17 (bump)
+                canvaBrandKit: "69781a65ca50037639df9f5a",        // $27
+                emailSwipeFile: "69781a667a096c97959ce1da",       // $19
+                fbAdsMasterclass: "69781a68f4da0e6f334cb915",     // $97
+                innerCircle: "69781a6aa243f6c59b1ecead",          // $47/mo
+                dfyStore: "69781d705b454d82e3e8d20b"              // $4,997 (webinar offer)
             },
 
             // Thank you page URL after purchase
@@ -1754,6 +1757,40 @@
 
             <div class="upsell-grid">
                 <div class="upsell-card">
+                    <div class="upsell-icon">🎨</div>
+                    <h3>Done-For-You Canva Brand Kit</h3>
+                    <p>Skip the design struggle. Get 50+ premium templates ready to customize with your brand colors and logo.</p>
+                    <ul class="upsell-features">
+                        <li>Logo templates & variations</li>
+                        <li>Social media post templates</li>
+                        <li>Packaging & label designs</li>
+                        <li>Email header templates</li>
+                    </ul>
+                    <div class="upsell-pricing">
+                        <span class="old">$97</span>
+                        <span class="current">$27</span>
+                    </div>
+                    <a href="#" class="upsell-button" onclick="openCheckout('canvaKit'); return false;">Add to Order</a>
+                </div>
+
+                <div class="upsell-card">
+                    <div class="upsell-icon">📧</div>
+                    <h3>Email Sequence Swipe File</h3>
+                    <p>Copy-paste email sequences that convert. Welcome series, abandoned cart, and post-purchase flows ready to deploy.</p>
+                    <ul class="upsell-features">
+                        <li>7-email welcome sequence</li>
+                        <li>3-email abandoned cart flow</li>
+                        <li>Post-purchase upsell sequence</li>
+                        <li>Win-back campaign templates</li>
+                    </ul>
+                    <div class="upsell-pricing">
+                        <span class="old">$67</span>
+                        <span class="current">$19</span>
+                    </div>
+                    <a href="#" class="upsell-button" onclick="openCheckout('emailSwipe'); return false;">Add to Order</a>
+                </div>
+
+                <div class="upsell-card">
                     <div class="upsell-icon">🎯</div>
                     <h3>Facebook Ads for Brands Masterclass</h3>
                     <p>The exact ad strategies that work for brand-building (not product-chasing). Learn to acquire customers profitably while building long-term brand equity.</p>
@@ -1938,6 +1975,14 @@
                 case 'main':
                     formUrl = `${GHL_CONFIG.locationUrl}/v2/preview/${GHL_CONFIG.orderForms.mainCourse}`;
                     title = '7-Day Shopify Branding Blueprint';
+                    break;
+                case 'canvaKit':
+                    formUrl = `${GHL_CONFIG.locationUrl}/v2/preview/${GHL_CONFIG.orderForms.canvaKit}`;
+                    title = 'Done-For-You Canva Brand Kit';
+                    break;
+                case 'emailSwipe':
+                    formUrl = `${GHL_CONFIG.locationUrl}/v2/preview/${GHL_CONFIG.orderForms.emailSwipe}`;
+                    title = 'Email Sequence Swipe File';
                     break;
                 case 'fbAds':
                     formUrl = `${GHL_CONFIG.locationUrl}/v2/preview/${GHL_CONFIG.orderForms.fbAdsMasterclass}`;
