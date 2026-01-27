@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7-Day Shopify Branding Blueprint | Build a 6-Figure Brand</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: #141414;
+            --gold-primary: #d4a853;
+            --gold-light: #e8c47c;
+            --gold-dark: #b8923f;
+            --gold-glow: rgba(212, 168, 83, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --red-accent: #e74c3c;
+            --green-accent: #27ae60;
+            --border-subtle: rgba(255,255,255,0.06);
+            --border-gold: rgba(212, 168, 83, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4 {
+            font-family: 'Instrument Serif', serif;
+            font-weight: 400;
+            line-height: 1.2;
+        }
+
+        /* Noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Announcement Bar */
+        .announcement-bar {
+            background: linear-gradient(90deg, var(--gold-dark), var(--gold-primary), var(--gold-dark));
+            padding: 12px 24px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--bg-primary);
+            letter-spacing: 0.5px;
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: -200% center; }
+            50% { background-position: 200% center; }
+        }
+
+        .announcement-bar span {
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding: 80px 0;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: linear-gradient(to top, var(--bg-primary), transparent);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-gold);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 13px;
+            color: var(--gold-primary);
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .hero-badge::before {
+            content: '★';
+            font-size: 10px;
+        }
+
+        .hero h1 {
+            font-size: clamp(48px, 6vw, 72px);
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--gold-light) 50%, var(--text-primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero h1 em {
+            font-style: italic;
+            color: var(--gold-primary);
+            -webkit-text-fill-color: var(--gold-primary);
+        }
+
+        .hero-subtitle {
+            font-size: 20px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            max-width: 540px;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .stat {
+            text-align: left;
+        }
+
+        .stat-number {
+            font-family: 'Instrument Serif', serif;
+            font-size: 42px;
+            color: var(--gold-primary);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        /* Product Card Visual */
+        .hero-visual {
+            position: relative;
+        }
+
+        .product-mockup {
+            background: linear-gradient(145deg, var(--bg-tertiary), var(--bg-secondary));
+            border: 1px solid var(--border-gold);
+            border-radius: 24px;
+            padding: 40px;
+            position: relative;
+            transform: perspective(1000px) rotateY(-5deg) rotateX(2deg);
+            box-shadow:
+                0 50px 100px -20px rgba(0,0,0,0.5),
+                0 0 60px var(--gold-glow);
+        }
+
+        .mockup-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .mockup-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .mockup-title {
+            font-family: 'Instrument Serif', serif;
+            font-size: 20px;
+        }
+
+        .mockup-lessons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .lesson-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .lesson-item:hover {
+            background: var(--bg-tertiary);
+            transform: translateX(4px);
+        }
+
+        .lesson-day {
+            background: var(--gold-primary);
+            color: var(--bg-primary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .floating-badge {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            background: var(--red-accent);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            transform: rotate(12deg);
+            box-shadow: 0 10px 30px rgba(231, 76, 60, 0.3);
+        }
+
+        .floating-badge span {
+            font-size: 24px;
+            display: block;
+        }
+
+        /* Social Proof Strip */
+        .social-proof-strip {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 40px 0;
+            overflow: hidden;
+        }
+
+        .proof-scroll {
+            display: flex;
+            gap: 60px;
+            animation: scroll 30s linear infinite;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .proof-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            white-space: nowrap;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .proof-item strong {
+            color: var(--gold-primary);
+            font-size: 18px;
+        }
+
+        /* Problem Section */
+        .problem-section {
+            padding: 120px 0;
+            background: var(--bg-secondary);
+            position: relative;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--gold-primary);
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .section-title {
+            font-size: clamp(36px, 4vw, 52px);
+            margin-bottom: 24px;
+        }
+
+        .section-title em {
+            font-style: italic;
+            color: var(--gold-primary);
+        }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 60px;
+        }
+
+        .problem-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 32px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .problem-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--red-accent), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .problem-card:hover::before {
+            opacity: 1;
+        }
+
+        .problem-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-gold);
+        }
+
+        .problem-icon {
+            width: 56px;
+            height: 56px;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .problem-card h3 {
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+
+        .problem-card p {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        /* Solution Section */
+        .solution-section {
+            padding: 120px 0;
+            position: relative;
+        }
+
+        .solution-intro {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 80px;
+        }
+
+        .solution-intro p {
+            font-size: 18px;
+            color: var(--text-secondary);
+        }
+
+        .day-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .day-card {
+            display: grid;
+            grid-template-columns: 120px 1fr auto;
+            align-items: center;
+            gap: 32px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 24px 32px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .day-card:hover {
+            border-color: var(--gold-primary);
+            background: var(--bg-tertiary);
+            transform: translateX(8px);
+        }
+
+        .day-number {
+            font-family: 'Instrument Serif', serif;
+            font-size: 48px;
+            color: var(--gold-primary);
+            line-height: 1;
+        }
+
+        .day-content h3 {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .day-content p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .day-value {
+            text-align: right;
+        }
+
+        .day-value span {
+            display: block;
+            font-size: 20px;
+            color: var(--gold-primary);
+            font-weight: 600;
+        }
+
+        .day-value small {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Testimonials */
+        .testimonials-section {
+            padding: 120px 0;
+            background: var(--bg-secondary);
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 60px;
+        }
+
+        .testimonial-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 32px;
+            position: relative;
+        }
+
+        .testimonial-card::before {
+            content: '"';
+            font-family: 'Instrument Serif', serif;
+            font-size: 120px;
+            position: absolute;
+            top: -20px;
+            right: 20px;
+            color: var(--gold-primary);
+            opacity: 0.1;
+            line-height: 1;
+        }
+
+        .testimonial-stars {
+            color: var(--gold-primary);
+            font-size: 14px;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+
+        .testimonial-text {
+            font-size: 16px;
+            margin-bottom: 24px;
+            line-height: 1.8;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .author-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--bg-primary);
+        }
+
+        .author-info strong {
+            display: block;
+            font-size: 15px;
+        }
+
+        .author-info span {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Pricing Section */
+        .pricing-section {
+            padding: 120px 0;
+            position: relative;
+        }
+
+        .pricing-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .pricing-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .pricing-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .pricing-card {
+            background: linear-gradient(145deg, var(--bg-tertiary), var(--bg-secondary));
+            border: 2px solid var(--gold-primary);
+            border-radius: 32px;
+            padding: 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pricing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gold-dark), var(--gold-primary), var(--gold-light), var(--gold-primary), var(--gold-dark));
+        }
+
+        .pricing-badge {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: var(--gold-primary);
+            color: var(--bg-primary);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .pricing-main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            margin-bottom: 32px;
+        }
+
+        .pricing-info h2 {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+
+        .pricing-info p {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .price-display {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .price-old {
+            font-size: 24px;
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+
+        .price-current {
+            font-family: 'Instrument Serif', serif;
+            font-size: 64px;
+            color: var(--gold-primary);
+            line-height: 1;
+        }
+
+        .price-current sup {
+            font-size: 32px;
+            position: relative;
+            top: -16px;
+        }
+
+        .pricing-features {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+        }
+
+        .feature-item::before {
+            content: '✓';
+            width: 24px;
+            height: 24px;
+            background: rgba(39, 174, 96, 0.15);
+            color: var(--green-accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* Order Bumps */
+        .order-bumps {
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 32px;
+            margin-bottom: 32px;
+        }
+
+        .bumps-title {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .bump-item {
+            background: var(--bg-primary);
+            border: 2px dashed var(--border-gold);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .bump-item:hover {
+            border-style: solid;
+            background: var(--bg-tertiary);
+        }
+
+        .bump-item.selected {
+            border-color: var(--gold-primary);
+            border-style: solid;
+            background: var(--bg-tertiary);
+        }
+
+        .bump-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--gold-primary);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--gold-primary);
+            transition: all 0.3s ease;
+        }
+
+        .bump-item.selected .bump-checkbox {
+            background: var(--gold-primary);
+            color: var(--bg-primary);
+        }
+
+        .bump-content h4 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .bump-content p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .bump-price {
+            text-align: right;
+        }
+
+        .bump-price .original {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+
+        .bump-price .current {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gold-primary);
+        }
+
+        /* CTA Button */
+        .cta-button {
+            width: 100%;
+            padding: 20px 32px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
+            border: none;
+            border-radius: 16px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--bg-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(212, 168, 83, 0.3);
+        }
+
+        .cta-subtext {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .cta-subtext span {
+            color: var(--green-accent);
+        }
+
+        /* Guarantee Section */
+        .guarantee-section {
+            padding: 80px 0;
+            background: var(--bg-secondary);
+        }
+
+        .guarantee-card {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 24px;
+            padding: 48px;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .guarantee-badge {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg-primary);
+        }
+
+        .guarantee-badge span {
+            font-family: 'Instrument Serif', serif;
+            font-size: 36px;
+            line-height: 1;
+        }
+
+        .guarantee-badge small {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .guarantee-content h3 {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        .guarantee-content p {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        /* Upsell Section */
+        .upsell-section {
+            padding: 120px 0;
+            position: relative;
+        }
+
+        .upsell-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+            margin-top: 60px;
+        }
+
+        .upsell-card {
+            background: linear-gradient(145deg, var(--bg-tertiary), var(--bg-secondary));
+            border: 1px solid var(--border-subtle);
+            border-radius: 24px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .upsell-card:hover {
+            border-color: var(--gold-primary);
+            transform: translateY(-4px);
+        }
+
+        .upsell-card.featured {
+            border-color: var(--gold-primary);
+            background: linear-gradient(145deg, var(--bg-tertiary), var(--bg-card));
+        }
+
+        .upsell-card.featured::before {
+            content: 'MOST POPULAR';
+            position: absolute;
+            top: 20px;
+            right: -32px;
+            background: var(--gold-primary);
+            color: var(--bg-primary);
+            padding: 6px 40px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transform: rotate(45deg);
+        }
+
+        .upsell-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--gold-glow);
+            border: 1px solid var(--border-gold);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 24px;
+        }
+
+        .upsell-card h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .upsell-card > p {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            font-size: 15px;
+        }
+
+        .upsell-features {
+            margin-bottom: 24px;
+        }
+
+        .upsell-features li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .upsell-features li::before {
+            content: '→';
+            color: var(--gold-primary);
+        }
+
+        .upsell-pricing {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .upsell-pricing .old {
+            font-size: 18px;
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+
+        .upsell-pricing .current {
+            font-family: 'Instrument Serif', serif;
+            font-size: 36px;
+            color: var(--gold-primary);
+        }
+
+        .upsell-button {
+            width: 100%;
+            padding: 16px 24px;
+            background: transparent;
+            border: 2px solid var(--gold-primary);
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--gold-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upsell-button:hover {
+            background: var(--gold-primary);
+            color: var(--bg-primary);
+        }
+
+        .upsell-card.featured .upsell-button {
+            background: var(--gold-primary);
+            color: var(--bg-primary);
+        }
+
+        .upsell-card.featured .upsell-button:hover {
+            background: var(--gold-light);
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            padding: 120px 0;
+            background: var(--bg-secondary);
+        }
+
+        .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-top: 60px;
+        }
+
+        .faq-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            border-color: var(--border-gold);
+        }
+
+        .faq-question {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 17px;
+            font-weight: 500;
+        }
+
+        .faq-question span {
+            color: var(--gold-primary);
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.open .faq-question span {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item.open .faq-answer {
+            max-height: 200px;
+            margin-top: 16px;
+        }
+
+        .faq-answer p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        /* Final CTA */
+        .final-cta {
+            padding: 120px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .final-cta::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 400px;
+            background: radial-gradient(ellipse, var(--gold-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .final-cta h2 {
+            font-size: clamp(36px, 5vw, 56px);
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .final-cta h2 em {
+            font-style: italic;
+            color: var(--gold-primary);
+        }
+
+        .final-cta p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .final-cta .cta-button {
+            max-width: 400px;
+            margin: 0 auto;
+            display: block;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Footer */
+        footer {
+            padding: 48px 0;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-logo {
+            font-family: 'Instrument Serif', serif;
+            font-size: 24px;
+            color: var(--gold-primary);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--gold-primary);
+        }
+
+        /* Countdown Timer */
+        .countdown-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-tertiary);
+            border-top: 1px solid var(--border-gold);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .countdown-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .countdown-timer {
+            display: flex;
+            gap: 8px;
+        }
+
+        .countdown-unit {
+            background: var(--gold-primary);
+            color: var(--bg-primary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            min-width: 48px;
+            text-align: center;
+        }
+
+        .countdown-unit small {
+            display: block;
+            font-size: 9px;
+            font-weight: 500;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        .countdown-cta {
+            padding: 12px 24px;
+            background: var(--gold-primary);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .countdown-cta:hover {
+            background: var(--gold-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero-stats {
+                justify-content: center;
+            }
+
+            .hero-visual {
+                display: none;
+            }
+
+            .problem-grid,
+            .testimonials-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .pricing-main {
+                grid-template-columns: 1fr;
+            }
+
+            .upsell-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .faq-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .problem-grid,
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .guarantee-card {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .guarantee-badge {
+                margin: 0 auto;
+            }
+
+            .day-card {
+                grid-template-columns: 80px 1fr;
+                gap: 16px;
+            }
+
+            .day-value {
+                display: none;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 24px;
+            }
+
+            .countdown-bar {
+                flex-wrap: wrap;
+                padding: 12px 16px;
+                gap: 12px;
+            }
+
+            .countdown-text {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        /* Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+    </style>
+</head>
+<body>
+    <!-- Announcement Bar -->
+    <div class="announcement-bar">
+        <span>🔥 LAUNCH SPECIAL: Get 70% Off + Free Bonuses Worth $297 — Ends Tonight!</span>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <div class="hero-badge fade-in">Limited Time Offer</div>
+                    <h1 class="fade-in delay-1">Stop Chasing Products.<br><em>Start Building Wealth.</em></h1>
+                    <p class="hero-subtitle fade-in delay-2">The complete 7-day system for transforming from product-hopper to brand owner — build a real, valuable, lasting Shopify brand that generates 6-7 figures.</p>
+
+                    <div class="hero-stats fade-in delay-3">
+                        <div class="stat">
+                            <div class="stat-number">$10K+</div>
+                            <div class="stat-label">Actual Value</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">7</div>
+                            <div class="stat-label">Days to Launch</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">500+</div>
+                            <div class="stat-label">Success Stories</div>
+                        </div>
+                    </div>
+
+                    <a href="#pricing" class="cta-button fade-in delay-4">Get Instant Access for Just $27 →</a>
+                    <p class="cta-subtext fade-in delay-5"><span>✓</span> 30-Day Money Back Guarantee • Instant Digital Access</p>
+                </div>
+
+                <div class="hero-visual fade-in delay-3">
+                    <div class="product-mockup">
+                        <div class="floating-badge">Only<span>$27</span></div>
+                        <div class="mockup-header">
+                            <div class="mockup-icon">📚</div>
+                            <div class="mockup-title">7-Day Branding Blueprint</div>
+                        </div>
+                        <div class="mockup-lessons">
+                            <div class="lesson-item">
+                                <span class="lesson-day">DAY 1</span>
+                                What Is a Brand?
+                            </div>
+                            <div class="lesson-item">
+                                <span class="lesson-day">DAY 2</span>
+                                What It Means to Own a Brand
+                            </div>
+                            <div class="lesson-item">
+                                <span class="lesson-day">DAY 3</span>
+                                Create Perfect Branding
+                            </div>
+                            <div class="lesson-item">
+                                <span class="lesson-day">DAY 4</span>
+                                Find Products & Suppliers
+                            </div>
+                            <div class="lesson-item">
+                                <span class="lesson-day">DAY 5</span>
+                                Get Products Customized
+                            </div>
+                            <div class="lesson-item">
+                                <span class="lesson-day">DAY 6</span>
+                                3 Profitable Industries
+                            </div>
+                            <div class="lesson-item">
+                                <span class="lesson-day">DAY 7</span>
+                                Launch Your Brand
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof Strip -->
+    <div class="social-proof-strip">
+        <div class="proof-scroll">
+            <div class="proof-item"><strong>$2.3M+</strong> in student brand revenue</div>
+            <div class="proof-item"><strong>500+</strong> brands launched</div>
+            <div class="proof-item"><strong>4.9★</strong> average rating</div>
+            <div class="proof-item"><strong>47</strong> countries</div>
+            <div class="proof-item"><strong>$2.3M+</strong> in student brand revenue</div>
+            <div class="proof-item"><strong>500+</strong> brands launched</div>
+            <div class="proof-item"><strong>4.9★</strong> average rating</div>
+            <div class="proof-item"><strong>47</strong> countries</div>
+        </div>
+    </div>
+
+    <!-- Problem Section -->
+    <section class="problem-section">
+        <div class="container">
+            <span class="section-label">The Problem</span>
+            <h2 class="section-title">Sound <em>familiar?</em></h2>
+
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-icon">🎰</div>
+                    <h3>The Product Roulette</h3>
+                    <p>You find a "winning" product, make money for 2 months, then watch it die. Back to square one. Every. Single. Time.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">🏃</div>
+                    <h3>The Hamster Wheel</h3>
+                    <p>You're working 40+ hours a week but one algorithm change or supplier issue could wipe out everything overnight.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">💸</div>
+                    <h3>The Exit Trap</h3>
+                    <p>Your store might make $10K/month but it's worth almost nothing. You can't sell it. You can't step away. You're trapped.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="solution-section">
+        <div class="container">
+            <div class="solution-intro">
+                <span class="section-label">The Solution</span>
+                <h2 class="section-title">Build an <em>Asset</em>, Not a Job</h2>
+                <p>In just 7 days, you'll have everything you need to build a brand worth 30-50X monthly profit — not a fragile product store worth 2-3X.</p>
+            </div>
+
+            <div class="day-breakdown">
+                <div class="day-card">
+                    <div class="day-number">01</div>
+                    <div class="day-content">
+                        <h3>What Is a Brand?</h3>
+                        <p>The brutal truth about dropshipping & why brands always win</p>
+                    </div>
+                    <div class="day-value">
+                        <span>$497</span>
+                        <small>value</small>
+                    </div>
+                </div>
+                <div class="day-card">
+                    <div class="day-number">02</div>
+                    <div class="day-content">
+                        <h3>What It Means to Own a Brand</h3>
+                        <p>The asset mindset & owning vs. renting your business</p>
+                    </div>
+                    <div class="day-value">
+                        <span>$497</span>
+                        <small>value</small>
+                    </div>
+                </div>
+                <div class="day-card">
+                    <div class="day-number">03</div>
+                    <div class="day-content">
+                        <h3>Create Perfect Branding</h3>
+                        <p>Logo, colors, fonts, voice, story — your complete brand identity</p>
+                    </div>
+                    <div class="day-value">
+                        <span>$997</span>
+                        <small>value</small>
+                    </div>
+                </div>
+                <div class="day-card">
+                    <div class="day-number">04</div>
+                    <div class="day-content">
+                        <h3>Find Products & Suppliers</h3>
+                        <p>Product selection framework & building supplier relationships</p>
+                    </div>
+                    <div class="day-value">
+                        <span>$797</span>
+                        <small>value</small>
+                    </div>
+                </div>
+                <div class="day-card">
+                    <div class="day-number">05</div>
+                    <div class="day-content">
+                        <h3>Get Products Customized</h3>
+                        <p>POD, private label, Alibaba deep dive & packaging design</p>
+                    </div>
+                    <div class="day-value">
+                        <span>$997</span>
+                        <small>value</small>
+                    </div>
+                </div>
+                <div class="day-card">
+                    <div class="day-number">06</div>
+                    <div class="day-content">
+                        <h3>3 Profitable Industries</h3>
+                        <p>Complete roadmaps for Clothing, Coffee & Supplements brands</p>
+                    </div>
+                    <div class="day-value">
+                        <span>$1,497</span>
+                        <small>value</small>
+                    </div>
+                </div>
+                <div class="day-card">
+                    <div class="day-number">07</div>
+                    <div class="day-content">
+                        <h3>Launch Your Brand</h3>
+                        <p>Pre-launch checklist, launch strategies & 30-day game plan</p>
+                    </div>
+                    <div class="day-value">
+                        <span>$797</span>
+                        <small>value</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials-section">
+        <div class="container">
+            <span class="section-label">Success Stories</span>
+            <h2 class="section-title">Real Results from <em>Real Students</em></h2>
+
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">"I went from making $1,200/month selling random products to building a skincare brand now doing $45K/month. The private label module alone was worth 100X the price."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">JM</div>
+                        <div class="author-info">
+                            <strong>Jessica M.</strong>
+                            <span>Skincare Brand Owner</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">"Just sold my coffee brand for $450K. Started with this exact blueprint 18 months ago. The section on building brand equity completely changed how I think about business."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">MR</div>
+                        <div class="author-info">
+                            <strong>Marcus R.</strong>
+                            <span>Exited for $450K</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">"Finally stopped the product-hopping cycle. Built a fitness brand with 40% repeat customers. Working half the hours making triple the profit."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">DK</div>
+                        <div class="author-info">
+                            <strong>David K.</strong>
+                            <span>Fitness Brand Owner</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing-section" id="pricing">
+        <div class="container">
+            <div class="pricing-wrapper">
+                <div class="pricing-header">
+                    <span class="section-label">Get Started Today</span>
+                    <h2 class="section-title">One Investment.<br><em>Lifetime Returns.</em></h2>
+                </div>
+
+                <div class="pricing-card">
+                    <div class="pricing-badge">70% OFF</div>
+
+                    <div class="pricing-main">
+                        <div class="pricing-info">
+                            <h2>7-Day Shopify Branding Blueprint</h2>
+                            <p>The complete system for building a 6-7 figure brand that compounds in value every single month.</p>
+
+                            <div class="price-display">
+                                <span class="price-old">$97</span>
+                                <span class="price-current"><sup>$</sup>27</span>
+                            </div>
+
+                            <p style="font-size: 14px; color: var(--green-accent);">✓ Instant Access • Lifetime Updates</p>
+                        </div>
+
+                        <div class="pricing-features">
+                            <div class="feature-item">Complete 7-Day Video Course</div>
+                            <div class="feature-item">Actionable Worksheets for Each Day</div>
+                            <div class="feature-item">Brand Identity Templates</div>
+                            <div class="feature-item">Supplier Negotiation Scripts</div>
+                            <div class="feature-item">3 Industry Roadmaps (Clothing, Coffee, Supplements)</div>
+                            <div class="feature-item">30-Day Launch Checklist</div>
+                            <div class="feature-item">Private Community Access</div>
+                        </div>
+                    </div>
+
+                    <!-- Order Bumps -->
+                    <div class="order-bumps">
+                        <div class="bumps-title">⚡ Recommended Add-Ons (One-Time Offer)</div>
+
+                        <div class="bump-item" onclick="toggleBump(this)">
+                            <div class="bump-checkbox">✓</div>
+                            <div class="bump-content">
+                                <h4>Brand Name Generator + Trademark Guide</h4>
+                                <p>AI-powered naming tool + step-by-step USPTO trademark filing guide. Never get stuck on naming again.</p>
+                            </div>
+                            <div class="bump-price">
+                                <div class="original">$47</div>
+                                <div class="current">$17</div>
+                            </div>
+                        </div>
+
+                        <div class="bump-item" onclick="toggleBump(this)">
+                            <div class="bump-checkbox">✓</div>
+                            <div class="bump-content">
+                                <h4>Done-For-You Canva Brand Kit</h4>
+                                <p>50+ premium templates for logos, social posts, packaging labels, and email headers. Just customize colors.</p>
+                            </div>
+                            <div class="bump-price">
+                                <div class="original">$97</div>
+                                <div class="current">$27</div>
+                            </div>
+                        </div>
+
+                        <div class="bump-item" onclick="toggleBump(this)">
+                            <div class="bump-checkbox">✓</div>
+                            <div class="bump-content">
+                                <h4>Email Sequence Swipe File</h4>
+                                <p>Copy-paste welcome series, abandoned cart, and post-purchase sequences that convert at 35%+.</p>
+                            </div>
+                            <div class="bump-price">
+                                <div class="original">$67</div>
+                                <div class="current">$19</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="cta-button" onclick="checkout()">
+                        Get Instant Access Now →
+                    </button>
+                    <p class="cta-subtext"><span>🔒</span> Secure checkout • 30-Day Money Back Guarantee</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Guarantee -->
+    <section class="guarantee-section">
+        <div class="container">
+            <div class="guarantee-card">
+                <div class="guarantee-badge">
+                    <span>30</span>
+                    <small>Day Guarantee</small>
+                </div>
+                <div class="guarantee-content">
+                    <h3>100% Risk-Free Guarantee</h3>
+                    <p>Go through the entire course. Complete the worksheets. Start building your brand. If you don't feel like this was the best $27 you've ever spent on your business education, just email us within 30 days for a full refund. No questions. No hassle. You keep the templates.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Upsells -->
+    <section class="upsell-section">
+        <div class="container">
+            <span class="section-label">Level Up</span>
+            <h2 class="section-title">Accelerate Your <em>Results</em></h2>
+
+            <div class="upsell-grid">
+                <div class="upsell-card">
+                    <div class="upsell-icon">🎯</div>
+                    <h3>Facebook Ads for Brands Masterclass</h3>
+                    <p>The exact ad strategies that work for brand-building (not product-chasing). Learn to acquire customers profitably while building long-term brand equity.</p>
+                    <ul class="upsell-features">
+                        <li>Brand-first ad creative frameworks</li>
+                        <li>Retargeting sequences that build loyalty</li>
+                        <li>LTV-optimized campaign structures</li>
+                        <li>$0-$10K/month ad scaling roadmap</li>
+                    </ul>
+                    <div class="upsell-pricing">
+                        <span class="old">$297</span>
+                        <span class="current">$97</span>
+                    </div>
+                    <button class="upsell-button">Add to Order</button>
+                </div>
+
+                <div class="upsell-card featured">
+                    <div class="upsell-icon">🚀</div>
+                    <h3>Brand Builder's Inner Circle</h3>
+                    <p>Monthly coaching calls, private Slack community, and direct access to 7-figure brand owners. Get your questions answered and your brand reviewed.</p>
+                    <ul class="upsell-features">
+                        <li>2x monthly live coaching calls</li>
+                        <li>Private Slack community access</li>
+                        <li>Monthly brand audits & feedback</li>
+                        <li>Supplier introductions & discounts</li>
+                    </ul>
+                    <div class="upsell-pricing">
+                        <span class="old">$97/mo</span>
+                        <span class="current">$47/mo</span>
+                    </div>
+                    <button class="upsell-button">Start 7-Day Trial</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq-section">
+        <div class="container">
+            <span class="section-label">Questions?</span>
+            <h2 class="section-title">Frequently <em>Asked</em></h2>
+
+            <div class="faq-grid">
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">
+                        How is this different from other courses?
+                        <span>+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>This isn't about finding "winning products" or "secret suppliers." It's about building a real brand with equity that compounds over time. You'll learn to think like a brand owner, not a product flipper — that mindset shift alone is worth 1000X the price.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">
+                        Do I need a big budget to start?
+                        <span>+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>No. The course shows you how to start with generic products and gradually transition to customized/private label as your cash flow grows. You can start building brand equity from Day 1 with just branded packaging and consistent messaging.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">
+                        I'm already making money with dropshipping. Is this for me?
+                        <span>+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Especially for you. You have cash flow — now learn to build an asset. Transform your product store into a brand worth 10-20X more when you're ready to sell (or keep it as passive income).</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">
+                        How long until I see results?
+                        <span>+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>You'll have your complete brand strategy in 7 days. Most students start seeing increased repeat purchase rates within 30-60 days. Building a true brand asset takes 12-18 months, but the foundation starts immediately.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">
+                        What if it doesn't work for me?
+                        <span>+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>30-day money-back guarantee. Complete the course, do the work, and if you don't feel like it was worth every penny, email us for a full refund. You keep all the templates and worksheets.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">
+                        Do I get lifetime access?
+                        <span>+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes. One payment, lifetime access, including all future updates. As the course evolves with new strategies and industry changes, you get everything at no additional cost.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta">
+        <div class="container">
+            <h2>Stop Renting. Start <em>Owning.</em></h2>
+            <p>Your future self will thank you for making the decision today to build something real. Something valuable. Something that lasts.</p>
+            <a href="#pricing" class="cta-button">Get Instant Access for $27 →</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">Shopify Branding Blueprint</div>
+                <div class="footer-links">
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Contact</a>
+                    <a href="#">Refund Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Countdown Bar -->
+    <div class="countdown-bar">
+        <span class="countdown-text">🔥 Launch pricing ends in:</span>
+        <div class="countdown-timer">
+            <div class="countdown-unit" id="hours">
+                23
+                <small>Hours</small>
+            </div>
+            <div class="countdown-unit" id="minutes">
+                47
+                <small>Mins</small>
+            </div>
+            <div class="countdown-unit" id="seconds">
+                32
+                <small>Secs</small>
+            </div>
+        </div>
+        <button class="countdown-cta" onclick="document.getElementById('pricing').scrollIntoView({behavior: 'smooth'})">
+            Claim 70% Off →
+        </button>
+    </div>
+
+    <script>
+        // Countdown Timer
+        function updateCountdown() {
+            const now = new Date();
+            const midnight = new Date();
+            midnight.setHours(23, 59, 59, 999);
+
+            const diff = midnight - now;
+
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('hours').innerHTML = hours.toString().padStart(2, '0') + '<small>Hours</small>';
+            document.getElementById('minutes').innerHTML = minutes.toString().padStart(2, '0') + '<small>Mins</small>';
+            document.getElementById('seconds').innerHTML = seconds.toString().padStart(2, '0') + '<small>Secs</small>';
+        }
+
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // Toggle Order Bump
+        function toggleBump(element) {
+            element.classList.toggle('selected');
+            updateTotal();
+        }
+
+        // Update Total Price
+        function updateTotal() {
+            let total = 27;
+            const selectedBumps = document.querySelectorAll('.bump-item.selected');
+            selectedBumps.forEach(bump => {
+                const priceText = bump.querySelector('.current').textContent;
+                total += parseInt(priceText.replace('$', ''));
+            });
+            // You could update a total display here
+        }
+
+        // Toggle FAQ
+        function toggleFaq(element) {
+            // Close all other FAQs
+            document.querySelectorAll('.faq-item').forEach(item => {
+                if (item !== element) {
+                    item.classList.remove('open');
+                }
+            });
+            element.classList.toggle('open');
+        }
+
+        // Checkout function placeholder
+        function checkout() {
+            const selectedBumps = document.querySelectorAll('.bump-item.selected');
+            let items = ['7-Day Shopify Branding Blueprint'];
+
+            selectedBumps.forEach(bump => {
+                const name = bump.querySelector('h4').textContent;
+                items.push(name);
+            });
+
+            console.log('Checkout items:', items);
+            alert('Redirecting to checkout with: ' + items.join(', '));
+            // In production, this would redirect to your payment processor
+        }
+
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.problem-card, .day-card, .testimonial-card, .upsell-card, .faq-item').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
