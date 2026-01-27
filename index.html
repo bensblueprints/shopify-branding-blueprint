@@ -8,43 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- ========================================
-         GOHIGHLEVEL CONFIGURATION
-         Replace these placeholder values with your actual GHL IDs
-         ======================================== -->
-    <script>
-        const GHL_CONFIG = {
-            // Your GHL location URL
-            locationUrl: "https://api.loopflo.io",
-
-            // Order Form IDs (create these in GHL: Payments > Order Forms)
-            orderForms: {
-                mainCourse: "4x4DX4Z5ZmbrxTNXlodz",      // $27 course + $17 bump
-                canvaKit: "YOUR_CANVA_KIT_FORM_ID",         // $27 upsell
-                emailSwipe: "YOUR_EMAIL_SWIPE_FORM_ID",     // $19 upsell
-                fbAdsMasterclass: "YOUR_FB_ADS_FORM_ID",    // $97 upsell
-                innerCircle: "YOUR_INNER_CIRCLE_FORM_ID"    // $47/mo upsell
-            },
-
-            // Product IDs (already created in GHL)
-            products: {
-                mainCourse: "69781a502c050ecdd54a3e2f",           // $27
-                brandNameGenerator: "69781a637a096c6ec19ce108",   // $17 (bump)
-                canvaBrandKit: "69781a65ca50037639df9f5a",        // $27
-                emailSwipeFile: "69781a667a096c97959ce1da",       // $19
-                fbAdsMasterclass: "69781a68f4da0e6f334cb915",     // $97
-                innerCircle: "69781a6aa243f6c59b1ecead",          // $47/mo
-                dfyStore: "69781d705b454d82e3e8d20b"              // $4,997 (webinar offer)
-            },
-
-            // Thank you page URL after purchase
-            thankYouPage: "YOUR_THANK_YOU_PAGE_URL",
-
-            // Membership/Course access URL
-            courseAccessUrl: "YOUR_COURSE_ACCESS_URL"
-        };
-    </script>
-
     <style>
         :root {
             --bg-primary: #0a0a0a;
@@ -738,62 +701,85 @@
             flex-shrink: 0;
         }
 
-        /* GHL Order Form Embed Container */
-        .ghl-checkout-container {
+        /* Stripe Checkout Container */
+        .stripe-checkout-container {
             border-top: 1px solid var(--border-subtle);
             padding-top: 32px;
             margin-bottom: 24px;
         }
 
-        .ghl-checkout-container h3 {
+        .stripe-checkout-container h3 {
             font-family: 'Outfit', sans-serif;
             font-size: 18px;
             font-weight: 600;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .checkout-form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .form-group {
             margin-bottom: 20px;
-            text-align: center;
         }
 
-        /* Placeholder for GHL iframe */
-        .ghl-form-placeholder {
-            background: var(--bg-primary);
-            border: 2px dashed var(--border-gold);
-            border-radius: 16px;
-            padding: 40px;
-            text-align: center;
-            min-height: 400px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-        }
-
-        .ghl-form-placeholder p {
-            color: var(--text-muted);
+        .form-group label {
+            display: block;
             font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
         }
 
-        .ghl-form-placeholder code {
-            background: var(--bg-tertiary);
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 12px;
-            color: var(--gold-primary);
-            word-break: break-all;
-        }
-
-        /* When GHL form is loaded */
-        .ghl-order-form-wrapper {
-            background: var(--bg-primary);
-            border-radius: 16px;
-            overflow: hidden;
-            min-height: 500px;
-        }
-
-        .ghl-order-form-wrapper iframe {
+        .form-group input {
             width: 100%;
-            min-height: 500px;
-            border: none;
+            padding: 16px 20px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-subtle);
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 0 4px var(--gold-glow);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .checkout-error {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid var(--red-accent);
+            color: var(--red-accent);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .btn-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,0.2);
+            border-top-color: var(--bg-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* CTA Button (fallback/direct link) */
@@ -1484,31 +1470,24 @@
                         </div>
                     </div>
 
-                    <!-- GHL Order Form Container -->
-                    <div class="ghl-checkout-container">
+                    <!-- Stripe Checkout -->
+                    <div class="stripe-checkout-container">
                         <h3>Complete Your Order</h3>
 
-                        <div class="ghl-order-form-wrapper">
-                            <iframe
-                                src="https://api.loopflo.io/widget/form/4x4DX4Z5ZmbrxTNXlodz"
-                                style="width:100%;height:700px;border:none;border-radius:12px"
-                                id="inline-4x4DX4Z5ZmbrxTNXlodz"
-                                data-layout="{'id':'INLINE'}"
-                                data-trigger-type="alwaysShow"
-                                data-trigger-value=""
-                                data-activation-type="alwaysActivated"
-                                data-activation-value=""
-                                data-deactivation-type="neverDeactivate"
-                                data-deactivation-value=""
-                                data-form-name="Shopify Blueprint Checkout"
-                                data-height="700"
-                                data-layout-iframe-id="inline-4x4DX4Z5ZmbrxTNXlodz"
-                                data-form-id="4x4DX4Z5ZmbrxTNXlodz"
-                                title="Shopify Blueprint Checkout"
-                            ></iframe>
+                        <div class="checkout-form">
+                            <div class="form-group">
+                                <label for="checkout-email">Email Address</label>
+                                <input type="email" id="checkout-email" placeholder="you@example.com" required>
+                            </div>
+
+                            <button type="button" class="cta-button" id="checkout-button" onclick="startCheckout()">
+                                <span class="btn-text">Get Instant Access - $27</span>
+                                <span class="btn-spinner" style="display:none;"></span>
+                            </button>
+
+                            <div class="checkout-error" id="checkout-error" style="display:none;"></div>
                         </div>
                     </div>
-                    <script src="https://api.loopflo.io/js/form_embed.js"></script>
 
                     <p class="cta-subtext"><span>🔒</span> Secure checkout powered by Stripe • 30-Day Money Back Guarantee</p>
                 </div>
@@ -1648,6 +1627,60 @@
     </div>
 
     <script>
+        // Stripe Checkout
+        async function startCheckout() {
+            const emailInput = document.getElementById('checkout-email');
+            const button = document.getElementById('checkout-button');
+            const errorEl = document.getElementById('checkout-error');
+            const btnText = button.querySelector('.btn-text');
+            const btnSpinner = button.querySelector('.btn-spinner');
+
+            const email = emailInput.value.trim();
+
+            // Validate email
+            if (!email || !email.includes('@')) {
+                errorEl.textContent = 'Please enter a valid email address';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            // Show loading state
+            button.disabled = true;
+            btnText.textContent = 'Processing...';
+            btnSpinner.style.display = 'inline-block';
+            errorEl.style.display = 'none';
+
+            try {
+                const response = await fetch('/.netlify/functions/create-checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+
+                if (data.url) {
+                    // Redirect to Stripe Checkout
+                    window.location.href = data.url;
+                } else {
+                    throw new Error(data.error || 'Failed to create checkout');
+                }
+            } catch (err) {
+                errorEl.textContent = err.message || 'Something went wrong. Please try again.';
+                errorEl.style.display = 'block';
+                button.disabled = false;
+                btnText.textContent = 'Get Instant Access - $27';
+                btnSpinner.style.display = 'none';
+            }
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('checkout-email').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                startCheckout();
+            }
+        });
+
         // Countdown Timer
         function updateCountdown() {
             const now = new Date();

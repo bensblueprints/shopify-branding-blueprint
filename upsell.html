@@ -554,16 +554,49 @@
         let upsellToken = null;
         let purchasedProducts = [];
 
-        // Get token from URL
-        function init() {
+        // Get token from URL or Stripe session
+        async function init() {
             const urlParams = new URLSearchParams(window.location.search);
+
+            // Check for direct token first
             upsellToken = urlParams.get('token');
+
+            // If no token but have session_id, get token from Stripe session
+            const sessionId = urlParams.get('session_id');
+            if (!upsellToken && sessionId) {
+                try {
+                    showLoading(true);
+                    const response = await fetch('/.netlify/functions/get-session', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sessionId })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success && data.token) {
+                        upsellToken = data.token;
+                    } else {
+                        console.error('Failed to get session:', data.error);
+                    }
+                } catch (err) {
+                    console.error('Error fetching session:', err);
+                }
+                showLoading(false);
+            }
 
             // Check for starting upsell index
             const startIndex = parseInt(urlParams.get('step')) || 0;
             currentUpsell = Math.min(startIndex, UPSELLS.length - 1);
 
             renderUpsell();
+        }
+
+        function showLoading(show) {
+            const card = document.getElementById('upsell-card');
+            if (show) {
+                card.innerHTML = '<div style="text-align:center;padding:60px;"><div class="spinner" style="width:40px;height:40px;border:4px solid var(--border-subtle);border-top-color:var(--gold-primary);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px;"></div><p style="color:var(--text-secondary);">Loading your special offers...</p></div>';
+            }
         }
 
         function renderUpsell() {
