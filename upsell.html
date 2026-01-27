@@ -559,12 +559,6 @@
             const urlParams = new URLSearchParams(window.location.search);
             upsellToken = urlParams.get('token');
 
-            if (!upsellToken) {
-                // No token - redirect to main page
-                window.location.href = '/';
-                return;
-            }
-
             // Check for starting upsell index
             const startIndex = parseInt(urlParams.get('step')) || 0;
             currentUpsell = Math.min(startIndex, UPSELLS.length - 1);
