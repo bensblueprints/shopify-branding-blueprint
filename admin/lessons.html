@@ -79,6 +79,88 @@
         </div>
     </div>
 
+    <!-- Audio Recording Modal -->
+    <div class="modal-overlay" id="audioModal">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Record Audio for Lesson</h3>
+                <button class="modal-close" onclick="closeAudioModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="audioLessonInfo" style="margin-bottom: 20px; padding: 16px; background: var(--bg-tertiary); border-radius: 8px;">
+                    <p style="color: var(--text-muted); font-size: 0.875rem;">Lesson</p>
+                    <h4 id="audioLessonTitle" style="margin-top: 4px;">Loading...</h4>
+                </div>
+
+                <!-- Recording Status -->
+                <div id="recordingStatus" style="text-align: center; padding: 30px 0;">
+                    <div id="recordingIndicator" style="display: none; margin-bottom: 16px;">
+                        <div style="width: 20px; height: 20px; background: #ef4444; border-radius: 50%; margin: 0 auto; animation: pulse 1s infinite;"></div>
+                        <p style="margin-top: 12px; color: #ef4444; font-weight: 600;">Recording...</p>
+                        <p id="recordingTime" style="font-size: 2rem; font-weight: 700; margin-top: 8px;">00:00</p>
+                    </div>
+                    <div id="idleStatus">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="color: var(--text-muted);">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                        <p style="margin-top: 12px; color: var(--text-muted);">Click record to start</p>
+                    </div>
+                </div>
+
+                <!-- Audio Player (shown after recording) -->
+                <div id="audioPlayerSection" style="display: none; margin: 20px 0; padding: 20px; background: var(--bg-tertiary); border-radius: 12px;">
+                    <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 12px;">Recorded Audio</p>
+                    <audio id="audioPlayer" controls style="width: 100%;"></audio>
+                </div>
+
+                <!-- Existing Audio -->
+                <div id="existingAudioSection" style="display: none; margin: 20px 0; padding: 20px; background: var(--bg-tertiary); border-radius: 12px;">
+                    <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 12px;">Saved Audio</p>
+                    <audio id="existingAudioPlayer" controls style="width: 100%;"></audio>
+                    <div style="display: flex; gap: 10px; margin-top: 12px;">
+                        <a id="downloadExistingBtn" href="#" download class="btn btn-secondary btn-sm" style="flex: 1; text-align: center;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            Download
+                        </a>
+                        <button onclick="deleteAudio()" class="btn btn-danger btn-sm" style="flex: 1;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recording Controls -->
+                <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
+                    <button id="recordBtn" onclick="toggleRecording()" class="btn" style="background: #ef4444; color: white; padding: 16px 32px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                        <span id="recordBtnText">Record</span>
+                    </button>
+                    <button id="saveBtn" onclick="saveAudio()" class="btn btn-primary" style="display: none; padding: 16px 32px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                        </svg>
+                        Save Audio
+                    </button>
+                    <button id="downloadBtn" onclick="downloadRecording()" class="btn btn-secondary" style="display: none; padding: 16px 32px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Download
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+        }
+    </style>
+
     <!-- Preview Modal -->
     <div class="modal-overlay" id="previewModal">
         <div class="modal preview-modal" style="max-width: 1000px; max-height: 90vh; display: flex; flex-direction: column;">
@@ -230,6 +312,9 @@
                                         </div>
                                     </div>
                                     <div class="actions">
+                                        <button class="btn btn-sm" style="background: ${lesson.audio_url ? '#22c55e' : '#ef4444'}; color: white;" onclick="openAudioModal('${lesson.id}', '${lesson.title.replace(/'/g, "\\'")}', '${lesson.audio_url || ''}')" title="${lesson.audio_url ? 'Audio recorded' : 'Record audio'}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+                                        </button>
                                         <button class="btn btn-sm" style="background: #2563eb; color: white;" onclick="previewLesson('${lesson.id}')" title="Preview">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                         </button>
@@ -501,6 +586,209 @@
 
         function closePreviewModal() {
             document.getElementById('previewModal').classList.remove('active');
+        }
+
+        // Audio Recording Functions
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recordingInterval = null;
+        let recordingSeconds = 0;
+        let currentAudioLessonId = null;
+        let recordedBlob = null;
+
+        function openAudioModal(lessonId, lessonTitle, existingAudioUrl) {
+            currentAudioLessonId = lessonId;
+            document.getElementById('audioLessonTitle').textContent = lessonTitle;
+
+            // Reset state
+            audioChunks = [];
+            recordedBlob = null;
+            recordingSeconds = 0;
+            document.getElementById('recordingTime').textContent = '00:00';
+            document.getElementById('recordingIndicator').style.display = 'none';
+            document.getElementById('idleStatus').style.display = 'block';
+            document.getElementById('audioPlayerSection').style.display = 'none';
+            document.getElementById('saveBtn').style.display = 'none';
+            document.getElementById('downloadBtn').style.display = 'none';
+            document.getElementById('recordBtnText').textContent = 'Record';
+            document.getElementById('recordBtn').style.background = '#ef4444';
+
+            // Show existing audio if available
+            if (existingAudioUrl) {
+                document.getElementById('existingAudioSection').style.display = 'block';
+                document.getElementById('existingAudioPlayer').src = existingAudioUrl;
+                document.getElementById('downloadExistingBtn').href = existingAudioUrl;
+            } else {
+                document.getElementById('existingAudioSection').style.display = 'none';
+            }
+
+            document.getElementById('audioModal').classList.add('active');
+        }
+
+        function closeAudioModal() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+            }
+            if (recordingInterval) {
+                clearInterval(recordingInterval);
+            }
+            document.getElementById('audioModal').classList.remove('active');
+        }
+
+        async function toggleRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                // Stop recording
+                mediaRecorder.stop();
+                clearInterval(recordingInterval);
+                document.getElementById('recordBtnText').textContent = 'Record';
+                document.getElementById('recordBtn').style.background = '#ef4444';
+                document.getElementById('recordingIndicator').style.display = 'none';
+                document.getElementById('idleStatus').style.display = 'block';
+            } else {
+                // Start recording
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const audioUrl = URL.createObjectURL(recordedBlob);
+                        document.getElementById('audioPlayer').src = audioUrl;
+                        document.getElementById('audioPlayerSection').style.display = 'block';
+                        document.getElementById('saveBtn').style.display = 'inline-flex';
+                        document.getElementById('downloadBtn').style.display = 'inline-flex';
+
+                        // Stop all tracks
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+
+                    mediaRecorder.start();
+                    recordingSeconds = 0;
+                    document.getElementById('recordBtnText').textContent = 'Stop';
+                    document.getElementById('recordBtn').style.background = '#666';
+                    document.getElementById('recordingIndicator').style.display = 'block';
+                    document.getElementById('idleStatus').style.display = 'none';
+
+                    recordingInterval = setInterval(() => {
+                        recordingSeconds++;
+                        const mins = Math.floor(recordingSeconds / 60).toString().padStart(2, '0');
+                        const secs = (recordingSeconds % 60).toString().padStart(2, '0');
+                        document.getElementById('recordingTime').textContent = `${mins}:${secs}`;
+                    }, 1000);
+
+                } catch (error) {
+                    console.error('Error accessing microphone:', error);
+                    alert('Could not access microphone. Please ensure you have granted permission.');
+                }
+            }
+        }
+
+        async function saveAudio() {
+            if (!recordedBlob || !currentAudioLessonId) {
+                alert('No recording to save');
+                return;
+            }
+
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span>Saving...</span>';
+
+            try {
+                // Convert blob to base64
+                const reader = new FileReader();
+                reader.readAsDataURL(recordedBlob);
+
+                reader.onloadend = async () => {
+                    const base64data = reader.result;
+
+                    const response = await fetch('/.netlify/functions/admin-audio', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${auth.getToken()}`
+                        },
+                        body: JSON.stringify({
+                            action: 'upload',
+                            lessonId: currentAudioLessonId,
+                            audioData: base64data
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        alert('Audio saved successfully!');
+                        loadCourse(); // Refresh to show updated status
+
+                        // Update existing audio section
+                        document.getElementById('existingAudioSection').style.display = 'block';
+                        document.getElementById('existingAudioPlayer').src = result.audio_url;
+                        document.getElementById('downloadExistingBtn').href = result.audio_url;
+                    } else {
+                        throw new Error(result.error || 'Failed to save audio');
+                    }
+
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg> Save Audio';
+                };
+            } catch (error) {
+                console.error('Error saving audio:', error);
+                alert('Failed to save audio: ' + error.message);
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg> Save Audio';
+            }
+        }
+
+        function downloadRecording() {
+            if (!recordedBlob) {
+                alert('No recording to download');
+                return;
+            }
+
+            const url = URL.createObjectURL(recordedBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `lesson-audio-${currentAudioLessonId}.webm`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        async function deleteAudio() {
+            if (!confirm('Delete the saved audio for this lesson?')) return;
+
+            try {
+                const response = await fetch('/.netlify/functions/admin-audio', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${auth.getToken()}`
+                    },
+                    body: JSON.stringify({
+                        action: 'delete',
+                        lessonId: currentAudioLessonId
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Audio deleted');
+                    document.getElementById('existingAudioSection').style.display = 'none';
+                    loadCourse();
+                } else {
+                    throw new Error(result.error || 'Failed to delete audio');
+                }
+            } catch (error) {
+                console.error('Error deleting audio:', error);
+                alert('Failed to delete audio: ' + error.message);
+            }
         }
 
         loadCourse();
