@@ -79,6 +79,19 @@
         </div>
     </div>
 
+    <!-- Preview Modal -->
+    <div class="modal-overlay" id="previewModal">
+        <div class="modal preview-modal" style="max-width: 1000px; max-height: 90vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="flex-shrink: 0;">
+                <h3 class="modal-title">Lesson Preview</h3>
+                <button class="modal-close" onclick="closePreviewModal()">&times;</button>
+            </div>
+            <div class="preview-container" style="flex: 1; overflow-y: auto; background: #0a0a0a; border-radius: 0 0 12px 12px;">
+                <div id="previewContent"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Lesson Modal -->
     <div class="modal-overlay" id="lessonModal">
         <div class="modal" style="max-width: 700px;">
@@ -190,6 +203,9 @@
                             ${module.description ? `<p style="color: var(--text-secondary); margin-top: 4px; font-size: 0.875rem;">${module.description}</p>` : ''}
                         </div>
                         <div class="actions">
+                            <button class="btn btn-sm" style="background: #2563eb; color: white;" onclick="previewModule('${module.id}')" title="Preview Module">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                            </button>
                             <button class="btn btn-primary btn-sm" onclick="openLessonModal('${module.id}')">Add Lesson</button>
                             <button class="btn btn-secondary btn-sm" onclick="editModule('${module.id}')">Edit</button>
                             <button class="btn btn-danger btn-sm" onclick="deleteModule('${module.id}')">Delete</button>
@@ -214,6 +230,9 @@
                                         </div>
                                     </div>
                                     <div class="actions">
+                                        <button class="btn btn-sm" style="background: #2563eb; color: white;" onclick="previewLesson('${lesson.id}')" title="Preview">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                        </button>
                                         <button class="btn btn-secondary btn-sm" onclick="editLesson('${lesson.id}')">Edit</button>
                                         <button class="btn btn-danger btn-sm" onclick="deleteLesson('${lesson.id}')">Delete</button>
                                     </div>
@@ -341,6 +360,148 @@
                 alert('Failed to save lesson: ' + error.message);
             }
         });
+
+        // Preview functions
+        function previewModule(moduleId) {
+            const module = modules.find(m => m.id === moduleId);
+            if (!module) return;
+
+            const lessons = module.lessons || [];
+
+            document.getElementById('previewContent').innerHTML = `
+                <div style="padding: 24px; font-family: 'Outfit', sans-serif; color: #fff;">
+                    <div style="background: linear-gradient(180deg, #141414 0%, #0a0a0a 100%); padding: 40px; border-bottom: 1px solid #2a2a2a; margin: -24px -24px 24px -24px;">
+                        <p style="color: #a0a0a0; font-size: 0.875rem; margin-bottom: 8px;">
+                            <a style="color: #a0a0a0;">My Courses</a> / <a style="color: #a0a0a0;">${course.title}</a>
+                        </p>
+                        <h1 style="font-family: 'Instrument Serif', serif; font-size: 2rem; margin-bottom: 12px;">${module.title}</h1>
+                        ${module.description ? `<p style="color: #a0a0a0; margin-bottom: 16px;">${module.description}</p>` : ''}
+                        <p style="color: #666; font-size: 0.9rem;">${lessons.length} lesson${lessons.length !== 1 ? 's' : ''}</p>
+                    </div>
+
+                    <div style="background: #141414; border: 1px solid #2a2a2a; border-radius: 12px; overflow: hidden;">
+                        ${lessons.length ? lessons.sort((a, b) => a.sort_order - b.sort_order).map((lesson, idx) => `
+                            <div style="display: flex; align-items: center; padding: 16px 24px; border-bottom: 1px solid #2a2a2a; gap: 16px;">
+                                <div style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid #2a2a2a; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 500; margin-bottom: 4px;">
+                                        ${lesson.title}
+                                        ${lesson.is_preview ? '<span style="background: rgba(201, 169, 98, 0.2); color: #C9A962; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">Free Preview</span>' : ''}
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: #666;">
+                                        ${lesson.duration_minutes ? lesson.duration_minutes + ' min' : 'Duration not set'}
+                                    </div>
+                                </div>
+                                <button onclick="previewLesson('${lesson.id}')" style="padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem;">
+                                    Preview
+                                </button>
+                            </div>
+                        `).join('') : `
+                            <div style="padding: 40px; text-align: center; color: #666;">
+                                No lessons in this module yet
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('previewModal').classList.add('active');
+        }
+
+        async function previewLesson(id) {
+            try {
+                const lesson = await api.admin.getLesson(id);
+                const module = modules.find(m => m.id === lesson.module_id);
+
+                // Build video HTML
+                let videoHtml = '';
+                if (lesson.video_id && lesson.video_provider === 'youtube') {
+                    videoHtml = `
+                        <div style="position: relative; padding-bottom: 56.25%; background: #000; border-radius: 12px; overflow: hidden; margin-bottom: 24px;">
+                            <iframe
+                                src="https://www.youtube.com/embed/${lesson.video_id}?rel=0&modestbranding=1"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+                            ></iframe>
+                        </div>
+                    `;
+                } else {
+                    videoHtml = `
+                        <div style="position: relative; padding-bottom: 56.25%; background: #141414; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+                            <p style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #666;">No video uploaded</p>
+                        </div>
+                    `;
+                }
+
+                // Build preview content
+                document.getElementById('previewContent').innerHTML = `
+                    <div style="padding: 24px; font-family: 'Outfit', sans-serif; color: #fff;">
+                        ${videoHtml}
+
+                        <div style="margin-bottom: 24px;">
+                            <p style="color: #C9A962; font-size: 0.9rem; margin-bottom: 16px;">${module ? module.title : 'Module'}</p>
+                            <h1 style="font-family: 'Instrument Serif', serif; font-size: 1.75rem; margin-bottom: 8px;">${lesson.title}</h1>
+                            ${lesson.duration_minutes ? `<p style="color: #666; font-size: 0.875rem;">${lesson.duration_minutes} minutes</p>` : ''}
+                        </div>
+
+                        <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                            <button style="display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: #22c55e; color: #fff; border: none; border-radius: 8px; font-size: 1rem; cursor: default;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Mark as Complete
+                            </button>
+                            <button style="display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: #1a1a1a; color: #fff; border: 1px solid #2a2a2a; border-radius: 8px; cursor: default;">
+                                Previous
+                            </button>
+                            <button style="display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: #C9A962; color: #000; border: none; border-radius: 8px; cursor: default;">
+                                Next Lesson
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        ${lesson.description ? `
+                            <div style="color: #a0a0a0; line-height: 1.7; margin-bottom: 24px; padding: 20px; background: #141414; border-radius: 12px;">
+                                <h3 style="margin-bottom: 12px; color: #fff;">About This Lesson</h3>
+                                <p>${lesson.description}</p>
+                            </div>
+                        ` : ''}
+
+                        ${lesson.content_html ? `
+                            <div style="color: #a0a0a0; line-height: 1.7; padding: 20px; background: #141414; border-radius: 12px;">
+                                <style>
+                                    #previewContent h2 { color: #fff; font-family: 'Instrument Serif', serif; font-size: 1.5rem; margin-bottom: 16px; }
+                                    #previewContent h3 { color: #fff; font-size: 1.2rem; margin: 24px 0 12px; }
+                                    #previewContent p { margin-bottom: 16px; }
+                                    #previewContent ul, #previewContent ol { margin: 16px 0; padding-left: 24px; }
+                                    #previewContent li { margin-bottom: 8px; }
+                                    #previewContent strong { color: #fff; }
+                                </style>
+                                ${lesson.content_html}
+                            </div>
+                        ` : `
+                            <div style="color: #666; text-align: center; padding: 40px; background: #141414; border-radius: 12px;">
+                                <p>No additional content added to this lesson yet.</p>
+                            </div>
+                        `}
+                    </div>
+                `;
+
+                document.getElementById('previewModal').classList.add('active');
+            } catch (error) {
+                console.error('Failed to load lesson preview:', error);
+                alert('Failed to load lesson preview');
+            }
+        }
+
+        function closePreviewModal() {
+            document.getElementById('previewModal').classList.remove('active');
+        }
 
         loadCourse();
 
