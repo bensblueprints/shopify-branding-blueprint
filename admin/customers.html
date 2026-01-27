@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customers | Admin Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <h2>Blueprint</h2>
+                <span>Admin Portal</span>
+            </div>
+            <nav>
+                <ul class="sidebar-nav">
+                    <li><a href="/admin/"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>Dashboard</a></li>
+                    <li><a href="/admin/courses.html"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>Courses</a></li>
+                    <li><a href="/admin/customers.html" class="active"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>Customers</a></li>
+                    <li><a href="#" onclick="handleLogout()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>Logout</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Customers</h1>
+                    <p class="page-subtitle">Manage customer accounts and access</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div id="customersList">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+
+                <div id="pagination" style="display: flex; justify-content: center; gap: 8px; margin-top: 20px;"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Customer Detail Modal -->
+    <div class="modal-overlay" id="customerModal">
+        <div class="modal" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Customer Details</h3>
+                <button class="modal-close" onclick="closeCustomerModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="customerDetail">
+                <div class="loading"><div class="spinner"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        if (!auth.requireAdmin()) {}
+
+        let currentPage = 1;
+        let totalPages = 1;
+
+        async function loadCustomers(page = 1) {
+            try {
+                const data = await api.admin.getCustomers(page, 20);
+                currentPage = data.pagination.page;
+                totalPages = data.pagination.totalPages;
+                renderCustomers(data.users);
+                renderPagination();
+            } catch (error) {
+                console.error('Failed to load customers:', error);
+                document.getElementById('customersList').innerHTML = '<div class="alert alert-error">Failed to load customers</div>';
+            }
+        }
+
+        function renderCustomers(customers) {
+            const container = document.getElementById('customersList');
+
+            if (!customers.length) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <h3>No customers yet</h3>
+                        <p>Customers will appear here after they make a purchase</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Enrollments</th>
+                                <th>Purchases</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${customers.map(customer => `
+                                <tr>
+                                    <td>
+                                        <div class="item-title">${customer.full_name || 'No name'}</div>
+                                        <div class="item-meta">${customer.email}</div>
+                                    </td>
+                                    <td>${customer.enrollments?.[0]?.count || 0}</td>
+                                    <td>${customer.purchases?.[0]?.count || 0}</td>
+                                    <td>${new Date(customer.created_at).toLocaleDateString()}</td>
+                                    <td>
+                                        <button class="btn btn-secondary btn-sm" onclick="viewCustomer('${customer.id}')">View Details</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderPagination() {
+            const container = document.getElementById('pagination');
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+
+            if (currentPage > 1) {
+                html += `<button class="btn btn-secondary btn-sm" onclick="loadCustomers(${currentPage - 1})">Previous</button>`;
+            }
+
+            html += `<span style="padding: 6px 12px; color: var(--text-secondary);">Page ${currentPage} of ${totalPages}</span>`;
+
+            if (currentPage < totalPages) {
+                html += `<button class="btn btn-secondary btn-sm" onclick="loadCustomers(${currentPage + 1})">Next</button>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        async function viewCustomer(id) {
+            document.getElementById('customerModal').classList.add('active');
+            document.getElementById('customerDetail').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+            try {
+                const customer = await api.admin.getCustomer(id);
+
+                document.getElementById('customerDetail').innerHTML = `
+                    <div style="margin-bottom: 24px;">
+                        <h4 style="color: var(--text-secondary); margin-bottom: 8px; font-size: 0.875rem; text-transform: uppercase;">Customer Info</h4>
+                        <p><strong>Email:</strong> ${customer.email}</p>
+                        <p><strong>Name:</strong> ${customer.full_name || 'Not set'}</p>
+                        <p><strong>Stripe ID:</strong> ${customer.stripe_customer_id || 'N/A'}</p>
+                        <p><strong>Joined:</strong> ${new Date(customer.created_at).toLocaleString()}</p>
+                        <p><strong>Last Login:</strong> ${customer.last_login_at ? new Date(customer.last_login_at).toLocaleString() : 'Never'}</p>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <h4 style="color: var(--text-secondary); margin-bottom: 8px; font-size: 0.875rem; text-transform: uppercase;">Enrollments</h4>
+                        ${customer.enrollments?.length ? `
+                            <ul class="item-list" style="border: 1px solid var(--border-color); border-radius: 8px;">
+                                ${customer.enrollments.map(e => `
+                                    <li class="item-list-item">
+                                        <div class="item-info">
+                                            <div class="item-title">${e.courses?.title || 'Unknown Course'}</div>
+                                            <div class="item-meta">Enrolled ${new Date(e.enrolled_at).toLocaleDateString()}</div>
+                                        </div>
+                                        <span class="status-badge ${e.status === 'active' ? 'status-active' : 'status-draft'}">${e.status}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        ` : '<p style="color: var(--text-muted);">No enrollments</p>'}
+                    </div>
+
+                    <div>
+                        <h4 style="color: var(--text-secondary); margin-bottom: 8px; font-size: 0.875rem; text-transform: uppercase;">Purchases</h4>
+                        ${customer.purchases?.length ? `
+                            <ul class="item-list" style="border: 1px solid var(--border-color); border-radius: 8px;">
+                                ${customer.purchases.map(p => `
+                                    <li class="item-list-item">
+                                        <div class="item-info">
+                                            <div class="item-title">${p.products?.name || 'Unknown Product'}</div>
+                                            <div class="item-meta">${new Date(p.purchased_at).toLocaleDateString()}</div>
+                                        </div>
+                                        <div style="color: var(--gold); font-weight: 600;">$${(p.amount_cents / 100).toFixed(2)}</div>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        ` : '<p style="color: var(--text-muted);">No purchases</p>'}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('customerDetail').innerHTML = '<div class="alert alert-error">Failed to load customer details</div>';
+            }
+        }
+
+        function closeCustomerModal() {
+            document.getElementById('customerModal').classList.remove('active');
+        }
+
+        loadCustomers();
+
+        function handleLogout() {
+            auth.logout();
+            window.location.href = '/admin/login.html';
+        }
+    </script>
+</body>
+</html>

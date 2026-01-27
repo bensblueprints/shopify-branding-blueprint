@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course | Shopify Branding Blueprint</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/portal.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="portal-header">
+        <a href="/portal/" class="portal-logo">Shopify Branding Blueprint</a>
+        <nav class="portal-nav">
+            <a href="/portal/">My Courses</a>
+            <div class="user-menu">
+                <a href="#" onclick="handleLogout()" style="color: var(--gold);">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Course Header -->
+    <div class="course-header" id="courseHeader">
+        <div class="course-header-content">
+            <div class="breadcrumb">
+                <a href="/portal/">My Courses</a>
+                <span>/</span>
+                <span id="breadcrumbTitle">Loading...</span>
+            </div>
+            <h1 id="courseTitle">Loading...</h1>
+            <p class="subtitle" id="courseSubtitle"></p>
+            <div class="course-stats" id="courseStats"></div>
+        </div>
+    </div>
+
+    <!-- Course Content -->
+    <div class="portal-container">
+        <!-- Progress Bar -->
+        <div style="margin-bottom: 32px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: var(--text-secondary);">Your Progress</span>
+                <span id="progressText" style="color: var(--gold);">0%</span>
+            </div>
+            <div class="progress-bar" style="height: 8px;">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Modules -->
+        <div id="modulesContainer">
+            <div class="loading"><div class="spinner"></div></div>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        if (!auth.requireAuth()) {}
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const courseSlug = urlParams.get('slug');
+
+        if (!courseSlug) {
+            window.location.href = '/portal/';
+        }
+
+        let courseData = null;
+
+        async function loadCourse() {
+            try {
+                const data = await api.portal.getCourse(courseSlug);
+                courseData = data;
+                renderCourse(data);
+            } catch (error) {
+                console.error('Failed to load course:', error);
+                document.getElementById('modulesContainer').innerHTML = `
+                    <div class="alert alert-error">
+                        ${error.message === 'Not enrolled in this course'
+                            ? 'You are not enrolled in this course.'
+                            : 'Failed to load course. Please try again.'
+                        }
+                    </div>
+                `;
+            }
+        }
+
+        function renderCourse(data) {
+            const { course, progress } = data;
+
+            // Update header
+            document.title = `${course.title} | Shopify Branding Blueprint`;
+            document.getElementById('breadcrumbTitle').textContent = course.title;
+            document.getElementById('courseTitle').textContent = course.title;
+            document.getElementById('courseSubtitle').textContent = course.subtitle || '';
+
+            // Stats
+            document.getElementById('courseStats').innerHTML = `
+                <div class="course-stat">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    ${course.lesson_count || 0} lessons
+                </div>
+                <div class="course-stat">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    ${course.total_duration_minutes ? Math.round(course.total_duration_minutes / 60) + 'h ' + (course.total_duration_minutes % 60) + 'm' : 'Duration varies'}
+                </div>
+                ${course.instructor_name ? `
+                    <div class="course-stat">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        ${course.instructor_name}
+                    </div>
+                ` : ''}
+            `;
+
+            // Progress
+            document.getElementById('progressText').textContent = `${progress.progress_percent}% complete`;
+            document.getElementById('progressFill').style.width = `${progress.progress_percent}%`;
+
+            // Modules
+            if (!course.modules || course.modules.length === 0) {
+                document.getElementById('modulesContainer').innerHTML = `
+                    <div class="empty-state">
+                        <h3>Coming Soon</h3>
+                        <p>Course content is being prepared. Check back soon!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            document.getElementById('modulesContainer').innerHTML = `
+                <ul class="module-list">
+                    ${course.modules.map((module, moduleIdx) => {
+                        const completedLessons = module.lessons.filter(l => l.progress?.is_completed).length;
+                        const totalLessons = module.lessons.length;
+
+                        return `
+                            <li class="module-item">
+                                <div class="module-header" onclick="toggleModule(${moduleIdx})">
+                                    <div>
+                                        <div class="module-title">${module.title}</div>
+                                        <div class="module-meta">${totalLessons} lessons</div>
+                                    </div>
+                                    <div class="module-progress">
+                                        ${completedLessons}/${totalLessons} complete
+                                    </div>
+                                </div>
+                                <ul class="lesson-list" id="module-${moduleIdx}">
+                                    ${module.lessons.map((lesson, lessonIdx) => `
+                                        <li class="lesson-item">
+                                            <a href="lesson.html?id=${lesson.id}">
+                                                <div class="lesson-status ${lesson.progress?.is_completed ? 'completed' : ''}">
+                                                    ${lesson.progress?.is_completed
+                                                        ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>'
+                                                        : ''
+                                                    }
+                                                </div>
+                                                <div class="lesson-info">
+                                                    <div class="lesson-title">${lesson.title}</div>
+                                                    <div class="lesson-duration">${lesson.duration_minutes ? lesson.duration_minutes + ' min' : 'Video lesson'}</div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </li>
+                        `;
+                    }).join('')}
+                </ul>
+            `;
+        }
+
+        function toggleModule(idx) {
+            const list = document.getElementById(`module-${idx}`);
+            list.style.display = list.style.display === 'none' ? 'block' : 'none';
+        }
+
+        loadCourse();
+
+        function handleLogout() {
+            auth.logout();
+            window.location.href = '/portal/login.html';
+        }
+    </script>
+</body>
+</html>

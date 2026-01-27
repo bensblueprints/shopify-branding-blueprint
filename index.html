@@ -1417,6 +1417,103 @@
         </div>
     </section>
 
+    <!-- Embedded Checkout Modal -->
+    <div id="checkout-modal" class="checkout-modal" style="display: none;">
+        <div class="checkout-modal-overlay" onclick="closeCheckoutModal()"></div>
+        <div class="checkout-modal-content">
+            <button class="checkout-modal-close" onclick="closeCheckoutModal()">&times;</button>
+            <div id="checkout-container">
+                <!-- Stripe Embedded Checkout will be mounted here -->
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Embedded Checkout Modal Styles */
+        .checkout-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .checkout-modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(4px);
+        }
+
+        .checkout-modal-content {
+            position: relative;
+            background: #fff;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .checkout-modal-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f0f0f0;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            transition: background 0.2s;
+        }
+
+        .checkout-modal-close:hover {
+            background: #e0e0e0;
+        }
+
+        #checkout-container {
+            min-height: 400px;
+        }
+
+        /* Loading state for checkout container */
+        #checkout-container.loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f8f8;
+        }
+
+        #checkout-container.loading::after {
+            content: '';
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e0e0e0;
+            border-top-color: var(--gold-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Guarantee -->
     <section class="guarantee-section">
         <div class="container">
@@ -1528,6 +1625,9 @@
         </div>
     </footer>
 
+    <!-- Stripe.js SDK -->
+    <script src="https://js.stripe.com/v3/"></script>
+
     <!-- Countdown Bar -->
     <div class="countdown-bar">
         <span class="countdown-text">🔥 Launch pricing ends in:</span>
@@ -1549,7 +1649,11 @@
     </div>
 
     <script>
-        // Stripe Checkout
+        // Initialize Stripe
+        const stripe = Stripe('pk_test_YOUR_PUBLISHABLE_KEY'); // Replace with your Stripe publishable key
+        let embeddedCheckout = null;
+
+        // Stripe Embedded Checkout
         async function startCheckout() {
             const emailInput = document.getElementById('checkout-email');
             const button = document.getElementById('checkout-button');
@@ -1573,7 +1677,8 @@
             errorEl.style.display = 'none';
 
             try {
-                const response = await fetch('/.netlify/functions/create-checkout', {
+                // Create embedded checkout session
+                const response = await fetch('/.netlify/functions/create-embedded-checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })
@@ -1581,9 +1686,27 @@
 
                 const data = await response.json();
 
-                if (data.url) {
-                    // Redirect to Stripe Checkout
-                    window.location.href = data.url;
+                if (data.clientSecret) {
+                    // Open the checkout modal
+                    openCheckoutModal();
+
+                    // Show loading state in modal
+                    const container = document.getElementById('checkout-container');
+                    container.classList.add('loading');
+
+                    // Initialize embedded checkout
+                    embeddedCheckout = await stripe.initEmbeddedCheckout({
+                        clientSecret: data.clientSecret
+                    });
+
+                    // Mount the checkout form
+                    container.classList.remove('loading');
+                    embeddedCheckout.mount('#checkout-container');
+
+                    // Reset button
+                    button.disabled = false;
+                    btnText.textContent = 'Get Instant Access - $27';
+                    btnSpinner.style.display = 'none';
                 } else {
                     throw new Error(data.error || 'Failed to create checkout');
                 }
@@ -1593,8 +1716,36 @@
                 button.disabled = false;
                 btnText.textContent = 'Get Instant Access - $27';
                 btnSpinner.style.display = 'none';
+                closeCheckoutModal();
             }
         }
+
+        // Modal functions
+        function openCheckoutModal() {
+            document.getElementById('checkout-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkout-modal').style.display = 'none';
+            document.body.style.overflow = '';
+
+            // Destroy embedded checkout if it exists
+            if (embeddedCheckout) {
+                embeddedCheckout.destroy();
+                embeddedCheckout = null;
+            }
+
+            // Clear the container
+            document.getElementById('checkout-container').innerHTML = '';
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeCheckoutModal();
+            }
+        });
 
         // Allow Enter key to submit
         document.getElementById('checkout-email').addEventListener('keypress', function(e) {

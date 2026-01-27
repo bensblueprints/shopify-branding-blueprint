@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | Shopify Branding Blueprint</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-logo">
+                <h1>Admin Portal</h1>
+                <p>Shopify Branding Blueprint</p>
+            </div>
+
+            <div id="alert" class="alert alert-error" style="display: none;"></div>
+
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label class="form-label" for="email">Email</label>
+                    <input type="email" id="email" class="form-input" placeholder="admin@advancedmarketingco" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <span id="btnText">Sign In</span>
+                    <span id="btnLoader" style="display: none;">
+                        <div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>
+                    </span>
+                </button>
+            </form>
+
+            <p style="text-align: center; margin-top: 20px; color: var(--text-muted); font-size: 0.875rem;">
+                First time? Your password will be set on first login.
+            </p>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script>
+        // Check if already logged in
+        if (auth.isLoggedIn() && auth.isAdmin()) {
+            window.location.href = '/admin/';
+        }
+
+        const form = document.getElementById('loginForm');
+        const alert = document.getElementById('alert');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoader = document.getElementById('btnLoader');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Show loading
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'block';
+            submitBtn.disabled = true;
+            alert.style.display = 'none';
+
+            try {
+                const result = await auth.adminLogin(email, password);
+
+                if (result.success) {
+                    window.location.href = '/admin/';
+                } else {
+                    alert.textContent = result.error;
+                    alert.style.display = 'block';
+                }
+            } catch (error) {
+                alert.textContent = 'Login failed. Please try again.';
+                alert.style.display = 'block';
+            } finally {
+                btnText.style.display = 'block';
+                btnLoader.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

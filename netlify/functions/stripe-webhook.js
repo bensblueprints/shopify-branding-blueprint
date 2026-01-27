@@ -1,7 +1,14 @@
 // Stripe Webhook Handler
-// Receives Stripe events and sends webhooks to GoHighLevel
+// Receives Stripe events, creates users in Supabase, and sends webhooks to GoHighLevel
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { createClient } = require('@supabase/supabase-js');
+
+// Initialize Supabase
+const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 // Product mapping - matches the upsell products
 const PRODUCTS = {
@@ -129,6 +136,131 @@ exports.handler = async (event, context) => {
   };
 };
 
+// =====================================
+// SUPABASE HELPER FUNCTIONS
+// =====================================
+
+async function getOrCreateUser(email, stripeCustomerId, customerName = '') {
+    if (!email) return null;
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Check if user exists
+    let { data: user } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', normalizedEmail)
+        .single();
+
+    if (user) {
+        // Update Stripe customer ID if not set
+        if (!user.stripe_customer_id && stripeCustomerId) {
+            await supabase
+                .from('users')
+                .update({ stripe_customer_id: stripeCustomerId })
+                .eq('id', user.id);
+        }
+        return user;
+    }
+
+    // Create new user
+    const { data: newUser, error } = await supabase
+        .from('users')
+        .insert({
+            email: normalizedEmail,
+            full_name: customerName,
+            stripe_customer_id: stripeCustomerId,
+            email_verified: true
+        })
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Failed to create user:', error);
+        return null;
+    }
+
+    console.log('Created new user:', newUser.id);
+    return newUser;
+}
+
+async function getProductByKey(productKey) {
+    const { data: product } = await supabase
+        .from('products')
+        .select('*')
+        .eq('product_key', productKey)
+        .single();
+    return product;
+}
+
+async function createPurchase(userId, productId, data) {
+    const { data: purchase, error } = await supabase
+        .from('purchases')
+        .insert({
+            user_id: userId,
+            product_id: productId,
+            stripe_payment_intent_id: data.paymentIntentId,
+            stripe_checkout_session_id: data.sessionId,
+            stripe_subscription_id: data.subscriptionId,
+            amount_cents: data.amountCents,
+            is_upsell: data.isUpsell || false,
+            source: data.source || 'checkout',
+            status: 'completed'
+        })
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Failed to create purchase:', error);
+        return null;
+    }
+
+    return purchase;
+}
+
+async function createEnrollment(userId, courseId, purchaseId) {
+    // Check if enrollment exists
+    const { data: existing } = await supabase
+        .from('enrollments')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('course_id', courseId)
+        .single();
+
+    if (existing) {
+        // Reactivate if revoked
+        await supabase
+            .from('enrollments')
+            .update({ status: 'active', purchase_id: purchaseId })
+            .eq('id', existing.id);
+        return existing;
+    }
+
+    // Create new enrollment
+    const { data: enrollment, error } = await supabase
+        .from('enrollments')
+        .insert({
+            user_id: userId,
+            course_id: courseId,
+            purchase_id: purchaseId,
+            status: 'active'
+        })
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Failed to create enrollment:', error);
+        return null;
+    }
+
+    console.log('Created enrollment for user', userId, 'in course', courseId);
+    return enrollment;
+}
+
+// =====================================
+// CHECKOUT HANDLER
+// =====================================
+
 async function handleCheckoutComplete(session) {
   const email = session.customer_email || session.customer_details?.email;
   const customerName = session.customer_details?.name || '';
@@ -136,6 +268,40 @@ async function handleCheckoutComplete(session) {
   const product = PRODUCTS[productKey];
 
   console.log('Checkout completed:', { email, productKey, amount: session.amount_total });
+
+  // =====================================
+  // SUPABASE: Create user, purchase, and enrollment
+  // =====================================
+  try {
+      const user = await getOrCreateUser(email, session.customer, customerName);
+
+      if (user) {
+          const dbProduct = await getProductByKey(productKey);
+
+          if (dbProduct) {
+              const purchase = await createPurchase(user.id, dbProduct.id, {
+                  paymentIntentId: session.payment_intent,
+                  sessionId: session.id,
+                  amountCents: session.amount_total,
+                  source: 'checkout'
+              });
+
+              // Create enrollments for any courses linked to this product
+              if (dbProduct.course_ids && dbProduct.course_ids.length > 0) {
+                  for (const courseId of dbProduct.course_ids) {
+                      await createEnrollment(user.id, courseId, purchase?.id);
+                  }
+              }
+          }
+      }
+  } catch (supabaseError) {
+      console.error('Supabase error:', supabaseError);
+      // Continue with GHL webhook even if Supabase fails
+  }
+
+  // =====================================
+  // GHL WEBHOOKS (existing logic)
+  // =====================================
 
   // Build the webhook payload
   const payload = {
@@ -183,6 +349,39 @@ async function handlePaymentSuccess(paymentIntent) {
 
   console.log('Upsell payment succeeded:', { email, productKey, amount: paymentIntent.amount });
 
+  // =====================================
+  // SUPABASE: Create purchase and enrollment for upsell
+  // =====================================
+  try {
+      const user = await getOrCreateUser(email, paymentIntent.customer);
+
+      if (user) {
+          const dbProduct = await getProductByKey(productKey);
+
+          if (dbProduct) {
+              const purchase = await createPurchase(user.id, dbProduct.id, {
+                  paymentIntentId: paymentIntent.id,
+                  amountCents: paymentIntent.amount,
+                  isUpsell: true,
+                  source: 'one_click_upsell'
+              });
+
+              // Create enrollments for any courses linked to this product
+              if (dbProduct.course_ids && dbProduct.course_ids.length > 0) {
+                  for (const courseId of dbProduct.course_ids) {
+                      await createEnrollment(user.id, courseId, purchase?.id);
+                  }
+              }
+          }
+      }
+  } catch (supabaseError) {
+      console.error('Supabase upsell error:', supabaseError);
+  }
+
+  // =====================================
+  // GHL WEBHOOKS (existing logic)
+  // =====================================
+
   const payload = {
     event: 'upsell_purchase',
     timestamp: new Date().toISOString(),
@@ -215,10 +414,36 @@ async function handlePaymentSuccess(paymentIntent) {
 
 async function handleSubscriptionCreated(subscription) {
   const email = subscription.metadata?.email;
-  const productKey = subscription.metadata?.productKey;
+  const productKey = subscription.metadata?.productKey || 'inner_circle';
   const product = PRODUCTS[productKey];
 
   console.log('Subscription created:', { email, productKey });
+
+  // =====================================
+  // SUPABASE: Create purchase for subscription
+  // =====================================
+  try {
+      const user = await getOrCreateUser(email, subscription.customer);
+
+      if (user) {
+          const dbProduct = await getProductByKey(productKey);
+
+          if (dbProduct) {
+              await createPurchase(user.id, dbProduct.id, {
+                  subscriptionId: subscription.id,
+                  amountCents: subscription.items?.data[0]?.price?.unit_amount || 4700,
+                  isUpsell: true,
+                  source: 'subscription'
+              });
+          }
+      }
+  } catch (supabaseError) {
+      console.error('Supabase subscription error:', supabaseError);
+  }
+
+  // =====================================
+  // GHL WEBHOOKS (existing logic)
+  // =====================================
 
   const payload = {
     event: 'subscription_created',
