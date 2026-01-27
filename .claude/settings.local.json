@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd video embed and Stripe 1-click upsell system\n\n- Embed YouTube video in hero section\n- Add Stripe webhook handler for GHL integration\n- Add complete-order function for final purchase summary\n- Update one-click-charge with GHL webhook support\n- Add comprehensive GHL setup guide\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git config:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}
