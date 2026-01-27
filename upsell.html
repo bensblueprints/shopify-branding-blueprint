@@ -707,10 +707,24 @@
             }
         }
 
-        function goToThankYou() {
+        async function goToThankYou() {
+            // Send final order complete webhook with all purchased products
+            try {
+                await fetch('/.netlify/functions/complete-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        token: upsellToken,
+                        purchasedUpsells: purchasedProducts
+                    })
+                });
+            } catch (err) {
+                console.error('Failed to send order complete webhook:', err);
+            }
+
             // Redirect to thank you page
             const purchased = purchasedProducts.join(',');
-            window.location.href = `/thank-you.html?purchased=${purchased}`;
+            window.location.href = `/thank-you.html?purchased=${purchased}&token=${encodeURIComponent(upsellToken || '')}`;
         }
 
         // Initialize on load

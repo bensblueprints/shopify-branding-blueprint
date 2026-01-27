@@ -1,5 +1,6 @@
 // One-click upsell charge function
 // Charges customer's saved payment method via Stripe
+// Sends webhooks to GoHighLevel on successful purchase
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
@@ -8,25 +9,54 @@ const PRODUCTS = {
   canva_kit: {
     name: 'Done-For-You Canva Brand Kit',
     price: 2700, // $27.00
-    productId: '69781a65ca50037639df9f5a'
+    ghlTag: 'purchased_canva_kit'
   },
   email_swipe: {
     name: 'Email Sequence Swipe File',
     price: 1900, // $19.00
-    productId: '69781a667a096c97959ce1da'
+    ghlTag: 'purchased_email_swipe'
   },
   fb_ads: {
     name: 'Facebook Ads for Brands Masterclass',
     price: 9700, // $97.00
-    productId: '69781a68f4da0e6f334cb915'
+    ghlTag: 'purchased_fb_ads'
   },
   inner_circle: {
     name: 'Brand Builders Inner Circle (Monthly)',
     price: 4700, // $47.00/month
-    productId: '69781a6aa243f6c59b1ecead',
+    ghlTag: 'purchased_inner_circle',
     recurring: true
   }
 };
+
+// Send webhook to GoHighLevel
+async function sendGHLWebhook(webhookUrl, payload) {
+  if (!webhookUrl) {
+    console.log('No GHL webhook URL configured, skipping...');
+    return null;
+  }
+
+  try {
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      console.error('GHL webhook failed:', response.status);
+      return null;
+    }
+
+    console.log('GHL webhook sent successfully');
+    return true;
+  } catch (error) {
+    console.error('GHL webhook error:', error);
+    return null;
+  }
+}
 
 exports.handler = async (event, context) => {
   // CORS headers
@@ -101,10 +131,10 @@ exports.handler = async (event, context) => {
     }
 
     let charge;
+    let ghlPayload;
 
     if (product.recurring) {
       // Create a subscription for recurring products
-      // First, create or get a price
       const price = await stripe.prices.create({
         unit_amount: product.price,
         currency: 'usd',
@@ -133,6 +163,26 @@ exports.handler = async (event, context) => {
         type: 'subscription'
       };
 
+      // Build GHL payload for subscription
+      ghlPayload = {
+        event: 'subscription_created',
+        timestamp: new Date().toISOString(),
+        customer: {
+          email,
+          stripeCustomerId,
+        },
+        subscription: {
+          subscriptionId: subscription.id,
+          productKey,
+          productName: product.name,
+          amount: product.price / 100,
+          interval: 'month',
+          status: subscription.status
+        },
+        tags: [product.ghlTag, 'upsell_buyer', 'subscriber'],
+        source: 'one_click_upsell'
+      };
+
     } else {
       // Create a one-time payment intent
       const paymentIntent = await stripe.paymentIntents.create({
@@ -156,6 +206,26 @@ exports.handler = async (event, context) => {
         status: paymentIntent.status,
         type: 'one_time'
       };
+
+      // Build GHL payload for one-time purchase
+      ghlPayload = {
+        event: 'upsell_purchase',
+        timestamp: new Date().toISOString(),
+        customer: {
+          email,
+          stripeCustomerId,
+        },
+        purchase: {
+          productKey,
+          productName: product.name,
+          amount: product.price / 100,
+          currency: 'USD',
+          paymentId: paymentIntent.id,
+          isUpsell: true
+        },
+        tags: [product.ghlTag, 'upsell_buyer'],
+        source: 'one_click_upsell'
+      };
     }
 
     console.log('Charge successful:', {
@@ -164,8 +234,27 @@ exports.handler = async (event, context) => {
       chargeId: charge.id
     });
 
-    // TODO: Trigger GHL webhook/automation to grant access to the product
-    // You can call GHL API here to add tags, grant course access, etc.
+    // Send webhooks to GoHighLevel
+    // 1. Send to the main upsell webhook (catches all upsells)
+    const upsellWebhookUrl = process.env.GHL_WEBHOOK_UPSELL;
+    if (upsellWebhookUrl) {
+      await sendGHLWebhook(upsellWebhookUrl, ghlPayload);
+    }
+
+    // 2. Send to product-specific webhook
+    const productWebhookEnvKey = `GHL_WEBHOOK_${productKey.toUpperCase()}`;
+    const productWebhookUrl = process.env[productWebhookEnvKey];
+    if (productWebhookUrl) {
+      await sendGHLWebhook(productWebhookUrl, ghlPayload);
+    }
+
+    // 3. If subscription, also send to subscription webhook
+    if (product.recurring) {
+      const subscriptionWebhookUrl = process.env.GHL_WEBHOOK_SUBSCRIPTION;
+      if (subscriptionWebhookUrl) {
+        await sendGHLWebhook(subscriptionWebhookUrl, ghlPayload);
+      }
+    }
 
     return {
       statusCode: 200,

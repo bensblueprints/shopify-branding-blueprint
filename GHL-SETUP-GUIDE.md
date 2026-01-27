@@ -1,252 +1,308 @@
-# GoHighLevel Integration Setup Guide
+# GoHighLevel + Stripe Integration Setup Guide
 
-This guide walks you through connecting your landing page to GoHighLevel for payments and course delivery.
-
----
-
-## Overview
-
-The landing page is pre-built with GHL integration. You need to:
-1. Create products in GHL
-2. Create order forms with order bumps
-3. Set up course/membership for delivery
-4. Create automation workflow for fulfillment
-5. Update the config in `index.html`
+This guide walks you through setting up 1-click upsells with Stripe and GoHighLevel webhooks.
 
 ---
 
-## Step 1: Create Products in GoHighLevel
+## 1. Netlify Environment Variables
 
-Go to **Payments → Products** and create these products:
+Add these environment variables in Netlify Dashboard → Site Settings → Environment Variables:
 
-### Main Product
-| Field | Value |
-|-------|-------|
-| Name | 7-Day Shopify Branding Blueprint |
-| Price | $27.00 |
-| Type | One-time |
-
-### Order Bumps
-| Name | Price | Type |
-|------|-------|------|
-| Brand Name Generator + Trademark Guide | $17.00 | One-time |
-| Done-For-You Canva Brand Kit | $27.00 | One-time |
-| Email Sequence Swipe File | $19.00 | One-time |
-
-### Upsells
-| Name | Price | Type |
-|------|-------|------|
-| Facebook Ads for Brands Masterclass | $97.00 | One-time |
-| Brand Builder's Inner Circle | $47.00 | Recurring (monthly) |
-
----
-
-## Step 2: Create Order Forms
-
-Go to **Payments → Order Forms** → **+ New Order Form**
-
-### Main Order Form (with bumps)
-
-1. **Basic Settings**
-   - Name: `Shopify Blueprint - Main Offer`
-   - Select product: 7-Day Shopify Branding Blueprint
-
-2. **Add Order Bumps**
-   - Click "Add Bump"
-   - Add each bump product:
-     - Brand Name Generator + Trademark Guide ($17)
-     - Done-For-You Canva Brand Kit ($27)
-     - Email Sequence Swipe File ($19)
-   - Set bump display text for each
-
-3. **Customize Thank You Page**
-   - Redirect to your course access URL or upsell page
-
-4. **Save and copy the Order Form ID** (visible in URL or settings)
-
-### Create separate order forms for upsells:
-- FB Ads Masterclass Order Form
-- Inner Circle Order Form (recurring)
-
----
-
-## Step 3: Set Up Course/Membership
-
-Go to **Memberships → Courses**
-
-### Create New Course
-1. Click **+ New Course**
-2. Name: `7-Day Shopify Branding Blueprint`
-3. Add 7 modules (one for each day):
-   - Day 1: What Is a Brand?
-   - Day 2: What It Means to Own a Brand
-   - Day 3: Create Perfect Branding
-   - Day 4: Find Products & Suppliers
-   - Day 5: Get Products Customized
-   - Day 6: 3 Profitable Industries
-   - Day 7: Launch Your Brand
-
-4. Add lessons and content to each module
-5. Set course to **Locked** (requires purchase)
-
-### Create Offers for Each Product
-Go to **Memberships → Offers**
-
-Create offers that link products to course access:
-- Main Course Offer → Grants access to main course
-- FB Ads Offer → Grants access to FB Ads course
-- Inner Circle Offer → Grants access to community/coaching area
-
----
-
-## Step 4: Create Automation Workflow
-
-Go to **Automations → Workflows** → **+ Create Workflow**
-
-### Trigger: Order Submitted
-1. Add trigger: **Order Form Submitted**
-2. Select your main order form
-
-### Actions:
-1. **Create/Update Contact** (if needed)
-
-2. **Add Tag**
-   - Tag: `purchased-shopify-blueprint`
-
-3. **Grant Course Access**
-   - Select: 7-Day Shopify Branding Blueprint
-   - Access Level: Full
-
-4. **Send Email** (Welcome email)
-   - Subject: "You're In! Access Your 7-Day Branding Blueprint"
-   - Include course login link
-
-5. **Conditional: Check for Bumps** (Optional)
-   - If bump was purchased, add appropriate tags/access
-
-### Example Workflow Structure:
+### Required - Stripe Keys
 ```
-[Order Form Submitted]
-        ↓
-[Add Contact to Pipeline: "Course Buyers"]
-        ↓
-[Add Tag: "purchased-shopify-blueprint"]
-        ↓
-[Grant Membership Access: "7-Day Blueprint"]
-        ↓
-[Send Email: "Welcome - Your Course Access"]
-        ↓
-[Wait: 1 day]
-        ↓
-[Send Email: "Day 1 Reminder"]
+STRIPE_SECRET_KEY=sk_live_your_stripe_secret_key_here
+STRIPE_WEBHOOK_SECRET=whsec_... (get this from Stripe Dashboard after creating webhook)
+```
+
+### GoHighLevel Webhook URLs
+Create webhooks in GHL and add their URLs here:
+
+```
+# Main webhooks (recommended to set up all of these)
+GHL_WEBHOOK_PURCHASE=https://services.leadconnectorhq.com/hooks/your-hook-id
+GHL_WEBHOOK_UPSELL=https://services.leadconnectorhq.com/hooks/your-hook-id
+GHL_WEBHOOK_ORDER_COMPLETE=https://services.leadconnectorhq.com/hooks/your-hook-id
+GHL_WEBHOOK_SUBSCRIPTION=https://services.leadconnectorhq.com/hooks/your-hook-id
+
+# Product-specific webhooks (optional - for granular automations)
+GHL_WEBHOOK_MAIN_COURSE=https://services.leadconnectorhq.com/hooks/your-hook-id
+GHL_WEBHOOK_CANVA_KIT=https://services.leadconnectorhq.com/hooks/your-hook-id
+GHL_WEBHOOK_EMAIL_SWIPE=https://services.leadconnectorhq.com/hooks/your-hook-id
+GHL_WEBHOOK_FB_ADS=https://services.leadconnectorhq.com/hooks/your-hook-id
+GHL_WEBHOOK_INNER_CIRCLE=https://services.leadconnectorhq.com/hooks/your-hook-id
+
+# Bundle-specific webhooks (for specific product combinations)
+GHL_WEBHOOK_BUNDLE_MAIN_ONLY=https://...    # Bought main course only, no upsells
+GHL_WEBHOOK_BUNDLE_CANVA=https://...         # Main + Canva Kit
+GHL_WEBHOOK_BUNDLE_EMAIL=https://...         # Main + Email Swipe
+GHL_WEBHOOK_BUNDLE_FB=https://...            # Main + FB Ads
+GHL_WEBHOOK_BUNDLE_CIRCLE=https://...        # Main + Inner Circle
+GHL_WEBHOOK_BUNDLE_CANVA_EMAIL=https://...   # Main + Canva + Email
+GHL_WEBHOOK_BUNDLE_CANVA_FB=https://...      # Main + Canva + FB
+GHL_WEBHOOK_BUNDLE_CANVA_CIRCLE=https://...  # Main + Canva + Circle
+GHL_WEBHOOK_BUNDLE_EMAIL_FB=https://...      # Main + Email + FB
+GHL_WEBHOOK_BUNDLE_EMAIL_CIRCLE=https://...  # Main + Email + Circle
+GHL_WEBHOOK_BUNDLE_FB_CIRCLE=https://...     # Main + FB + Circle
+GHL_WEBHOOK_BUNDLE_CANVA_EMAIL_FB=https://...       # Main + Canva + Email + FB
+GHL_WEBHOOK_BUNDLE_CANVA_EMAIL_CIRCLE=https://...   # Main + Canva + Email + Circle
+GHL_WEBHOOK_BUNDLE_CANVA_FB_CIRCLE=https://...      # Main + Canva + FB + Circle
+GHL_WEBHOOK_BUNDLE_EMAIL_FB_CIRCLE=https://...      # Main + Email + FB + Circle
+GHL_WEBHOOK_BUNDLE_ALL=https://...           # Bought everything (whale!)
+
+# VIP buyer webhook (total spend >= $100)
+GHL_WEBHOOK_VIP_BUYER=https://services.leadconnectorhq.com/hooks/your-hook-id
 ```
 
 ---
 
-## Step 5: Update Landing Page Config
+## 2. Stripe Webhook Setup
 
-Open `index.html` and find the `GHL_CONFIG` section at the top:
+1. Go to Stripe Dashboard → Developers → Webhooks
+2. Click "Add endpoint"
+3. Set the endpoint URL to: `https://shopify-branding-blueprint.netlify.app/webhooks/stripe`
+4. Select these events:
+   - `checkout.session.completed`
+   - `payment_intent.succeeded`
+   - `customer.subscription.created`
+5. Copy the "Signing secret" (starts with `whsec_`)
+6. Add it to Netlify as `STRIPE_WEBHOOK_SECRET`
 
-```javascript
-const GHL_CONFIG = {
-    // Your GHL location URL
-    // Find this in Settings → Business Info → Domain
-    // Example: "https://app.gohighlevel.com/v2/location/abc123"
-    // Or your white-label domain: "https://crm.yourdomain.com"
-    locationUrl: "YOUR_GHL_LOCATION_URL",
+---
 
-    // Order Form IDs
-    // Find in Payments → Order Forms → Click form → ID in URL
-    orderForms: {
-        mainCourse: "YOUR_MAIN_ORDER_FORM_ID",
-        fbAdsMasterclass: "YOUR_FB_ADS_ORDER_FORM_ID",
-        innerCircle: "YOUR_INNER_CIRCLE_ORDER_FORM_ID"
-    },
+## 3. Webhook Payloads
 
-    // Product IDs (for analytics/tracking)
-    products: {
-        mainCourse: "prod_xxxxx",
-        brandNameGenerator: "prod_xxxxx",
-        canvaBrandKit: "prod_xxxxx",
-        emailSwipeFile: "prod_xxxxx",
-        fbAdsMasterclass: "prod_xxxxx",
-        innerCircle: "prod_xxxxx"
-    },
-
-    // After purchase redirects
-    thankYouPage: "https://yourdomain.com/thank-you",
-    courseAccessUrl: "https://yourdomain.com/courses"
-};
+### Purchase Complete (Initial checkout)
+```json
+{
+  "event": "purchase_complete",
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "customer": {
+    "email": "customer@example.com",
+    "name": "John Doe",
+    "stripeCustomerId": "cus_xxx"
+  },
+  "purchase": {
+    "productKey": "main_course",
+    "productName": "7-Day Shopify Branding Blueprint",
+    "amount": 27,
+    "currency": "USD",
+    "paymentId": "pi_xxx",
+    "sessionId": "cs_xxx"
+  },
+  "tags": ["purchased_main_course"],
+  "source": "stripe_checkout"
+}
 ```
 
-### Finding Your Values:
-
-**Location URL:**
-- Go to Settings → Business Info
-- Copy your location URL or custom domain
-
-**Order Form IDs:**
-- Go to Payments → Order Forms
-- Click on a form
-- The ID is in the URL: `/order-forms/FORM_ID_HERE`
-
-**Product IDs:**
-- Go to Payments → Products
-- Click on a product
-- Find the ID in the URL or API response
-
----
-
-## Step 6: Deploy Updates
-
-After updating the config, push to GitHub:
-
-```bash
-cd shopify-blueprint-landing
-git add .
-git commit -m "Add GHL configuration"
-git push
+### Upsell Purchase
+```json
+{
+  "event": "upsell_purchase",
+  "timestamp": "2024-01-15T10:32:00.000Z",
+  "customer": {
+    "email": "customer@example.com",
+    "stripeCustomerId": "cus_xxx"
+  },
+  "purchase": {
+    "productKey": "canva_kit",
+    "productName": "Done-For-You Canva Brand Kit",
+    "amount": 27,
+    "currency": "USD",
+    "paymentId": "pi_xxx",
+    "isUpsell": true
+  },
+  "tags": ["purchased_canva_kit", "upsell_buyer"],
+  "source": "one_click_upsell"
+}
 ```
 
-Netlify will auto-deploy the changes.
+### Order Complete (End of funnel)
+```json
+{
+  "event": "order_complete",
+  "timestamp": "2024-01-15T10:35:00.000Z",
+  "customer": {
+    "email": "customer@example.com",
+    "stripeCustomerId": "cus_xxx"
+  },
+  "order": {
+    "totalValue": 170,
+    "currency": "USD",
+    "productCount": 4,
+    "products": [
+      { "key": "main_course", "name": "7-Day Shopify Branding Blueprint", "price": 27 },
+      { "key": "canva_kit", "name": "Done-For-You Canva Brand Kit", "price": 27 },
+      { "key": "email_swipe", "name": "Email Sequence Swipe File", "price": 19 },
+      { "key": "fb_ads", "name": "Facebook Ads for Brands Masterclass", "price": 97 }
+    ],
+    "upsellCount": 3,
+    "hasSubscription": false,
+    "bundleKey": "canva_kit,email_swipe,fb_ads"
+  },
+  "tags": [
+    "purchased_main_course",
+    "purchased_canva_kit",
+    "purchased_email_swipe",
+    "purchased_fb_ads",
+    "high_value_buyer"
+  ],
+  "source": "funnel_complete"
+}
+```
+
+### Subscription Created
+```json
+{
+  "event": "subscription_created",
+  "timestamp": "2024-01-15T10:33:00.000Z",
+  "customer": {
+    "email": "customer@example.com",
+    "stripeCustomerId": "cus_xxx"
+  },
+  "subscription": {
+    "subscriptionId": "sub_xxx",
+    "productKey": "inner_circle",
+    "productName": "Brand Builders Inner Circle",
+    "amount": 47,
+    "interval": "month",
+    "status": "active"
+  },
+  "tags": ["purchased_inner_circle", "subscriber", "inner_circle_member"],
+  "source": "one_click_upsell"
+}
+```
 
 ---
 
-## Testing Checklist
+## 4. GHL Workflow Examples
 
-- [ ] Products created in GHL
-- [ ] Order forms created with bumps
-- [ ] Course content uploaded
-- [ ] Automation workflow active
-- [ ] Config updated in index.html
-- [ ] Test purchase with Stripe test mode
-- [ ] Verify course access granted
-- [ ] Verify welcome email sent
-- [ ] Test all order bumps
-- [ ] Test upsell purchases
+### Workflow 1: Grant Course Access (Main Purchase)
+**Trigger:** Webhook - `GHL_WEBHOOK_PURCHASE`
+**Filter:** `event` equals `purchase_complete`
+**Actions:**
+1. Add Tag: `{{tags}}` (loops through all tags)
+2. Create/Update Contact with email
+3. Add to Course/Membership
+4. Send Welcome Email
+
+### Workflow 2: Upsell Buyer Follow-up
+**Trigger:** Webhook - `GHL_WEBHOOK_UPSELL`
+**Actions:**
+1. Add Tags from payload
+2. Grant access to purchased product
+3. Send delivery email
+
+### Workflow 3: VIP Buyer Treatment
+**Trigger:** Webhook - `GHL_WEBHOOK_VIP_BUYER`
+**Filter:** `order.totalValue` >= 100
+**Actions:**
+1. Add Tag: `vip_customer`
+2. Add to VIP segment
+3. Send personal thank you from founder
+4. Add to priority support queue
+
+### Workflow 4: Inner Circle Onboarding
+**Trigger:** Webhook - `GHL_WEBHOOK_INNER_CIRCLE`
+**Filter:** `event` equals `subscription_created`
+**Actions:**
+1. Add Tag: `inner_circle_member`
+2. Grant community access
+3. Send calendar invite for next coaching call
+4. Add to Inner Circle email sequence
+
+### Workflow 5: Bundle-Specific Onboarding
+**Trigger:** Webhook - `GHL_WEBHOOK_BUNDLE_ALL`
+**Actions:**
+1. Add Tag: `whale_buyer`
+2. Grant ALL product access
+3. Send VIP welcome package
+4. Personal outreach from team
 
 ---
 
-## Optional Enhancements
+## 5. Products & Pricing
 
-### 1. One-Time Offer (OTO) Page
-After main purchase, redirect to an upsell page before the thank you page.
-
-### 2. Abandoned Cart Recovery
-Create automation triggered when someone starts but doesn't complete checkout.
-
-### 3. Email Sequences
-- Welcome sequence (Days 1-7 course reminders)
-- Upsell sequence (promote FB Ads course after Day 3)
-- Re-engagement sequence (inactive users)
-
-### 4. Analytics/Tracking
-Add Facebook Pixel, Google Analytics, and conversion tracking to measure funnel performance.
+| Product | Price | Product Key | GHL Tag |
+|---------|-------|-------------|---------|
+| 7-Day Branding Blueprint | $27 | `main_course` | `purchased_main_course` |
+| Canva Brand Kit | $27 | `canva_kit` | `purchased_canva_kit` |
+| Email Sequence Swipe File | $19 | `email_swipe` | `purchased_email_swipe` |
+| Facebook Ads Masterclass | $97 | `fb_ads` | `purchased_fb_ads` |
+| Inner Circle (Monthly) | $47/mo | `inner_circle` | `purchased_inner_circle` |
 
 ---
 
-## Support
+## 6. Customer Journey Flow
 
-For GHL-specific questions, refer to:
-- [GoHighLevel Documentation](https://help.gohighlevel.com/)
-- [GHL Community](https://community.gohighlevel.com/)
+```
+Landing Page ($27 checkout)
+         │
+         ▼
+    [Stripe Checkout]
+         │
+         ▼ (webhook: purchase_complete)
+         │
+    Upsell 1: Canva Kit ($27)
+    ├── Yes → (webhook: upsell_purchase) → Upsell 2
+    └── No → Upsell 2
+         │
+    Upsell 2: Email Swipe ($19)
+    ├── Yes → (webhook: upsell_purchase) → Upsell 3
+    └── No → Upsell 3
+         │
+    Upsell 3: FB Ads ($97)
+    ├── Yes → (webhook: upsell_purchase) → Upsell 4
+    └── No → Upsell 4
+         │
+    Upsell 4: Inner Circle ($47/mo)
+    ├── Yes → (webhook: subscription_created) → Thank You
+    └── No → Thank You
+         │
+         ▼ (webhook: order_complete with full bundle info)
+         │
+    Thank You Page
+```
+
+---
+
+## 7. Testing
+
+1. Use Stripe test mode keys first
+2. Use test card: `4242 4242 4242 4242`
+3. Check Netlify Functions logs for webhook activity
+4. Verify GHL receives webhooks in Automation → Webhook History
+
+---
+
+## 8. All Webhook Combinations Reference
+
+The `order_complete` webhook includes a `bundleKey` field that tells you exactly which upsells were purchased:
+
+| Bundle Key | Products Purchased |
+|------------|-------------------|
+| `none` | Main course only |
+| `canva_kit` | Main + Canva Kit |
+| `email_swipe` | Main + Email Swipe |
+| `fb_ads` | Main + FB Ads |
+| `inner_circle` | Main + Inner Circle |
+| `canva_kit,email_swipe` | Main + Canva + Email |
+| `canva_kit,fb_ads` | Main + Canva + FB Ads |
+| `canva_kit,inner_circle` | Main + Canva + Inner Circle |
+| `email_swipe,fb_ads` | Main + Email + FB Ads |
+| `email_swipe,inner_circle` | Main + Email + Inner Circle |
+| `fb_ads,inner_circle` | Main + FB Ads + Inner Circle |
+| `canva_kit,email_swipe,fb_ads` | Main + Canva + Email + FB Ads |
+| `canva_kit,email_swipe,inner_circle` | Main + Canva + Email + Inner Circle |
+| `canva_kit,fb_ads,inner_circle` | Main + Canva + FB Ads + Inner Circle |
+| `email_swipe,fb_ads,inner_circle` | Main + Email + FB Ads + Inner Circle |
+| `canva_kit,email_swipe,fb_ads,inner_circle` | ALL PRODUCTS (whale!) |
+
+Use these bundle keys in GHL workflow filters to create specific automations for each combination.
+
+---
+
+## Need Help?
+
+- Netlify Functions logs: Dashboard → Functions → View logs
+- Stripe webhook logs: Dashboard → Developers → Webhooks → Select endpoint → View logs
+- GHL webhook history: Automation → Webhook History

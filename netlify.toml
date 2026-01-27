@@ -11,6 +11,12 @@
   to = "/upsell.html"
   status = 200
 
+# Stripe webhook endpoint (cleaner URL)
+[[redirects]]
+  from = "/webhooks/stripe"
+  to = "/.netlify/functions/stripe-webhook"
+  status = 200
+
 # Headers for security
 [[headers]]
   for = "/*"
