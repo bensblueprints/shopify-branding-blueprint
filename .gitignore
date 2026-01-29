@@ -1,2 +1,13 @@
 # Local Netlify folder
 .netlify
+
+# Dependencies
+node_modules/
+
+# Audio files (too large for git)
+*.MP3
+*.mp3
+
+# Misc
+nul
+*.png
