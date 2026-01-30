@@ -49,9 +49,10 @@ exports.handler = async (event) => {
 
     try {
         // Get user's enrolled courses
+        // Note: Only selecting columns that exist in the courses table
         const enrollments = await sql`
-            SELECT e.*, c.id as course_id, c.slug, c.title, c.subtitle,
-                   c.thumbnail_url, c.lesson_count, c.total_duration_minutes
+            SELECT e.*, c.id as course_id, c.slug, c.title, c.description,
+                   c.thumbnail_url
             FROM enrollments e
             JOIN courses c ON e.course_id = c.id
             WHERE e.user_id = ${user.id}
@@ -61,13 +62,12 @@ exports.handler = async (event) => {
         // Calculate progress for each course
         const coursesWithProgress = await Promise.all(
             enrollments.map(async (enrollment) => {
-                // Get total lessons for course
+                // Get total lessons for course (no is_published column)
                 const [totalResult] = await sql`
                     SELECT COUNT(*) as total
                     FROM lessons l
                     JOIN modules m ON l.module_id = m.id
                     WHERE m.course_id = ${enrollment.course_id}
-                    AND l.is_published = true
                 `;
 
                 // Get completed lessons for user
@@ -76,7 +76,7 @@ exports.handler = async (event) => {
                     FROM lesson_progress lp
                     JOIN lessons l ON lp.lesson_id = l.id
                     JOIN modules m ON l.module_id = m.id
-                    WHERE lp.user_id = ${user.id}
+                    WHERE lp.user_id = ${user.id}::uuid
                     AND m.course_id = ${enrollment.course_id}
                     AND lp.is_completed = true
                 `;
@@ -91,10 +91,9 @@ exports.handler = async (event) => {
                     id: enrollment.course_id,
                     slug: enrollment.slug,
                     title: enrollment.title,
-                    subtitle: enrollment.subtitle,
+                    description: enrollment.description,
                     thumbnail_url: enrollment.thumbnail_url,
-                    lesson_count: enrollment.lesson_count,
-                    total_duration_minutes: enrollment.total_duration_minutes,
+                    lesson_count: totalLessons,
                     enrollment_id: enrollment.id,
                     enrolled_at: enrollment.enrolled_at,
                     progress: {

@@ -85,10 +85,10 @@ exports.handler = async (event) => {
 
         const lesson = lessons[0];
 
-        // Get enrollment
+        // Get enrollment (cast user.id to uuid)
         const enrollments = await sql`
             SELECT id FROM enrollments
-            WHERE user_id = ${user.id}
+            WHERE user_id = ${user.id}::uuid
             AND course_id = ${lesson.course_id}
             AND status = 'active'
         `;
@@ -101,11 +101,11 @@ exports.handler = async (event) => {
             };
         }
 
-        // Check if progress exists
+        // Check if progress exists (cast to uuid)
         const existingProgress = await sql`
             SELECT * FROM lesson_progress
-            WHERE user_id = ${user.id}
-            AND lesson_id = ${lessonId}
+            WHERE user_id = ${user.id}::uuid
+            AND lesson_id = ${lessonId}::uuid
         `;
 
         let progress;
@@ -115,45 +115,36 @@ exports.handler = async (event) => {
             const updates = [];
             const values = [];
 
-            if (typeof progress_percent === 'number') {
-                const clampedPercent = Math.min(100, Math.max(0, progress_percent));
-                progress = await sql`
-                    UPDATE lesson_progress
-                    SET progress_percent = ${clampedPercent}
-                    WHERE user_id = ${user.id} AND lesson_id = ${lessonId}
-                    RETURNING *
-                `;
-            }
-
+            // Note: using video_progress instead of progress_percent
             if (is_completed === true) {
                 progress = await sql`
                     UPDATE lesson_progress
-                    SET is_completed = true, completed_at = NOW(), progress_percent = 100
-                    WHERE user_id = ${user.id} AND lesson_id = ${lessonId}
+                    SET is_completed = true, completed_at = NOW(), video_progress = 100
+                    WHERE user_id = ${user.id}::uuid AND lesson_id = ${lessonId}::uuid
                     RETURNING *
                 `;
-            } else if (progress_percent !== undefined) {
+            } else if (typeof progress_percent === 'number') {
                 const clampedPercent = Math.min(100, Math.max(0, progress_percent));
                 progress = await sql`
                     UPDATE lesson_progress
-                    SET progress_percent = ${clampedPercent}
-                    WHERE user_id = ${user.id} AND lesson_id = ${lessonId}
+                    SET video_progress = ${clampedPercent}, last_watched_at = NOW()
+                    WHERE user_id = ${user.id}::uuid AND lesson_id = ${lessonId}::uuid
                     RETURNING *
                 `;
             } else {
                 progress = existingProgress;
             }
         } else {
-            // Insert new progress
+            // Insert new progress (using video_progress column)
             const clampedPercent = typeof progress_percent === 'number'
                 ? Math.min(100, Math.max(0, progress_percent))
                 : 0;
 
             progress = await sql`
-                INSERT INTO lesson_progress (user_id, lesson_id, progress_percent, is_completed, completed_at)
+                INSERT INTO lesson_progress (user_id, lesson_id, video_progress, is_completed, completed_at)
                 VALUES (
-                    ${user.id},
-                    ${lessonId},
+                    ${user.id}::uuid,
+                    ${lessonId}::uuid,
                     ${is_completed ? 100 : clampedPercent},
                     ${is_completed || false},
                     ${is_completed ? new Date().toISOString() : null}

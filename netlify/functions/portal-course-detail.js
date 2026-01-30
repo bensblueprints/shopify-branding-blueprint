@@ -59,11 +59,10 @@ exports.handler = async (event) => {
             };
         }
 
-        // Get course
+        // Get course (status column instead of is_published)
         const courses = await sql`
             SELECT * FROM courses
             WHERE slug = ${slug}
-            AND is_published = true
         `;
 
         if (courses.length === 0) {
@@ -94,36 +93,38 @@ exports.handler = async (event) => {
 
         const enrollment = enrollments[0];
 
-        // Get modules
+        // Get modules (no is_published column)
         const modules = await sql`
             SELECT * FROM modules
             WHERE course_id = ${course.id}
-            AND is_published = true
             ORDER BY sort_order ASC
         `;
 
-        // Get lessons for each module
+        // Get lessons for each module (adjusted column names)
         for (const module of modules) {
             const lessons = await sql`
-                SELECT id, slug, title, description, duration_minutes, is_preview, sort_order
+                SELECT id, title, description, video_duration as duration_minutes, sort_order
                 FROM lessons
                 WHERE module_id = ${module.id}
-                AND is_published = true
                 ORDER BY sort_order ASC
             `;
             module.lessons = lessons;
         }
 
         // Get lesson progress for this user
+        // lesson_progress has video_progress instead of progress_percent
         const progressData = await sql`
-            SELECT lesson_id, is_completed, progress_percent
+            SELECT lesson_id, is_completed, video_progress
             FROM lesson_progress
-            WHERE user_id = ${user.id}
+            WHERE user_id = ${user.id}::uuid
         `;
 
         const progressMap = {};
         (progressData || []).forEach(p => {
-            progressMap[p.lesson_id] = p;
+            progressMap[p.lesson_id] = {
+                is_completed: p.is_completed,
+                progress_percent: p.video_progress || 0
+            };
         });
 
         // Add progress to lessons
@@ -136,13 +137,12 @@ exports.handler = async (event) => {
             });
         });
 
-        // Calculate overall progress
+        // Calculate overall progress (no is_published column)
         const [totalResult] = await sql`
             SELECT COUNT(*) as total
             FROM lessons l
             JOIN modules m ON l.module_id = m.id
             WHERE m.course_id = ${course.id}
-            AND l.is_published = true
         `;
 
         const [completedResult] = await sql`
@@ -150,7 +150,7 @@ exports.handler = async (event) => {
             FROM lesson_progress lp
             JOIN lessons l ON lp.lesson_id = l.id
             JOIN modules m ON l.module_id = m.id
-            WHERE lp.user_id = ${user.id}
+            WHERE lp.user_id = ${user.id}::uuid
             AND m.course_id = ${course.id}
             AND lp.is_completed = true
         `;

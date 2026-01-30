@@ -41,37 +41,44 @@ exports.handler = async (event) => {
         const userId = sessions[0].user_id;
 
         // Get all upsell products (excluding main_course)
+        // Note: Using title/handle instead of name/product_key in some cases
         const products = await sql`
-            SELECT id, product_key, name, description, price_cents, features, product_type, thumbnail_url, download_url, is_recurring
+            SELECT id,
+                   COALESCE(product_key, handle) as product_key,
+                   COALESCE(name, title) as name,
+                   COALESCE(body_html, '') as description,
+                   COALESCE(price_cents, 0) as price_cents,
+                   features,
+                   product_type,
+                   is_active
             FROM products
-            WHERE product_key != 'main_course' AND is_active = true
-            ORDER BY price_cents ASC
+            WHERE (product_key IS NULL OR product_key != 'main_course')
+            AND (is_active IS NULL OR is_active = true)
+            ORDER BY price_cents ASC NULLS LAST
         `;
 
-        // Get user's purchases
+        // Get user's purchases (user_id needs cast, product_id is uuid but products.id is text)
         const purchases = await sql`
             SELECT product_id, status, purchased_at
             FROM purchases
-            WHERE user_id = ${userId} AND status = 'completed'
+            WHERE user_id = ${userId}::uuid AND status = 'completed'
         `;
 
         const purchasedProductIds = purchases.map(p => p.product_id);
 
         // Map products with purchase status
+        // Note: products.id is TEXT but purchases.product_id is UUID - compare as strings
         const upsells = products.map(product => ({
             id: product.id,
             product_key: product.product_key,
             name: product.name,
             description: product.description,
-            price: product.price_cents / 100,
-            price_cents: product.price_cents,
+            price: (product.price_cents || 0) / 100,
+            price_cents: product.price_cents || 0,
             features: product.features || [],
             product_type: product.product_type,
-            thumbnail_url: product.thumbnail_url,
-            download_url: product.download_url,
-            is_recurring: product.is_recurring,
-            is_purchased: purchasedProductIds.includes(product.id),
-            purchased_at: purchases.find(p => p.product_id === product.id)?.purchased_at || null
+            is_purchased: purchasedProductIds.some(pid => pid?.toString() === product.id?.toString()),
+            purchased_at: purchases.find(p => p.product_id?.toString() === product.id?.toString())?.purchased_at || null
         }));
 
         return {

@@ -80,10 +80,10 @@ exports.handler = async (event) => {
         const lesson = lessons[0];
         const courseId = lesson.course_id;
 
-        // Check enrollment
+        // Check enrollment (user.id is TEXT, enrollments.user_id is UUID)
         const enrollments = await sql`
             SELECT * FROM enrollments
-            WHERE user_id = ${user.id}
+            WHERE user_id = ${user.id}::uuid
             AND course_id = ${courseId}
             AND status = 'active'
         `;
@@ -98,17 +98,17 @@ exports.handler = async (event) => {
 
         const enrollment = enrollments[0];
 
-        // Get or create lesson progress
+        // Get or create lesson progress (cast user.id to uuid)
         let progress = await sql`
             SELECT * FROM lesson_progress
-            WHERE user_id = ${user.id}
-            AND lesson_id = ${id}
+            WHERE user_id = ${user.id}::uuid
+            AND lesson_id = ${id}::uuid
         `;
 
         if (progress.length === 0) {
             progress = await sql`
                 INSERT INTO lesson_progress (user_id, lesson_id)
-                VALUES (${user.id}, ${id})
+                VALUES (${user.id}::uuid, ${id}::uuid)
                 RETURNING *
             `;
         }
