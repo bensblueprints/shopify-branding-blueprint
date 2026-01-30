@@ -1958,12 +1958,9 @@
 
             const data = await response.json();
 
-            if (data.success && data.clientSecret) {
-                // For Airwallex, we'll use their hosted page or redirect
-                // This can be enhanced with Airwallex Drop-in elements
-                const airwallexEnv = data.env === 'production' ? '' : 'demo.';
-                const hostedUrl = `https://${airwallexEnv}airwallex.com/checkout/${data.paymentIntentId}?client_secret=${data.clientSecret}`;
-                window.location.href = hostedUrl;
+            if (data.success && data.checkoutUrl) {
+                // Redirect to Airwallex hosted checkout page
+                window.location.href = data.checkoutUrl;
             } else {
                 throw new Error(data.error || 'Failed to create payment');
             }

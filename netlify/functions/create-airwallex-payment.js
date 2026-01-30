@@ -96,7 +96,8 @@ exports.handler = async (event) => {
             }
         };
 
-        const response = await fetch(`${AIRWALLEX_API_URL}/api/v1/pa/payment_intents/create`, {
+        // Step 1: Create PaymentIntent
+        const piResponse = await fetch(`${AIRWALLEX_API_URL}/api/v1/pa/payment_intents/create`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -105,25 +106,53 @@ exports.handler = async (event) => {
             body: JSON.stringify(paymentIntentData)
         });
 
-        const result = await response.json();
+        const piResult = await piResponse.json();
 
-        if (!response.ok) {
-            console.error('Airwallex API error:', result);
+        if (!piResponse.ok) {
+            console.error('Airwallex PaymentIntent error:', piResult);
             return {
                 statusCode: 500,
                 headers,
-                body: JSON.stringify({ error: result.message || 'Failed to create payment' })
+                body: JSON.stringify({ error: piResult.message || 'Failed to create payment' })
             };
         }
 
-        // Return the client_secret for frontend
+        // Step 2: Create Checkout Session for hosted payment page
+        const checkoutData = {
+            payment_intent_id: piResult.id,
+            success_url: `${siteUrl}/thank-you.html?provider=airwallex&order_id=${orderId}&status=success`,
+            cancel_url: `${siteUrl}/?payment=cancelled`,
+            customer_email: email
+        };
+
+        const csResponse = await fetch(`${AIRWALLEX_API_URL}/api/v1/pa/checkout_sessions/create`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify(checkoutData)
+        });
+
+        const csResult = await csResponse.json();
+
+        if (!csResponse.ok) {
+            console.error('Airwallex Checkout Session error:', csResult);
+            return {
+                statusCode: 500,
+                headers,
+                body: JSON.stringify({ error: csResult.message || 'Failed to create checkout session' })
+            };
+        }
+
+        // Return the checkout URL for redirect
         return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
                 success: true,
-                clientSecret: result.client_secret,
-                paymentIntentId: result.id,
+                checkoutUrl: csResult.url,
+                paymentIntentId: piResult.id,
                 orderId: orderId,
                 env: process.env.AIRWALLEX_ENV || 'demo'
             })
