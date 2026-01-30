@@ -8,6 +8,32 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/portal.css">
+    <!-- Google Sign-In -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 24px 0;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-color, #333);
+        }
+        .divider span {
+            padding: 0 16px;
+        }
+        .google-btn-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">
@@ -18,6 +44,28 @@
             </div>
 
             <div id="alert" class="alert" style="display: none;"></div>
+
+            <!-- Google Sign-In Button -->
+            <div class="google-btn-wrapper">
+                <div id="g_id_onload"
+                     data-client_id="430821340623-1gkofd83i9pejudn29mh10822uhive66.apps.googleusercontent.com"
+                     data-context="signin"
+                     data-ux_mode="popup"
+                     data-callback="handleGoogleLogin"
+                     data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-shape="rectangular"
+                     data-theme="filled_black"
+                     data-text="signin_with"
+                     data-size="large"
+                     data-logo_alignment="left"
+                     data-width="300">
+                </div>
+            </div>
+
+            <div class="divider"><span>or continue with email</span></div>
 
             <form id="loginForm">
                 <div class="form-group">
@@ -53,6 +101,37 @@
         // Check if already logged in
         if (auth.isLoggedIn() && !auth.isAdmin()) {
             window.location.href = '/portal/';
+        }
+
+        // Handle Google Sign-In callback
+        async function handleGoogleLogin(response) {
+            const alertEl = document.getElementById('alert');
+
+            try {
+                alertEl.textContent = 'Signing in with Google...';
+                alertEl.className = 'alert alert-info';
+                alertEl.style.display = 'block';
+
+                const res = await fetch('/.netlify/functions/auth-google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credential: response.credential })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.session_token) {
+                    auth.setSessionToken(data.session_token, false);
+                    auth.setUserData(data.user);
+                    window.location.href = '/portal/';
+                } else {
+                    alertEl.textContent = data.error || 'Google login failed';
+                    alertEl.className = 'alert alert-error';
+                }
+            } catch (error) {
+                alertEl.textContent = 'Google login failed. Please try again.';
+                alertEl.className = 'alert alert-error';
+            }
         }
 
         const form = document.getElementById('loginForm');
