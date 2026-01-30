@@ -35,11 +35,11 @@ async function validateSession(authHeader) {
         };
     }
 
-    // Check for user session
+    // Check for user session (sessions.user_id is UUID, users.id is TEXT)
     const userSessions = await sql`
         SELECT s.*, u.id as user_id, u.email, u.full_name, u.avatar_url
         FROM sessions s
-        JOIN users u ON s.user_id = u.id
+        JOIN users u ON s.user_id::text = u.id
         WHERE s.session_token = ${sessionToken}
         AND s.expires_at > NOW()
         AND s.user_id IS NOT NULL

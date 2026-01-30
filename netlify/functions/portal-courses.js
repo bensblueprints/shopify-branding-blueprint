@@ -7,10 +7,11 @@ async function validateUserSession(authHeader) {
     if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
     const sessionToken = authHeader.replace('Bearer ', '');
 
+    // Note: sessions.user_id is UUID, users.id is TEXT - need to cast
     const sessions = await sql`
         SELECT s.*, u.id as user_id, u.email, u.full_name
         FROM sessions s
-        JOIN users u ON s.user_id = u.id
+        JOIN users u ON s.user_id::text = u.id
         WHERE s.session_token = ${sessionToken}
         AND s.expires_at > NOW()
         AND s.user_id IS NOT NULL

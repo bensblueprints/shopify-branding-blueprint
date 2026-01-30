@@ -52,11 +52,11 @@ exports.handler = async (event) => {
 
         const sessionToken = authHeader.replace('Bearer ', '');
 
-        // Verify session and get user
+        // Verify session and get user (sessions.user_id is UUID, users.id is TEXT)
         const sessions = await sql`
             SELECT s.user_id, u.email, u.full_name
             FROM sessions s
-            JOIN users u ON s.user_id = u.id
+            JOIN users u ON s.user_id::text = u.id
             WHERE s.session_token = ${sessionToken}
             AND s.expires_at > NOW()
         `;
