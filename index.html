@@ -1567,11 +1567,11 @@
                             <div class="payment-methods">
                                 <label class="payment-method-label">Select Payment Method</label>
                                 <div class="payment-options">
-                                    <div class="payment-option selected" data-method="stripe" onclick="selectPaymentMethod('stripe')">
+                                    <div class="payment-option selected" data-method="airwallex" onclick="selectPaymentMethod('airwallex')">
                                         <div class="payment-icon">💳</div>
                                         <div class="payment-info">
                                             <span class="payment-name">Credit / Debit Card</span>
-                                            <span class="payment-desc">Visa, Mastercard, Amex</span>
+                                            <span class="payment-desc">Visa, Mastercard, Amex, Discover & more</span>
                                         </div>
                                         <div class="payment-check">✓</div>
                                     </div>
@@ -1580,14 +1580,6 @@
                                         <div class="payment-info">
                                             <span class="payment-name">Cryptocurrency</span>
                                             <span class="payment-desc">BTC, ETH, USDT & more</span>
-                                        </div>
-                                        <div class="payment-check">✓</div>
-                                    </div>
-                                    <div class="payment-option" data-method="airwallex" onclick="selectPaymentMethod('airwallex')">
-                                        <div class="payment-icon">🌐</div>
-                                        <div class="payment-info">
-                                            <span class="payment-name">International Cards</span>
-                                            <span class="payment-desc">Global payment methods</span>
                                         </div>
                                         <div class="payment-check">✓</div>
                                     </div>
@@ -1846,7 +1838,7 @@
         // Initialize Stripe
         const stripe = Stripe('pk_test_YOUR_PUBLISHABLE_KEY'); // Replace with your Stripe publishable key
         let embeddedCheckout = null;
-        let selectedPaymentMethod = 'stripe'; // Default payment method
+        let selectedPaymentMethod = 'airwallex'; // Default payment method
 
         // Payment Method Selector
         function selectPaymentMethod(method) {
@@ -1884,14 +1876,11 @@
 
             try {
                 switch (selectedPaymentMethod) {
-                    case 'stripe':
-                        await handleStripeCheckout(email);
+                    case 'airwallex':
+                        await handleAirwallexCheckout(email);
                         break;
                     case 'cryptomus':
                         await handleCryptomusCheckout(email);
-                        break;
-                    case 'airwallex':
-                        await handleAirwallexCheckout(email);
                         break;
                     default:
                         throw new Error('Please select a payment method');
@@ -1948,9 +1937,24 @@
             }
         }
 
-        // Airwallex Payment Handler - Currently disabled, use Stripe instead
+        // Airwallex Payment Handler
         async function handleAirwallexCheckout(email) {
-            throw new Error('International cards coming soon. Please use Credit/Debit Card option.');
+            const response = await fetch('/.netlify/functions/create-airwallex-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.intentId) {
+                // Build checkout URL and redirect
+                const env = data.env === 'prod' ? '' : '-demo';
+                const checkoutUrl = `https://checkout${env}.airwallex.com/pay/${data.intentId}?client_secret=${encodeURIComponent(data.clientSecret)}&successUrl=${encodeURIComponent(data.successUrl)}&failUrl=${encodeURIComponent(data.failUrl)}`;
+                window.location.href = checkoutUrl;
+            } else {
+                throw new Error(data.error || 'Failed to create payment');
+            }
         }
 
         // Reset button state
