@@ -117,33 +117,12 @@ exports.handler = async (event) => {
             };
         }
 
-        // Step 2: Create Checkout Session for hosted payment page
-        const checkoutData = {
-            payment_intent_id: piResult.id,
-            success_url: `${siteUrl}/thank-you.html?provider=airwallex&order_id=${orderId}&status=success`,
-            cancel_url: `${siteUrl}/?payment=cancelled`,
-            customer_email: email
-        };
+        // Construct the hosted checkout URL
+        const checkoutDomain = process.env.AIRWALLEX_ENV === 'production'
+            ? 'https://checkout.airwallex.com'
+            : 'https://checkout-demo.airwallex.com';
 
-        const csResponse = await fetch(`${AIRWALLEX_API_URL}/api/v1/pa/checkout_sessions/create`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`
-            },
-            body: JSON.stringify(checkoutData)
-        });
-
-        const csResult = await csResponse.json();
-
-        if (!csResponse.ok) {
-            console.error('Airwallex Checkout Session error:', csResult);
-            return {
-                statusCode: 500,
-                headers,
-                body: JSON.stringify({ error: csResult.message || 'Failed to create checkout session' })
-            };
-        }
+        const checkoutUrl = `${checkoutDomain}/pay/${piResult.id}?client_secret=${encodeURIComponent(piResult.client_secret)}&mode=payment&successUrl=${encodeURIComponent(siteUrl + '/thank-you.html?provider=airwallex&order_id=' + orderId)}&failUrl=${encodeURIComponent(siteUrl + '/?payment=failed')}`;
 
         // Return the checkout URL for redirect
         return {
@@ -151,7 +130,7 @@ exports.handler = async (event) => {
             headers,
             body: JSON.stringify({
                 success: true,
-                checkoutUrl: csResult.url,
+                checkoutUrl: checkoutUrl,
                 paymentIntentId: piResult.id,
                 orderId: orderId,
                 env: process.env.AIRWALLEX_ENV || 'demo'
