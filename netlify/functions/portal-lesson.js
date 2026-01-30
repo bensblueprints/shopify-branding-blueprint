@@ -136,8 +136,8 @@ exports.handler = async (event) => {
                     description: lesson.description,
                     video_url: lesson.video_url,
                     video_id: lesson.video_id,
-                    duration_minutes: lesson.duration_minutes,
-                    content_html: lesson.content_html,
+                    duration_minutes: lesson.duration_minutes || lesson.video_duration,
+                    content_html: lesson.content_html || lesson.content,
                     is_preview: lesson.is_preview,
                     sort_order: lesson.sort_order,
                     course: {
