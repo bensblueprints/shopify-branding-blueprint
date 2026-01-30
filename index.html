@@ -1821,8 +1821,6 @@
 
     <!-- Stripe.js SDK -->
     <script src="https://js.stripe.com/v3/"></script>
-    <!-- Airwallex SDK -->
-    <script src="https://checkout.airwallex.com/assets/elements.bundle.min.js"></script>
 
     <!-- Countdown Bar -->
     <div class="countdown-bar">
@@ -1950,36 +1948,9 @@
             }
         }
 
-        // Airwallex Payment Handler
+        // Airwallex Payment Handler - Currently disabled, use Stripe instead
         async function handleAirwallexCheckout(email) {
-            const response = await fetch('/.netlify/functions/create-airwallex-payment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            });
-
-            const data = await response.json();
-
-            if (data.success && data.intentId) {
-                // Use Airwallex SDK to redirect to hosted checkout
-                Airwallex.init({
-                    env: data.env,
-                    origin: window.location.origin
-                });
-
-                Airwallex.redirectToCheckout({
-                    env: data.env,
-                    mode: 'payment',
-                    intent_id: data.intentId,
-                    client_secret: data.clientSecret,
-                    currency: data.currency,
-                    country_code: 'US',
-                    successUrl: data.successUrl,
-                    failUrl: data.failUrl
-                });
-            } else {
-                throw new Error(data.error || 'Failed to create payment');
-            }
+            throw new Error('International cards coming soon. Please use Credit/Debit Card option.');
         }
 
         // Reset button state
