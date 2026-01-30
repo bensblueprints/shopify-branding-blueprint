@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Sequence Swipe File | Shopify Branding Blueprint</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; max-width: 900px; margin: 0 auto; padding: 40px; color: #1a1a1a; line-height: 1.6; background: #fafafa; }
+        @media print { body { padding: 20px; background: #fff; } .no-print { display: none !important; } .page-break { page-break-before: always; } }
+        .header { text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #c9a962; }
+        .logo { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: #c9a962; margin-bottom: 8px; }
+        h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        .subtitle { color: #666; font-size: 14px; }
+        h2 { font-size: 20px; margin: 40px 0 20px; padding-bottom: 8px; border-bottom: 2px solid #c9a962; color: #333; display: flex; align-items: center; gap: 10px; }
+        h2 .badge { background: #c9a962; color: #000; font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
+        h3 { font-size: 16px; margin: 24px 0 12px; color: #444; }
+        .intro { background: linear-gradient(135deg, #fefbf3, #fff9e6); padding: 24px; border-radius: 12px; margin-bottom: 32px; border: 1px solid #f0e6c8; }
+        .email-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .email-header { background: linear-gradient(135deg, #f8f8f8, #f0f0f0); padding: 16px 20px; border-bottom: 1px solid #e0e0e0; }
+        .email-number { font-size: 11px; color: #c9a962; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .email-subject { font-size: 15px; font-weight: 600; color: #333; }
+        .email-timing { font-size: 12px; color: #888; margin-top: 4px; }
+        .email-body { padding: 20px; }
+        .email-content { background: #fafafa; border-radius: 8px; padding: 16px; font-size: 14px; line-height: 1.7; white-space: pre-wrap; border-left: 3px solid #c9a962; }
+        .email-notes { margin-top: 16px; padding: 12px 16px; background: #fffdf0; border-radius: 8px; font-size: 13px; color: #666; }
+        .email-notes strong { color: #333; }
+        .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center; font-size: 12px; color: #999; }
+        .btn-print { display: inline-block; background: linear-gradient(135deg, #c9a962, #b8943d); color: #000; padding: 14px 32px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-bottom: 24px; }
+        .toc { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 24px; margin-bottom: 32px; }
+        .toc h3 { margin-top: 0; margin-bottom: 16px; }
+        .toc ul { list-style: none; }
+        .toc li { padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+        .toc li:last-child { border-bottom: none; }
+        .toc a { color: #333; text-decoration: none; }
+        .toc a:hover { color: #c9a962; }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="text-align: center;">
+        <button class="btn-print" onclick="window.print()">Download / Print PDF</button>
+    </div>
+
+    <div class="header">
+        <div class="logo">Shopify Branding Blueprint</div>
+        <h1>Email Sequence Swipe File</h1>
+        <p class="subtitle">Copy-and-Paste Email Templates That Convert</p>
+    </div>
+
+    <div class="intro">
+        <strong>How to Use This Swipe File:</strong> Copy these email templates into your email marketing platform (Klaviyo, Mailchimp, etc.). Replace the [BRACKETED TEXT] with your brand-specific information. Customize the tone and style to match your brand voice. Test different subject lines to see what resonates with your audience.
+    </div>
+
+    <div class="toc">
+        <h3>What's Included</h3>
+        <ul>
+            <li><a href="#welcome">Welcome Sequence (7 emails)</a></li>
+            <li><a href="#abandoned">Abandoned Cart Recovery (3 emails)</a></li>
+            <li><a href="#post-purchase">Post-Purchase Thank You (3 emails)</a></li>
+            <li><a href="#winback">Re-Engagement Campaign (3 emails)</a></li>
+            <li><a href="#flash-sale">Flash Sale Templates (3 emails)</a></li>
+            <li><a href="#launch">Product Launch Sequence (4 emails)</a></li>
+        </ul>
+    </div>
+
+    <h2 id="welcome">Welcome Sequence <span class="badge">7 Emails</span></h2>
+
+    <div class="email-card">
+        <div class="email-header">
+            <div class="email-number">Email 1 of 7</div>
+            <div class="email-subject">Subject: Welcome to [BRAND NAME] - Here's 10% off your first order</div>
+            <div class="email-timing">Send: Immediately after signup</div>
+        </div>
+        <div class="email-body">
+            <div class="email-content">Hey [FIRST NAME],
+
+Welcome to the [BRAND NAME] family! We're so excited you're here.
+
+As a thank you for joining us, here's 10% off your first order:
+
+Use code: WELCOME10
+
+[BUTTON: Shop Now]
+
+At [BRAND NAME], we believe [YOUR BRAND MISSION/VALUE PROPOSITION - e.g., "everyone deserves high-quality skincare that actually works"].
+
+Here's what you can expect from us:
+• Exclusive offers and early access to new products
+• Tips and content to help you [BENEFIT]
+• A peek behind the scenes of our brand
+
+Got questions? Just hit reply - we read every email.
+
+Talk soon,
+[YOUR NAME]
+Founder, [BRAND NAME]
+
+P.S. Your 10% off code expires in 7 days. Don't wait!</div>
+            <div class="email-notes">
+                <strong>Pro Tip:</strong> Include a product image or your most popular item to give subscribers a visual hook.
+            </div>
+        </div>
+    </div>
+
+    <div class="email-card">
+        <div class="email-header">
+            <div class="email-number">Email 2 of 7</div>
+            <div class="email-subject">Subject: The story behind [BRAND NAME]</div>
+            <div class="email-timing">Send: Day 2</div>
+        </div>
+        <div class="email-body">
+            <div class="email-content">Hey [FIRST NAME],
+
+I wanted to share why I started [BRAND NAME]...
+
+[SHARE YOUR ORIGIN STORY - Keep it personal and authentic. Example:]
+
+Two years ago, I was frustrated. I'd spent hundreds on [PRODUCT CATEGORY] that promised the world but delivered nothing. Sound familiar?
+
+That's when I decided to create something different. Something that actually [KEY BENEFIT].
+
+Today, [BRAND NAME] has helped [NUMBER] customers [ACHIEVE RESULT], and we're just getting started.
+
+[IMAGE: Founder photo or behind-the-scenes]
+
+I'd love for you to be part of our story.
+
+Ready to try us out? Your 10% off code (WELCOME10) is still waiting.
+
+[BUTTON: Start Shopping]
+
+Cheers,
+[YOUR NAME]</div>
+        </div>
+    </div>
+
+    <div class="email-card">
+        <div class="email-header">
+            <div class="email-number">Email 3 of 7</div>
+            <div class="email-subject">Subject: Our customers are saying...</div>
+            <div class="email-timing">Send: Day 4</div>
+        </div>
+        <div class="email-body">
+            <div class="email-content">Hey [FIRST NAME],
+
+Don't just take our word for it - here's what real customers are saying about [BRAND NAME]:
+
+⭐⭐⭐⭐⭐
+"[CUSTOMER TESTIMONIAL 1]"
+— [Customer Name], [Location]
+
+⭐⭐⭐⭐⭐
+"[CUSTOMER TESTIMONIAL 2]"
+— [Customer Name], [Location]
+
+⭐⭐⭐⭐⭐
+"[CUSTOMER TESTIMONIAL 3]"
+— [Customer Name], [Location]
+
+Ready to join them?
+
+[BUTTON: Shop Bestsellers]
+
+Your 10% off code (WELCOME10) is waiting.
+
+Best,
+[YOUR NAME]</div>
+            <div class="email-notes">
+                <strong>Pro Tip:</strong> Include photos with testimonials when possible. Real faces build trust.
+            </div>
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h2 id="abandoned">Abandoned Cart Recovery <span class="badge">3 Emails</span></h2>
+
+    <div class="email-card">
+        <div class="email-header">
+            <div class="email-number">Email 1 of 3</div>
+            <div class="email-subject">Subject: Did you forget something?</div>
+            <div class="email-timing">Send: 1 hour after abandonment</div>
+        </div>
+        <div class="email-body">
+            <div class="email-content">Hey [FIRST NAME],
+
+Looks like you left something behind!
+
+[SHOW CART ITEMS WITH IMAGES]
+
+Good news: your items are still in your cart, waiting for you.
+
+[BUTTON: Complete My Order]
+
+Questions about your order? Just reply to this email and we'll help you out.
+
+— The [BRAND NAME] Team</div>
+        </div>
+    </div>
+
+    <div class="email-card">
+        <div class="email-header">
+            <div class="email-number">Email 2 of 3</div>
+            <div class="email-subject">Subject: Your cart is expiring soon...</div>
+            <div class="email-timing">Send: 24 hours after abandonment</div>
+        </div>
+        <div class="email-body">
+            <div class="email-content">Hey [FIRST NAME],
+
+Just a friendly reminder - you left some goodies in your cart!
+
+[SHOW CART ITEMS]
+
+Your cart will expire soon, and we'd hate for you to miss out.
+
+Still on the fence? Here's what our customers say:
+
+"[SHORT TESTIMONIAL ABOUT RELEVANT PRODUCT]"
+
+[BUTTON: Complete My Order]
+
+— The [BRAND NAME] Team
+
+P.S. Have questions? Reply to this email and we'll help!</div>
+        </div>
+    </div>
+
+    <div class="email-card">
+        <div class="email-header">
+            <div class="email-number">Email 3 of 3</div>
+            <div class="email-subject">Subject: Last chance: 10% off to complete your order</div>
+            <div class="email-timing">Send: 72 hours after abandonment</div>
+        </div>
+        <div class="email-body">
+            <div class="email-content">Hey [FIRST NAME],
+
+We really think you'll love what's in your cart, so here's a little incentive:
+
+Use code COMEBACK10 for 10% off your order.
+
+[SHOW CART ITEMS]
+
+This code expires in 24 hours, so don't wait too long!
+
+[BUTTON: Claim My 10% Off]
+
+— The [BRAND NAME] Team</div>
+            <div class="email-notes">
+                <strong>Pro Tip:</strong> Only send the discount email to customers who didn't open/click the first two. Don't train everyone to expect discounts.
+            </div>
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h2 id="post-purchase">Post-Purchase Thank You <span class="badge">3 Emails</span></h2>
+
+    <div class="email-card">
+        <div class="email-header">
+            <div class="email-number">Email 1 of 3</div>
+            <div class="email-subject">Subject: Thank you for your order! 🎉</div>
+            <div class="email-timing">Send: Immediately after purchase</div>
+        </div>
+        <div class="email-body">
+            <div class="email-content">Hey [FIRST NAME],
+
+THANK YOU! Your order is confirmed and we're already getting it ready for you.
+
+Order #[ORDER NUMBER]
+[ORDER DETAILS]
+
+What happens next:
+1. We'll pack your order with care
+2. You'll get a shipping notification with tracking
+3. Your order arrives in [X-X] business days
+
+While you wait, follow us on Instagram for styling tips and behind-the-scenes content: [@HANDLE]
+
+Questions? Reply to this email anytime.
+
+With gratitude,
+[YOUR NAME]
+Founder, [BRAND NAME]</div>
+        </div>
+    </div>
+
+    <div class="email-card">
+        <div class="email-header">
+            <div class="email-number">Email 2 of 3</div>
+            <div class="email-subject">Subject: Your order is on its way! 📦</div>
+            <div class="email-timing">Send: When order ships</div>
+        </div>
+        <div class="email-body">
+            <div class="email-content">Great news, [FIRST NAME]!
+
+Your order has shipped and is on its way to you!
+
+Track your package: [TRACKING LINK]
+
+Estimated delivery: [DATE]
+
+Pro tip: [SHARE RELEVANT TIP ABOUT PRODUCT USE]
+
+Can't wait for you to try it!
+
+— The [BRAND NAME] Team</div>
+        </div>
+    </div>
+
+    <div class="email-card">
+        <div class="email-header">
+            <div class="email-number">Email 3 of 3</div>
+            <div class="email-subject">Subject: How's everything? We'd love your feedback</div>
+            <div class="email-timing">Send: 7-14 days after delivery</div>
+        </div>
+        <div class="email-body">
+            <div class="email-content">Hey [FIRST NAME],
+
+You've had your [PRODUCT] for about a week now - how's it going?
+
+We'd love to hear what you think! Your feedback helps us improve and helps other customers discover products they'll love.
+
+[BUTTON: Leave a Review]
+
+As a thank you for sharing your thoughts, here's 15% off your next order: THANKS15
+
+We truly appreciate you being part of the [BRAND NAME] family.
+
+With gratitude,
+[YOUR NAME]</div>
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h2 id="flash-sale">Flash Sale Templates <span class="badge">3 Emails</span></h2>
+
+    <div class="email-card">
+        <div class="email-header">
+            <div class="email-number">Announcement Email</div>
+            <div class="email-subject">Subject: 🔥 FLASH SALE: [X]% off everything (48 hours only)</div>
+            <div class="email-timing">Send: Sale start</div>
+        </div>
+        <div class="email-body">
+            <div class="email-content">[FIRST NAME], it's happening!
+
+For the next 48 hours, take [X]% OFF EVERYTHING at [BRAND NAME].
+
+No code needed - discount applied automatically at checkout.
+
+[BUTTON: Shop the Sale]
+
+Here's what's flying off the shelves:
+• [PRODUCT 1] - was $XX, now $XX
+• [PRODUCT 2] - was $XX, now $XX
+• [PRODUCT 3] - was $XX, now $XX
+
+But hurry - this sale ends [DAY] at midnight!
+
+— The [BRAND NAME] Team</div>
+        </div>
+    </div>
+
+    <div class="email-card">
+        <div class="email-header">
+            <div class="email-number">Reminder Email</div>
+            <div class="email-subject">Subject: ⏰ 12 hours left - don't miss [X]% off</div>
+            <div class="email-timing">Send: 12 hours before sale ends</div>
+        </div>
+        <div class="email-body">
+            <div class="email-content">Hey [FIRST NAME],
+
+Just a heads up - our flash sale ends TONIGHT at midnight!
+
+This is your last chance to grab [X]% off everything.
+
+[BUTTON: Shop Before It's Gone]
+
+These items are almost sold out:
+• [LOW STOCK ITEM 1]
+• [LOW STOCK ITEM 2]
+
+Don't say we didn't warn you 😉
+
+— The [BRAND NAME] Team</div>
+        </div>
+    </div>
+
+    <div class="email-card">
+        <div class="email-header">
+            <div class="email-number">Last Call Email</div>
+            <div class="email-subject">Subject: FINAL HOURS ⚡ Sale ends at midnight</div>
+            <div class="email-timing">Send: 2-3 hours before sale ends</div>
+        </div>
+        <div class="email-body">
+            <div class="email-content">[FIRST NAME], this is it!
+
+Our flash sale ends in just a few hours.
+
+After midnight, prices go back to normal.
+
+[BUTTON: Last Chance to Save]
+
+— The [BRAND NAME] Team
+
+P.S. Seriously, we won't be extending this one!</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Shopify Branding Blueprint | shopifycourse.advancedmarketing.co</p>
+        <p style="margin-top: 8px; color: #c9a962; font-weight: 600;">This premium resource is for course members only. Do not distribute.</p>
+    </div>
+</body>
+</html>

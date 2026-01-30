@@ -1,6 +1,8 @@
-// Portal Reset Password (using token from email)
-const { createClient } = require('@supabase/supabase-js');
+// Portal Reset Password with Neon database
+const { neon } = require('@neondatabase/serverless');
 const bcrypt = require('bcryptjs');
+
+const sql = neon(process.env.DATABASE_URL);
 
 exports.handler = async (event) => {
     const headers = {
@@ -28,41 +30,39 @@ exports.handler = async (event) => {
             return { statusCode: 400, headers, body: JSON.stringify({ error: 'Password must be at least 8 characters' }) };
         }
 
-        const supabase = createClient(
-            process.env.SUPABASE_URL,
-            process.env.SUPABASE_SERVICE_ROLE_KEY
-        );
-
         // Find valid reset token
-        const { data: resetRecord, error: resetError } = await supabase
-            .from('password_resets')
-            .select('*, users(*)')
-            .eq('token', token)
-            .gt('expires_at', new Date().toISOString())
-            .is('used_at', null)
-            .single();
+        const resetRecords = await sql`
+            SELECT at.*, u.id as user_id, u.email
+            FROM auth_tokens at
+            JOIN users u ON at.user_id = u.id
+            WHERE at.token = ${token}
+            AND at.token_type = 'password_reset'
+            AND at.expires_at > NOW()
+            AND at.used_at IS NULL
+        `;
 
-        if (resetError || !resetRecord) {
+        if (resetRecords.length === 0) {
             return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid or expired reset link' }) };
         }
+
+        const resetRecord = resetRecords[0];
 
         // Hash new password
         const newPasswordHash = await bcrypt.hash(newPassword, 12);
 
         // Update user password
-        await supabase
-            .from('users')
-            .update({
-                password_hash: newPasswordHash,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', resetRecord.user_id);
+        await sql`
+            UPDATE users
+            SET password_hash = ${newPasswordHash}, updated_at = NOW()
+            WHERE id = ${resetRecord.user_id}
+        `;
 
         // Mark token as used
-        await supabase
-            .from('password_resets')
-            .update({ used_at: new Date().toISOString() })
-            .eq('id', resetRecord.id);
+        await sql`
+            UPDATE auth_tokens
+            SET used_at = NOW()
+            WHERE id = ${resetRecord.id}
+        `;
 
         return {
             statusCode: 200,

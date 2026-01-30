@@ -92,6 +92,27 @@
         </div>
     </div>
 
+    <!-- Grant Product Access Modal -->
+    <div class="modal-overlay" id="grantProductModal">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Grant Product Access</h3>
+                <button class="modal-close" onclick="closeGrantProductModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 16px; color: var(--text-secondary);">Select a product/upsell to grant access to this customer:</p>
+                <div id="productsList" style="margin-bottom: 20px;">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+                <div id="grantProductMessage" style="display: none;"></div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button class="btn btn-secondary" onclick="closeGrantProductModal()">Cancel</button>
+                    <button class="btn btn-primary" id="grantProductBtn" onclick="grantProductAccess()" disabled>Grant Access</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="../js/auth.js"></script>
     <script src="../js/api.js"></script>
     <script>
@@ -212,6 +233,12 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             </svg>
                             Grant Course Access
+                        </button>
+                        <button class="btn btn-primary" onclick="openGrantProductModal('${customer.id}')" style="background: linear-gradient(135deg, #c9a962, #b8943d);">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 16px; height: 16px; margin-right: 6px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Grant Product Access
                         </button>
                         <button class="btn btn-secondary" onclick="sendPasswordReset('${customer.email}')">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 16px; height: 16px; margin-right: 6px;">
@@ -388,6 +415,88 @@
 
         function closePasswordResetModal() {
             document.getElementById('passwordResetModal').classList.remove('active');
+        }
+
+        // Grant Product Access Functions
+        let selectedProductId = null;
+        let currentProductCustomerId = null;
+
+        async function openGrantProductModal(customerId) {
+            currentProductCustomerId = customerId;
+            selectedProductId = null;
+            document.getElementById('grantProductModal').classList.add('active');
+            document.getElementById('grantProductBtn').disabled = true;
+            document.getElementById('grantProductMessage').style.display = 'none';
+
+            try {
+                const products = await api.admin.getProducts();
+                renderProductsList(products);
+            } catch (error) {
+                document.getElementById('productsList').innerHTML = '<div class="alert alert-error">Failed to load products</div>';
+            }
+        }
+
+        function renderProductsList(products) {
+            const container = document.getElementById('productsList');
+
+            if (!products.length) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No products available</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    ${products.map(product => `
+                        <label class="product-option" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                            <div style="display: flex; align-items: center;">
+                                <input type="radio" name="product" value="${product.id}" onchange="selectProduct('${product.id}')" style="margin-right: 12px;">
+                                <div>
+                                    <div style="font-weight: 500;">${product.name}</div>
+                                    <div style="font-size: 0.875rem; color: var(--text-muted);">${product.product_key}</div>
+                                </div>
+                            </div>
+                            <div style="color: var(--gold); font-weight: 600;">$${(product.price_cents / 100).toFixed(2)}</div>
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function selectProduct(productId) {
+            selectedProductId = productId;
+            document.getElementById('grantProductBtn').disabled = false;
+        }
+
+        async function grantProductAccess() {
+            if (!selectedProductId || !currentProductCustomerId) return;
+
+            const btn = document.getElementById('grantProductBtn');
+            const messageEl = document.getElementById('grantProductMessage');
+            btn.disabled = true;
+            btn.textContent = 'Granting...';
+
+            try {
+                await api.admin.grantProductAccess(currentProductCustomerId, selectedProductId);
+
+                messageEl.className = 'alert alert-success';
+                messageEl.textContent = 'Product access granted successfully!';
+                messageEl.style.display = 'block';
+
+                setTimeout(() => {
+                    closeGrantProductModal();
+                    viewCustomer(currentProductCustomerId); // Refresh customer details
+                }, 1500);
+            } catch (error) {
+                messageEl.className = 'alert alert-error';
+                messageEl.textContent = error.message || 'Failed to grant product access';
+                messageEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Grant Access';
+            }
+        }
+
+        function closeGrantProductModal() {
+            document.getElementById('grantProductModal').classList.remove('active');
         }
     </script>
 </body>

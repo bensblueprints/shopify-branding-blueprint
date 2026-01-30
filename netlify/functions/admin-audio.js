@@ -1,24 +1,29 @@
-const { createClient } = require('@supabase/supabase-js');
+// Admin audio with Neon database
+// Note: Audio upload/storage functionality requires external storage solution
+const { neon } = require('@neondatabase/serverless');
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const sql = neon(process.env.DATABASE_URL);
 
-// Verify admin session
-async function verifyAdmin(token) {
-    if (!token) return null;
+async function validateAdminSession(authHeader) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+    const sessionToken = authHeader.replace('Bearer ', '');
 
-    const { data: session } = await supabase
-        .from('sessions')
-        .select('*, admin_users(*)')
-        .eq('session_token', token)
-        .eq('is_valid', true)
-        .gt('expires_at', new Date().toISOString())
-        .single();
+    const sessions = await sql`
+        SELECT s.*, a.id as admin_id, a.email, a.full_name, a.role
+        FROM sessions s
+        JOIN admin_users a ON s.admin_id = a.id
+        WHERE s.session_token = ${sessionToken}
+        AND s.expires_at > NOW()
+        AND s.admin_id IS NOT NULL
+    `;
 
-    if (!session || !session.admin_users) return null;
-    return session.admin_users;
+    if (sessions.length === 0) return null;
+    return {
+        id: sessions[0].admin_id,
+        email: sessions[0].email,
+        full_name: sessions[0].full_name,
+        role: sessions[0].role
+    };
 }
 
 exports.handler = async (event) => {
@@ -34,10 +39,8 @@ exports.handler = async (event) => {
     }
 
     try {
-        // Verify admin
         const authHeader = event.headers.authorization || event.headers.Authorization;
-        const token = authHeader?.replace('Bearer ', '');
-        const admin = await verifyAdmin(token);
+        const admin = await validateAdminSession(authHeader);
 
         if (!admin) {
             return {
@@ -63,77 +66,55 @@ exports.handler = async (event) => {
                 };
             }
 
-            const { data: lesson, error } = await supabase
-                .from('lessons')
-                .select('id, title, audio_url')
-                .eq('id', lessonIdParam)
-                .single();
+            const lessons = await sql`
+                SELECT id, title, audio_url
+                FROM lessons
+                WHERE id = ${lessonIdParam}
+            `;
 
-            if (error) throw error;
+            if (lessons.length === 0) {
+                return {
+                    statusCode: 404,
+                    headers,
+                    body: JSON.stringify({ error: 'Lesson not found' })
+                };
+            }
 
             return {
                 statusCode: 200,
                 headers,
-                body: JSON.stringify(lesson)
+                body: JSON.stringify(lessons[0])
             };
         }
 
-        // POST - Upload audio
+        // POST - Upload audio (simplified - stores URL only)
         if (action === 'upload') {
-            if (!lessonId || !audioData) {
+            if (!lessonId) {
                 return {
                     statusCode: 400,
                     headers,
-                    body: JSON.stringify({ error: 'lessonId and audioData required' })
+                    body: JSON.stringify({ error: 'lessonId required' })
                 };
             }
 
-            // Decode base64 audio data
-            const base64Data = audioData.replace(/^data:audio\/\w+;base64,/, '');
-            const buffer = Buffer.from(base64Data, 'base64');
+            // For now, we'll just update the audio_url field
+            // Actual file storage would need a separate service like S3, Cloudinary, etc.
+            const audioUrl = body.audio_url || null;
 
-            // Generate filename
-            const ext = 'webm';
-            const filePath = `lesson-audio/${lessonId}.${ext}`;
-
-            // Upload to Supabase Storage
-            const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('audio')
-                .upload(filePath, buffer, {
-                    contentType: 'audio/webm',
-                    upsert: true
-                });
-
-            if (uploadError) {
-                console.error('Upload error:', uploadError);
-                throw uploadError;
-            }
-
-            // Get public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('audio')
-                .getPublicUrl(filePath);
-
-            // Update lesson with audio URL
-            const { data: lesson, error: updateError } = await supabase
-                .from('lessons')
-                .update({
-                    audio_url: publicUrl,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', lessonId)
-                .select()
-                .single();
-
-            if (updateError) throw updateError;
+            const lessons = await sql`
+                UPDATE lessons
+                SET audio_url = ${audioUrl}
+                WHERE id = ${lessonId}
+                RETURNING *
+            `;
 
             return {
                 statusCode: 200,
                 headers,
                 body: JSON.stringify({
                     success: true,
-                    audio_url: publicUrl,
-                    lesson
+                    audio_url: audioUrl,
+                    lesson: lessons[0]
                 })
             };
         }
@@ -148,27 +129,17 @@ exports.handler = async (event) => {
                 };
             }
 
-            // Delete from storage
-            const filePath = `lesson-audio/${lessonId}.webm`;
-            await supabase.storage.from('audio').remove([filePath]);
-
-            // Update lesson
-            const { data: lesson, error } = await supabase
-                .from('lessons')
-                .update({
-                    audio_url: null,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', lessonId)
-                .select()
-                .single();
-
-            if (error) throw error;
+            const lessons = await sql`
+                UPDATE lessons
+                SET audio_url = NULL
+                WHERE id = ${lessonId}
+                RETURNING *
+            `;
 
             return {
                 statusCode: 200,
                 headers,
-                body: JSON.stringify({ success: true, lesson })
+                body: JSON.stringify({ success: true, lesson: lessons[0] })
             };
         }
 

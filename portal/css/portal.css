@@ -689,3 +689,320 @@ body {
         gap: 16px;
     }
 }
+
+/* Enhanced Resources Banner */
+.resources-cta-banner {
+    background: linear-gradient(135deg, #1a1612 0%, #0f0d0b 50%, #1a1612 100%);
+    border: 1px solid rgba(201, 169, 98, 0.3);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+}
+
+.resources-cta-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.resources-cta-banner::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(201, 169, 98, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.resources-cta-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    position: relative;
+    z-index: 1;
+}
+
+.resources-cta-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 8px 32px rgba(201, 169, 98, 0.25);
+}
+
+.resources-cta-icon svg {
+    width: 32px;
+    height: 32px;
+    color: #000;
+}
+
+.resources-cta-text {
+    flex: 1;
+}
+
+.resources-cta-text h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.5rem;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+}
+
+.resources-cta-text p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.resources-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: #000;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(201, 169, 98, 0.3);
+    white-space: nowrap;
+}
+
+.resources-cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(201, 169, 98, 0.4);
+}
+
+.resources-cta-btn svg {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.3s ease;
+}
+
+.resources-cta-btn:hover svg {
+    transform: translateX(4px);
+}
+
+@media (max-width: 768px) {
+    .resources-cta-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .resources-cta-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Lesson Download Section */
+.lesson-downloads {
+    background: linear-gradient(135deg, rgba(201, 169, 98, 0.08), rgba(201, 169, 98, 0.02));
+    border: 1px solid rgba(201, 169, 98, 0.2);
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 32px;
+}
+
+.lesson-downloads-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.lesson-downloads-header svg {
+    width: 24px;
+    height: 24px;
+    color: var(--gold);
+}
+
+.lesson-downloads-header h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+}
+
+.download-cards {
+    display: grid;
+    gap: 12px;
+}
+
+.download-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.download-card:hover {
+    border-color: var(--gold);
+    transform: translateX(4px);
+}
+
+.download-card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.download-card-icon svg {
+    width: 24px;
+    height: 24px;
+    color: #000;
+}
+
+.download-card-info {
+    flex: 1;
+}
+
+.download-card-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.download-card-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.download-card-arrow {
+    color: var(--gold);
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.download-card:hover .download-card-arrow {
+    opacity: 1;
+    transform: translateX(4px);
+}
+
+/* Floating Action Button */
+.floating-resources-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: #000;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(201, 169, 98, 0.4);
+    transition: all 0.3s ease;
+    z-index: 99;
+}
+
+.floating-resources-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 40px rgba(201, 169, 98, 0.5);
+}
+
+.floating-resources-btn svg {
+    width: 28px;
+    height: 28px;
+}
+
+.floating-resources-tooltip {
+    position: absolute;
+    right: 70px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 8px;
+    white-space: nowrap;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.floating-resources-btn:hover .floating-resources-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Mobile Menu Button */
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--gold);
+    cursor: pointer;
+    padding: 8px;
+}
+
+.mobile-menu-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+@media (max-width: 768px) {
+    .mobile-menu-btn {
+        display: flex;
+    }
+
+    .portal-nav {
+        position: fixed;
+        top: 73px;
+        left: 0;
+        right: 0;
+        background: var(--bg-card);
+        border-bottom: 1px solid var(--border-color);
+        padding: 16px 24px;
+        flex-direction: column;
+        gap: 16px;
+        display: none;
+        z-index: 99;
+    }
+
+    .portal-nav.active {
+        display: flex;
+    }
+
+    .user-menu {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .floating-resources-btn {
+        bottom: 16px;
+        right: 16px;
+        width: 56px;
+        height: 56px;
+    }
+}

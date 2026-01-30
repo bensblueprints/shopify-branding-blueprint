@@ -1,23 +1,35 @@
-const { createClient } = require('@supabase/supabase-js');
+// Admin customers with Neon database
+const { neon } = require('@neondatabase/serverless');
+const { blockUserDeletion, softDeleteUser } = require('./utils/user-protection');
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const sql = neon(process.env.DATABASE_URL);
+
+/**
+ * IMPORTANT: User records should NEVER be deleted programmatically.
+ * Use soft delete (disable) instead. Only manual deletion from
+ * admin dashboard is permitted.
+ */
 
 async function validateAdminSession(authHeader) {
     if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
     const sessionToken = authHeader.replace('Bearer ', '');
 
-    const { data: session } = await supabase
-        .from('sessions')
-        .select('*, admin_users(*)')
-        .eq('session_token', sessionToken)
-        .gt('expires_at', new Date().toISOString())
-        .not('admin_id', 'is', null)
-        .single();
+    const sessions = await sql`
+        SELECT s.*, a.id as admin_id, a.email, a.full_name, a.role
+        FROM sessions s
+        JOIN admin_users a ON s.admin_id = a.id
+        WHERE s.session_token = ${sessionToken}
+        AND s.expires_at > NOW()
+        AND s.admin_id IS NOT NULL
+    `;
 
-    return session?.admin_users || null;
+    if (sessions.length === 0) return null;
+    return {
+        id: sessions[0].admin_id,
+        email: sessions[0].email,
+        full_name: sessions[0].full_name,
+        role: sessions[0].role
+    };
 }
 
 exports.handler = async (event) => {
@@ -49,17 +61,38 @@ exports.handler = async (event) => {
 
             if (params.id) {
                 // Get single customer with enrollments and purchases
-                const { data: user, error } = await supabase
-                    .from('users')
-                    .select(`
-                        *,
-                        enrollments(*, courses(title, slug)),
-                        purchases(*, products(name, product_key))
-                    `)
-                    .eq('id', params.id)
-                    .single();
+                const users = await sql`
+                    SELECT * FROM users WHERE id = ${params.id}
+                `;
 
-                if (error) throw error;
+                if (users.length === 0) {
+                    return {
+                        statusCode: 404,
+                        headers,
+                        body: JSON.stringify({ error: 'User not found' })
+                    };
+                }
+
+                const user = users[0];
+
+                // Get enrollments
+                const enrollments = await sql`
+                    SELECT e.*, c.title, c.slug
+                    FROM enrollments e
+                    JOIN courses c ON e.course_id = c.id
+                    WHERE e.user_id = ${params.id}
+                `;
+                user.enrollments = enrollments;
+
+                // Get purchases
+                const purchases = await sql`
+                    SELECT p.*, pr.name, pr.product_key
+                    FROM purchases p
+                    JOIN products pr ON p.product_id = pr.id
+                    WHERE p.user_id = ${params.id}
+                `;
+                user.purchases = purchases;
+
                 return { statusCode: 200, headers, body: JSON.stringify(user) };
             }
 
@@ -68,13 +101,17 @@ exports.handler = async (event) => {
             const limit = parseInt(params.limit) || 20;
             const offset = (page - 1) * limit;
 
-            const { data: users, error, count } = await supabase
-                .from('users')
-                .select('*, enrollments(count), purchases(count)', { count: 'exact' })
-                .order('created_at', { ascending: false })
-                .range(offset, offset + limit - 1);
+            const users = await sql`
+                SELECT u.*,
+                    (SELECT COUNT(*) FROM enrollments WHERE user_id = u.id) as enrollment_count,
+                    (SELECT COUNT(*) FROM purchases WHERE user_id = u.id) as purchase_count
+                FROM users u
+                ORDER BY u.created_at DESC
+                LIMIT ${limit} OFFSET ${offset}
+            `;
 
-            if (error) throw error;
+            const [countResult] = await sql`SELECT COUNT(*) as count FROM users`;
+            const total = parseInt(countResult.count) || 0;
 
             return {
                 statusCode: 200,
@@ -84,8 +121,8 @@ exports.handler = async (event) => {
                     pagination: {
                         page,
                         limit,
-                        total: count,
-                        totalPages: Math.ceil(count / limit)
+                        total,
+                        totalPages: Math.ceil(total / limit)
                     }
                 })
             };
@@ -98,26 +135,23 @@ exports.handler = async (event) => {
 
             if (action === 'grant_access') {
                 // Check if enrollment already exists
-                const { data: existing } = await supabase
-                    .from('enrollments')
-                    .select('id')
-                    .eq('user_id', userId)
-                    .eq('course_id', courseId)
-                    .single();
+                const existing = await sql`
+                    SELECT id FROM enrollments
+                    WHERE user_id = ${userId} AND course_id = ${courseId}
+                `;
 
-                if (existing) {
+                if (existing.length > 0) {
                     // Update status to active
-                    await supabase
-                        .from('enrollments')
-                        .update({ status: 'active' })
-                        .eq('id', existing.id);
+                    await sql`
+                        UPDATE enrollments SET status = 'active'
+                        WHERE id = ${existing[0].id}
+                    `;
                 } else {
                     // Create new enrollment
-                    await supabase.from('enrollments').insert({
-                        user_id: userId,
-                        course_id: courseId,
-                        status: 'active'
-                    });
+                    await sql`
+                        INSERT INTO enrollments (user_id, course_id, status)
+                        VALUES (${userId}, ${courseId}, 'active')
+                    `;
                 }
 
                 return {
@@ -128,11 +162,10 @@ exports.handler = async (event) => {
             }
 
             if (action === 'revoke_access') {
-                await supabase
-                    .from('enrollments')
-                    .update({ status: 'revoked' })
-                    .eq('user_id', userId)
-                    .eq('course_id', courseId);
+                await sql`
+                    UPDATE enrollments SET status = 'revoked'
+                    WHERE user_id = ${userId} AND course_id = ${courseId}
+                `;
 
                 return {
                     statusCode: 200,
@@ -141,10 +174,41 @@ exports.handler = async (event) => {
                 };
             }
 
+            // SOFT DELETE - Disable user instead of deleting
+            if (action === 'disable_user' && userId) {
+                const result = await softDeleteUser(sql, userId);
+                return {
+                    statusCode: 200,
+                    headers,
+                    body: JSON.stringify(result)
+                };
+            }
+
             return {
                 statusCode: 400,
                 headers,
                 body: JSON.stringify({ error: 'Invalid action' })
+            };
+        }
+
+        // DELETE - BLOCKED for user safety
+        if (event.httpMethod === 'DELETE') {
+            const params = event.queryStringParameters || {};
+
+            // Block ALL delete attempts on users
+            console.error('🚫 DELETE attempt blocked on admin-customers endpoint');
+            console.error('User ID:', params.id || params.userId);
+            console.error('Admin:', admin.email);
+
+            return {
+                statusCode: 403,
+                headers,
+                body: JSON.stringify({
+                    error: 'User deletion is not permitted via API',
+                    message: 'Users can only be deleted manually from the admin dashboard. ' +
+                             'Use the "disable_user" action to soft-delete a user instead.',
+                    blocked: true
+                })
             };
         }
 

@@ -235,23 +235,26 @@
 
         .btn-yes {
             width: 100%;
-            padding: 20px 32px;
+            padding: 28px 40px;
             background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
             border: none;
             border-radius: 16px;
             font-family: 'Outfit', sans-serif;
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 700;
             color: var(--bg-primary);
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 8px 30px rgba(212, 168, 83, 0.4);
         }
 
         .btn-yes:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 40px rgba(212, 168, 83, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 20px 50px rgba(212, 168, 83, 0.5);
         }
 
         .btn-yes:disabled {
@@ -262,13 +265,13 @@
 
         .btn-yes .spinner {
             display: none;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             border: 3px solid rgba(0,0,0,0.2);
             border-top-color: var(--bg-primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-right: 10px;
+            margin-right: 12px;
         }
 
         .btn-yes.loading .spinner {
@@ -284,20 +287,19 @@
         }
 
         .btn-no {
-            width: 100%;
-            padding: 16px 32px;
             background: transparent;
-            border: 1px solid var(--border-subtle);
-            border-radius: 12px;
+            border: none;
             font-family: 'Outfit', sans-serif;
             font-size: 14px;
             color: var(--text-muted);
             cursor: pointer;
             transition: all 0.3s ease;
+            text-decoration: underline;
+            padding: 12px 0;
+            margin-top: 8px;
         }
 
         .btn-no:hover {
-            border-color: var(--text-muted);
             color: var(--text-secondary);
         }
 
@@ -459,10 +461,10 @@
             <div class="button-group">
                 <button class="btn-yes" id="btn-yes" onclick="acceptOffer()">
                     <span class="spinner"></span>
-                    <span class="btn-text">Yes! Add This To My Order →</span>
+                    <span class="btn-text">YES! ADD THIS TO MY ORDER</span>
                 </button>
                 <button class="btn-no" id="btn-no" onclick="declineOffer()">
-                    No thanks, I don't want to save time on design
+                    No thanks, I'll pass on this deal
                 </button>
             </div>
 
@@ -497,7 +499,7 @@
                 priceOld: '$97',
                 priceNew: '27',
                 savings: 'Save 72%',
-                declineText: "No thanks, I don't want to save time on design"
+                declineText: "No thanks, I'll pass on this deal"
             },
             {
                 key: 'email_swipe',
@@ -513,7 +515,7 @@
                 priceOld: '$67',
                 priceNew: '19',
                 savings: 'Save 71%',
-                declineText: "No thanks, I'll write my own emails"
+                declineText: "No thanks, I'll pass on this deal"
             },
             {
                 key: 'fb_ads',
@@ -529,7 +531,7 @@
                 priceOld: '$297',
                 priceNew: '97',
                 savings: 'Save 67%',
-                declineText: "No thanks, I don't need help with ads"
+                declineText: "No thanks, I'll pass on this deal"
             },
             {
                 key: 'inner_circle',
@@ -546,7 +548,7 @@
                 priceNew: '47',
                 priceSuffix: '/mo',
                 savings: 'Save 51%',
-                declineText: "No thanks, I'll figure it out alone"
+                declineText: "No thanks, I'll pass on this deal"
             }
         ];
 
@@ -554,8 +556,9 @@
         let upsellToken = null;
         let purchasedProducts = [];
         let cardOriginalHTML = null;
+        let paymentProvider = 'stripe'; // Default to stripe
 
-        // Get token from URL or Stripe session
+        // Get token from URL or create from Airwallex/Stripe session
         async function init() {
             const urlParams = new URLSearchParams(window.location.search);
 
@@ -565,15 +568,22 @@
             // Check for direct token first
             upsellToken = urlParams.get('token');
 
-            // If no token but have session_id, get token from Stripe session
-            const sessionId = urlParams.get('session_id');
-            if (!upsellToken && sessionId) {
+            // Check if this is an Airwallex payment
+            const provider = urlParams.get('provider');
+            const airwallexCustomerId = urlParams.get('cid');
+            const orderId = urlParams.get('order_id');
+
+            if (provider === 'airwallex' && airwallexCustomerId) {
+                paymentProvider = 'airwallex';
+                showLoading(true);
+
+                // Create token for Airwallex 1-click upsell
+                // We need to get the payment consent ID from the backend
                 try {
-                    showLoading(true);
-                    const response = await fetch('/.netlify/functions/get-session', {
+                    const response = await fetch('/.netlify/functions/get-airwallex-session', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ sessionId })
+                        body: JSON.stringify({ customerId: airwallexCustomerId, orderId })
                     });
 
                     const data = await response.json();
@@ -581,12 +591,52 @@
                     if (data.success && data.token) {
                         upsellToken = data.token;
                     } else {
-                        console.error('Failed to get session:', data.error);
+                        // Create a basic token with just the customer ID
+                        // The one-click-charge will fetch consent from database
+                        const tokenData = {
+                            provider: 'airwallex',
+                            awcid: airwallexCustomerId,
+                            email: data.email || '',
+                            ts: Date.now()
+                        };
+                        upsellToken = btoa(JSON.stringify(tokenData));
                     }
                 } catch (err) {
-                    console.error('Error fetching session:', err);
+                    console.error('Error getting Airwallex session:', err);
+                    // Create basic token anyway
+                    const tokenData = {
+                        provider: 'airwallex',
+                        awcid: airwallexCustomerId,
+                        ts: Date.now()
+                    };
+                    upsellToken = btoa(JSON.stringify(tokenData));
                 }
                 showLoading(false);
+            }
+            // If no token but have session_id, get token from Stripe session
+            else {
+                const sessionId = urlParams.get('session_id');
+                if (!upsellToken && sessionId) {
+                    try {
+                        showLoading(true);
+                        const response = await fetch('/.netlify/functions/get-session', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ sessionId })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success && data.token) {
+                            upsellToken = data.token;
+                        } else {
+                            console.error('Failed to get session:', data.error);
+                        }
+                    } catch (err) {
+                        console.error('Error fetching session:', err);
+                    }
+                    showLoading(false);
+                }
             }
 
             // Check for starting upsell index

@@ -1,6 +1,30 @@
-// Admin Send Password Reset
-const { createClient } = require('@supabase/supabase-js');
-const { Resend } = require('resend');
+// Admin Send Password Reset with Neon database
+const { neon } = require('@neondatabase/serverless');
+const crypto = require('crypto');
+
+const sql = neon(process.env.DATABASE_URL);
+
+async function validateAdminSession(authHeader) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+    const sessionToken = authHeader.replace('Bearer ', '');
+
+    const sessions = await sql`
+        SELECT s.*, a.id as admin_id, a.email, a.full_name, a.role
+        FROM sessions s
+        JOIN admin_users a ON s.admin_id = a.id
+        WHERE s.session_token = ${sessionToken}
+        AND s.expires_at > NOW()
+        AND s.admin_id IS NOT NULL
+    `;
+
+    if (sessions.length === 0) return null;
+    return {
+        id: sessions[0].admin_id,
+        email: sessions[0].email,
+        full_name: sessions[0].full_name,
+        role: sessions[0].role
+    };
+}
 
 exports.handler = async (event) => {
     const headers = {
@@ -18,28 +42,11 @@ exports.handler = async (event) => {
     }
 
     try {
-        // Verify admin session
-        const authHeader = event.headers.authorization;
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        const authHeader = event.headers.authorization || event.headers.Authorization;
+        const admin = await validateAdminSession(authHeader);
+
+        if (!admin) {
             return { statusCode: 401, headers, body: JSON.stringify({ error: 'Unauthorized' }) };
-        }
-
-        const token = authHeader.substring(7);
-        const supabase = createClient(
-            process.env.SUPABASE_URL,
-            process.env.SUPABASE_SERVICE_ROLE_KEY
-        );
-
-        // Verify admin session
-        const { data: session, error: sessionError } = await supabase
-            .from('admin_sessions')
-            .select('*, admins(*)')
-            .eq('token', token)
-            .gt('expires_at', new Date().toISOString())
-            .single();
-
-        if (sessionError || !session) {
-            return { statusCode: 401, headers, body: JSON.stringify({ error: 'Invalid or expired session' }) };
         }
 
         const { email } = JSON.parse(event.body);
@@ -48,58 +55,59 @@ exports.handler = async (event) => {
             return { statusCode: 400, headers, body: JSON.stringify({ error: 'Email required' }) };
         }
 
-        // Find the user
-        const { data: user, error: userError } = await supabase
-            .from('users')
-            .select('id, email, full_name')
-            .eq('email', email)
-            .single();
+        const normalizedEmail = email.toLowerCase().trim();
 
-        if (userError || !user) {
+        // Find the user
+        const users = await sql`
+            SELECT id, email, full_name FROM users WHERE email = ${normalizedEmail}
+        `;
+
+        if (users.length === 0) {
             return { statusCode: 404, headers, body: JSON.stringify({ error: 'User not found' }) };
         }
 
+        const user = users[0];
+
         // Generate reset token
-        const resetToken = require('crypto').randomBytes(32).toString('hex');
+        const resetToken = crypto.randomBytes(32).toString('hex');
         const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
         // Store reset token
-        await supabase.from('password_resets').insert({
-            user_id: user.id,
-            token: resetToken,
-            expires_at: expiresAt.toISOString(),
-            created_by: session.admin_id
-        });
+        await sql`
+            INSERT INTO auth_tokens (user_id, email, token, token_type, expires_at)
+            VALUES (${user.id}, ${normalizedEmail}, ${resetToken}, 'password_reset', ${expiresAt.toISOString()})
+        `;
 
-        // Send email
-        const siteUrl = process.env.URL || 'http://localhost:8888';
+        // Send email via Resend if available
+        const siteUrl = process.env.URL || 'https://shopifycourse.advancedmarketing.co';
         const resetUrl = `${siteUrl}/portal/reset-password.html?token=${resetToken}`;
 
-        const resend = new Resend(process.env.RESEND_API_KEY);
+        if (process.env.RESEND_API_KEY) {
+            const { Resend } = require('resend');
+            const resend = new Resend(process.env.RESEND_API_KEY);
 
-        await resend.emails.send({
-            from: 'Shopify Branding Blueprint <noreply@justfeatured.com>',
-            to: email,
-            subject: 'Reset Your Password',
-            html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h2 style="color: #d4a853;">Reset Your Password</h2>
-                    <p>Hello ${user.full_name || 'there'},</p>
-                    <p>An administrator has requested a password reset for your account. Click the button below to set a new password:</p>
-                    <div style="text-align: center; margin: 30px 0;">
-                        <a href="${resetUrl}" style="background: #d4a853; color: #000; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold;">Reset Password</a>
+            await resend.emails.send({
+                from: 'Shopify Branding Blueprint <noreply@justfeatured.com>',
+                to: normalizedEmail,
+                subject: 'Reset Your Password',
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <h2 style="color: #d4a853;">Reset Your Password</h2>
+                        <p>Hello ${user.full_name || 'there'},</p>
+                        <p>A password reset was requested for your account. Click the button below to set a new password:</p>
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a href="${resetUrl}" style="background: #d4a853; color: #000; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold;">Reset Password</a>
+                        </div>
+                        <p style="color: #666; font-size: 14px;">This link will expire in 24 hours. If you didn't request this, you can ignore this email.</p>
                     </div>
-                    <p style="color: #666; font-size: 14px;">This link will expire in 24 hours. If you didn't request this, you can ignore this email.</p>
-                    <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-                    <p style="color: #999; font-size: 12px;">Shopify Branding Blueprint</p>
-                </div>
-            `
-        });
+                `
+            });
+        }
 
         return {
             statusCode: 200,
             headers,
-            body: JSON.stringify({ success: true, message: 'Password reset email sent' })
+            body: JSON.stringify({ success: true, message: 'Password reset email sent', resetUrl })
         };
 
     } catch (error) {

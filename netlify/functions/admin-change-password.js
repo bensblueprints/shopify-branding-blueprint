@@ -1,6 +1,8 @@
-// Admin Change Password
-const { createClient } = require('@supabase/supabase-js');
+// Admin Change Password with Neon database
+const { neon } = require('@neondatabase/serverless');
 const bcrypt = require('bcryptjs');
+
+const sql = neon(process.env.DATABASE_URL);
 
 exports.handler = async (event) => {
     const headers = {
@@ -24,23 +26,22 @@ exports.handler = async (event) => {
         }
 
         const token = authHeader.substring(7);
-        const supabase = createClient(
-            process.env.SUPABASE_URL,
-            process.env.SUPABASE_SERVICE_ROLE_KEY
-        );
 
-        // Verify admin session (auth-admin-login saves to 'sessions' table with 'session_token' field)
-        const { data: session, error: sessionError } = await supabase
-            .from('sessions')
-            .select('*')
-            .eq('session_token', token)
-            .gt('expires_at', new Date().toISOString())
-            .single();
+        // Verify admin session
+        const sessions = await sql`
+            SELECT s.*, a.id as admin_id, a.password_hash
+            FROM sessions s
+            JOIN admin_users a ON s.admin_id = a.id
+            WHERE s.session_token = ${token}
+            AND s.expires_at > NOW()
+            AND s.admin_id IS NOT NULL
+        `;
 
-        if (sessionError || !session || !session.admin_id) {
+        if (sessions.length === 0) {
             return { statusCode: 401, headers, body: JSON.stringify({ error: 'Invalid or expired session' }) };
         }
 
+        const session = sessions[0];
         const { currentPassword, newPassword } = JSON.parse(event.body);
 
         if (!currentPassword || !newPassword) {
@@ -52,13 +53,7 @@ exports.handler = async (event) => {
         }
 
         // Verify current password
-        const { data: admin } = await supabase
-            .from('admin_users')
-            .select('password_hash')
-            .eq('id', session.admin_id)
-            .single();
-
-        const isValid = await bcrypt.compare(currentPassword, admin.password_hash);
+        const isValid = await bcrypt.compare(currentPassword, session.password_hash);
         if (!isValid) {
             return { statusCode: 400, headers, body: JSON.stringify({ error: 'Current password is incorrect' }) };
         }
@@ -67,13 +62,11 @@ exports.handler = async (event) => {
         const newPasswordHash = await bcrypt.hash(newPassword, 12);
 
         // Update password
-        await supabase
-            .from('admin_users')
-            .update({
-                password_hash: newPasswordHash,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', session.admin_id);
+        await sql`
+            UPDATE admin_users
+            SET password_hash = ${newPasswordHash}, updated_at = NOW()
+            WHERE id = ${session.admin_id}
+        `;
 
         return {
             statusCode: 200,

@@ -1,9 +1,7 @@
-const { createClient } = require('@supabase/supabase-js');
+// Logout with Neon database
+const { neon } = require('@neondatabase/serverless');
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const sql = neon(process.env.DATABASE_URL);
 
 exports.handler = async (event) => {
     const headers = {
@@ -38,10 +36,9 @@ exports.handler = async (event) => {
         const sessionToken = authHeader.replace('Bearer ', '');
 
         // Delete the session
-        await supabase
-            .from('sessions')
-            .delete()
-            .eq('session_token', sessionToken);
+        await sql`
+            DELETE FROM sessions WHERE session_token = ${sessionToken}
+        `;
 
         return {
             statusCode: 200,

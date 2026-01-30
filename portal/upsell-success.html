@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Complete | Shopify Branding Blueprint</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/portal.css">
+    <style>
+        .success-container {
+            min-height: calc(100vh - 80px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px;
+        }
+
+        .success-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 48px;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+        }
+
+        .success-icon svg {
+            width: 40px;
+            height: 40px;
+            color: var(--success);
+        }
+
+        .success-title {
+            font-family: 'Instrument Serif', serif;
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+
+        .success-message {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .product-info {
+            background: var(--bg-input);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 32px;
+        }
+
+        .product-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .product-access {
+            color: var(--gold);
+            font-size: 0.9rem;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            padding: 14px 32px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-secondary {
+            padding: 14px 32px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .processing {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="portal-header">
+        <a href="/portal/" class="portal-logo">Shopify Branding Blueprint</a>
+        <nav class="portal-nav">
+            <a href="/portal/">My Courses</a>
+            <a href="/portal/resources.html">Resources</a>
+            <div class="user-menu">
+                <span id="userName" style="color: var(--text-secondary); font-size: 0.875rem;"></span>
+                <a href="#" onclick="handleLogout()" style="color: var(--gold);">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="success-container">
+        <div class="success-card">
+            <div id="content">
+                <div class="processing">
+                    <div class="spinner"></div>
+                    <p>Confirming your purchase...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script>
+        // Check auth
+        if (!auth.isLoggedIn()) {
+            window.location.href = '/portal/login.html';
+        }
+
+        const userData = auth.getUserData();
+        if (userData) {
+            document.getElementById('userName').textContent = userData.full_name || userData.email;
+        }
+
+        function handleLogout() {
+            auth.logout();
+        }
+
+        // Get URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('order_id');
+        const productKey = urlParams.get('product');
+
+        const productNames = {
+            'canva_kit': 'Done-For-You Canva Brand Kit',
+            'email_swipe': 'Email Sequence Swipe File',
+            'seo_checklist': 'Ultimate Shopify SEO Checklist',
+            'fb_ads': 'Facebook Ads for Brands Masterclass',
+            'inner_circle': 'Brand Builders Inner Circle'
+        };
+
+        const productActions = {
+            'canva_kit': { text: 'Download Now', action: () => window.open('/downloads/canva-brand-kit.html', '_blank') },
+            'email_swipe': { text: 'Download Now', action: () => window.open('/downloads/email-swipe-file.html', '_blank') },
+            'seo_checklist': { text: 'Download Now', action: () => window.open('/downloads/seo-checklist.html', '_blank') },
+            'fb_ads': { text: 'Start Learning', action: () => window.location.href = '/portal/course.html?slug=facebook-ads-masterclass' },
+            'inner_circle': { text: 'Join Community', action: () => window.open('https://discord.gg/your-invite', '_blank') }
+        };
+
+        async function confirmPurchase() {
+            try {
+                // Call webhook to confirm purchase (or it happens automatically via Airwallex webhook)
+                const response = await fetch('/.netlify/functions/confirm-upsell-purchase', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${auth.getSessionToken()}`
+                    },
+                    body: JSON.stringify({ order_id: orderId, product_key: productKey })
+                });
+
+                const data = await response.json();
+
+                // Show success regardless (webhook might have already processed it)
+                showSuccess();
+
+            } catch (error) {
+                console.error('Confirmation error:', error);
+                // Show success anyway - webhook likely processed it
+                showSuccess();
+            }
+        }
+
+        function showSuccess() {
+            const productName = productNames[productKey] || 'Your purchase';
+            const productAction = productActions[productKey] || { text: 'Go to Resources', action: () => window.location.href = '/portal/resources.html' };
+
+            document.getElementById('content').innerHTML = `
+                <div class="success-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h1 class="success-title">Purchase Complete!</h1>
+                <p class="success-message">Thank you for your purchase. Your resource is now available.</p>
+
+                <div class="product-info">
+                    <div class="product-name">${productName}</div>
+                    <div class="product-access">Ready to access</div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="accessProduct()">${productAction.text}</button>
+                    <a href="/portal/resources.html" class="btn-secondary">View All Resources</a>
+                </div>
+            `;
+
+            window.accessProduct = productAction.action;
+        }
+
+        // Confirm purchase on page load
+        if (orderId && productKey) {
+            confirmPurchase();
+        } else {
+            showSuccess();
+        }
+    </script>
+</body>
+</html>

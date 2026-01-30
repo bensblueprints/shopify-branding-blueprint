@@ -1,9 +1,7 @@
-const { createClient } = require('@supabase/supabase-js');
+// Check session with Neon database
+const { neon } = require('@neondatabase/serverless');
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const sql = neon(process.env.DATABASE_URL);
 
 // Exported helper for other functions
 async function validateSession(authHeader) {
@@ -13,29 +11,51 @@ async function validateSession(authHeader) {
 
     const sessionToken = authHeader.replace('Bearer ', '');
 
-    const { data: session, error } = await supabase
-        .from('sessions')
-        .select('*, users(*), admin_users(*)')
-        .eq('session_token', sessionToken)
-        .gt('expires_at', new Date().toISOString())
-        .single();
+    // Check for admin session
+    const adminSessions = await sql`
+        SELECT s.*, a.id as admin_id, a.email, a.full_name, a.role
+        FROM sessions s
+        JOIN admin_users a ON s.admin_id = a.id
+        WHERE s.session_token = ${sessionToken}
+        AND s.expires_at > NOW()
+        AND s.admin_id IS NOT NULL
+    `;
 
-    if (error || !session) {
-        return null;
-    }
-
-    // Return appropriate user type
-    if (session.admin_id && session.admin_users) {
+    if (adminSessions.length > 0) {
+        const session = adminSessions[0];
         return {
             type: 'admin',
             session: session,
-            admin: session.admin_users
+            admin: {
+                id: session.admin_id,
+                email: session.email,
+                full_name: session.full_name,
+                role: session.role
+            }
         };
-    } else if (session.user_id && session.users) {
+    }
+
+    // Check for user session
+    const userSessions = await sql`
+        SELECT s.*, u.id as user_id, u.email, u.full_name, u.avatar_url
+        FROM sessions s
+        JOIN users u ON s.user_id = u.id
+        WHERE s.session_token = ${sessionToken}
+        AND s.expires_at > NOW()
+        AND s.user_id IS NOT NULL
+    `;
+
+    if (userSessions.length > 0) {
+        const session = userSessions[0];
         return {
             type: 'user',
             session: session,
-            user: session.users
+            user: {
+                id: session.user_id,
+                email: session.email,
+                full_name: session.full_name,
+                avatar_url: session.avatar_url
+            }
         };
     }
 

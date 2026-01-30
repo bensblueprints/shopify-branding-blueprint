@@ -1,23 +1,27 @@
-const { createClient } = require('@supabase/supabase-js');
+// Portal course detail with Neon database
+const { neon } = require('@neondatabase/serverless');
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const sql = neon(process.env.DATABASE_URL);
 
 async function validateUserSession(authHeader) {
     if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
     const sessionToken = authHeader.replace('Bearer ', '');
 
-    const { data: session } = await supabase
-        .from('sessions')
-        .select('*, users(*)')
-        .eq('session_token', sessionToken)
-        .gt('expires_at', new Date().toISOString())
-        .not('user_id', 'is', null)
-        .single();
+    const sessions = await sql`
+        SELECT s.*, u.id as user_id, u.email, u.full_name
+        FROM sessions s
+        JOIN users u ON s.user_id = u.id
+        WHERE s.session_token = ${sessionToken}
+        AND s.expires_at > NOW()
+        AND s.user_id IS NOT NULL
+    `;
 
-    return session?.users || null;
+    if (sessions.length === 0) return null;
+    return {
+        id: sessions[0].user_id,
+        email: sessions[0].email,
+        full_name: sessions[0].full_name
+    };
 }
 
 exports.handler = async (event) => {
@@ -55,14 +59,13 @@ exports.handler = async (event) => {
         }
 
         // Get course
-        const { data: course, error: courseError } = await supabase
-            .from('courses')
-            .select('*')
-            .eq('slug', slug)
-            .eq('is_published', true)
-            .single();
+        const courses = await sql`
+            SELECT * FROM courses
+            WHERE slug = ${slug}
+            AND is_published = true
+        `;
 
-        if (courseError || !course) {
+        if (courses.length === 0) {
             return {
                 statusCode: 404,
                 headers,
@@ -70,16 +73,17 @@ exports.handler = async (event) => {
             };
         }
 
-        // Check enrollment
-        const { data: enrollment } = await supabase
-            .from('enrollments')
-            .select('*')
-            .eq('user_id', user.id)
-            .eq('course_id', course.id)
-            .eq('status', 'active')
-            .single();
+        const course = courses[0];
 
-        if (!enrollment) {
+        // Check enrollment
+        const enrollments = await sql`
+            SELECT * FROM enrollments
+            WHERE user_id = ${user.id}
+            AND course_id = ${course.id}
+            AND status = 'active'
+        `;
+
+        if (enrollments.length === 0) {
             return {
                 statusCode: 403,
                 headers,
@@ -87,40 +91,34 @@ exports.handler = async (event) => {
             };
         }
 
-        // Get modules with lessons
-        const { data: modules, error: modulesError } = await supabase
-            .from('modules')
-            .select(`
-                *,
-                lessons (
-                    id,
-                    slug,
-                    title,
-                    description,
-                    duration_minutes,
-                    is_preview,
-                    sort_order
-                )
-            `)
-            .eq('course_id', course.id)
-            .eq('is_published', true)
-            .order('sort_order', { ascending: true });
+        const enrollment = enrollments[0];
 
-        if (modulesError) throw modulesError;
+        // Get modules
+        const modules = await sql`
+            SELECT * FROM modules
+            WHERE course_id = ${course.id}
+            AND is_published = true
+            ORDER BY sort_order ASC
+        `;
 
-        // Sort lessons within each module
-        modules.forEach(module => {
-            module.lessons = module.lessons
-                .filter(l => l.is_published !== false)
-                .sort((a, b) => a.sort_order - b.sort_order);
-        });
+        // Get lessons for each module
+        for (const module of modules) {
+            const lessons = await sql`
+                SELECT id, slug, title, description, duration_minutes, is_preview, sort_order
+                FROM lessons
+                WHERE module_id = ${module.id}
+                AND is_published = true
+                ORDER BY sort_order ASC
+            `;
+            module.lessons = lessons;
+        }
 
         // Get lesson progress for this user
-        const { data: progressData } = await supabase
-            .from('lesson_progress')
-            .select('lesson_id, is_completed, progress_percent')
-            .eq('user_id', user.id)
-            .eq('enrollment_id', enrollment.id);
+        const progressData = await sql`
+            SELECT lesson_id, is_completed, progress_percent
+            FROM lesson_progress
+            WHERE user_id = ${user.id}
+        `;
 
         const progressMap = {};
         (progressData || []).forEach(p => {
@@ -138,10 +136,29 @@ exports.handler = async (event) => {
         });
 
         // Calculate overall progress
-        const { data: overallProgress } = await supabase.rpc('get_course_progress', {
-            p_user_id: user.id,
-            p_course_id: course.id
-        });
+        const [totalResult] = await sql`
+            SELECT COUNT(*) as total
+            FROM lessons l
+            JOIN modules m ON l.module_id = m.id
+            WHERE m.course_id = ${course.id}
+            AND l.is_published = true
+        `;
+
+        const [completedResult] = await sql`
+            SELECT COUNT(*) as completed
+            FROM lesson_progress lp
+            JOIN lessons l ON lp.lesson_id = l.id
+            JOIN modules m ON l.module_id = m.id
+            WHERE lp.user_id = ${user.id}
+            AND m.course_id = ${course.id}
+            AND lp.is_completed = true
+        `;
+
+        const totalLessons = parseInt(totalResult.total) || 0;
+        const completedLessons = parseInt(completedResult.completed) || 0;
+        const progressPercent = totalLessons > 0
+            ? Math.round((completedLessons / totalLessons) * 100)
+            : 0;
 
         return {
             statusCode: 200,
@@ -152,10 +169,10 @@ exports.handler = async (event) => {
                     modules
                 },
                 enrollment,
-                progress: overallProgress?.[0] || {
-                    total_lessons: 0,
-                    completed_lessons: 0,
-                    progress_percent: 0
+                progress: {
+                    total_lessons: totalLessons,
+                    completed_lessons: completedLessons,
+                    progress_percent: progressPercent
                 }
             })
         };

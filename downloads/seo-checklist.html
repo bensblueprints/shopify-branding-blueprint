@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Shopify SEO Checklist | Shopify Branding Blueprint</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; max-width: 800px; margin: 0 auto; padding: 40px; color: #1a1a1a; line-height: 1.6; }
+        @media print { body { padding: 20px; } .no-print { display: none !important; } .page-break { page-break-before: always; } }
+        .header { text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #c9a962; }
+        .logo { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: #c9a962; margin-bottom: 8px; }
+        h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        .subtitle { color: #666; font-size: 14px; }
+        h2 { font-size: 18px; margin: 32px 0 16px; padding-bottom: 8px; border-bottom: 1px solid #e0e0e0; color: #333; display: flex; align-items: center; gap: 10px; }
+        h2 .icon { width: 24px; height: 24px; background: #c9a962; color: #fff; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .instruction { background: linear-gradient(135deg, #fefbf3, #fff9e6); padding: 20px; border-radius: 12px; margin-bottom: 24px; font-size: 14px; color: #555; border: 1px solid #f0e6c8; }
+        .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center; font-size: 12px; color: #999; }
+        .btn-print { display: inline-block; background: linear-gradient(135deg, #c9a962, #b8943d); color: #000; padding: 14px 32px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-bottom: 24px; font-size: 15px; box-shadow: 0 4px 12px rgba(201, 169, 98, 0.3); }
+        .btn-print:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(201, 169, 98, 0.4); }
+        .checklist { list-style: none; }
+        .checklist li { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; font-size: 14px; padding: 14px 16px; background: #fafafa; border-radius: 10px; border: 1px solid #eee; transition: all 0.2s; }
+        .checklist li:hover { background: #f5f5f5; border-color: #ddd; }
+        .checkbox { width: 22px; height: 22px; border: 2px solid #c9a962; border-radius: 5px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; }
+        .item-content { flex: 1; }
+        .item-title { font-weight: 600; margin-bottom: 4px; color: #1a1a1a; }
+        .item-desc { font-size: 12px; color: #666; line-height: 1.5; }
+        .priority-critical { border-left: 4px solid #e74c3c; }
+        .priority-high { border-left: 4px solid #f39c12; }
+        .priority-medium { border-left: 4px solid #3498db; }
+        .priority-low { border-left: 4px solid #27ae60; }
+        .tip { background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-left: 4px solid #0ea5e9; padding: 14px 18px; margin: 20px 0; font-size: 13px; border-radius: 0 8px 8px 0; }
+        .tip strong { color: #0369a1; }
+        .progress-section { background: #f8f8f8; padding: 20px; border-radius: 12px; margin-bottom: 32px; }
+        .progress-bar { background: #e0e0e0; height: 12px; border-radius: 6px; overflow: hidden; margin: 12px 0; }
+        .progress-fill { background: linear-gradient(90deg, #c9a962, #d4b872); height: 100%; border-radius: 6px; width: 0%; transition: width 0.3s; }
+        .progress-text { display: flex; justify-content: space-between; font-size: 13px; color: #666; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
+        .stat-box { background: #fff; padding: 12px; border-radius: 8px; text-align: center; border: 1px solid #eee; }
+        .stat-number { font-size: 24px; font-weight: 700; color: #c9a962; }
+        .stat-label { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 24px; padding-top: 16px; border-top: 1px solid #eee; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #666; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+        .dot-critical { background: #e74c3c; }
+        .dot-high { background: #f39c12; }
+        .dot-medium { background: #3498db; }
+        .dot-low { background: #27ae60; }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="text-align: center;">
+        <button class="btn-print" onclick="window.print()">Download / Print PDF</button>
+    </div>
+
+    <div class="header">
+        <div class="logo">Shopify Branding Blueprint</div>
+        <h1>Ultimate Shopify SEO Checklist</h1>
+        <p class="subtitle">77 Essential Steps to Rank Higher & Get Free Organic Traffic</p>
+    </div>
+
+    <div class="instruction">
+        <strong>How to Use This Checklist:</strong> Work through each section systematically. Critical items (red) must be completed before launch. High priority (orange) should be done within the first month. Check off items as you complete them and track your progress below.
+    </div>
+
+    <div class="progress-section">
+        <strong>Your SEO Progress</strong>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text">
+            <span><span id="completedCount">0</span> of 77 completed</span>
+            <span id="progressPercent">0%</span>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-number" id="criticalCount">0</div>
+                <div class="stat-label">Critical Done</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="highCount">0</div>
+                <div class="stat-label">High Done</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="mediumCount">0</div>
+                <div class="stat-label">Medium Done</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="lowCount">0</div>
+                <div class="stat-label">Low Done</div>
+            </div>
+        </div>
+        <div class="legend">
+            <div class="legend-item"><div class="legend-dot dot-critical"></div> Critical (Must Do)</div>
+            <div class="legend-item"><div class="legend-dot dot-high"></div> High Priority</div>
+            <div class="legend-item"><div class="legend-dot dot-medium"></div> Medium Priority</div>
+            <div class="legend-item"><div class="legend-dot dot-low"></div> Nice to Have</div>
+        </div>
+    </div>
+
+    <h2><span class="icon">1</span> Technical SEO Foundation</h2>
+    <ul class="checklist">
+        <li class="priority-critical">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Connect custom domain</div>
+                <div class="item-desc">Remove .myshopify.com and connect your branded domain with SSL certificate</div>
+            </div>
+        </li>
+        <li class="priority-critical">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Submit sitemap to Google Search Console</div>
+                <div class="item-desc">Go to yourstore.com/sitemap.xml and submit to GSC for indexing</div>
+            </div>
+        </li>
+        <li class="priority-critical">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Verify site in Google Search Console</div>
+                <div class="item-desc">Add DNS TXT record or HTML tag to verify ownership</div>
+            </div>
+        </li>
+        <li class="priority-critical">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Enable HTTPS redirect</div>
+                <div class="item-desc">Settings > Domains > Check "Always redirect to primary domain with HTTPS"</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Set up Google Analytics 4</div>
+                <div class="item-desc">Install GA4 tracking code via Online Store > Preferences or Google channel</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Configure robots.txt</div>
+                <div class="item-desc">Review Settings > Files > robots.txt.liquid for proper crawl directives</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Check mobile responsiveness</div>
+                <div class="item-desc">Use Google's Mobile-Friendly Test tool on all key pages</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Test Core Web Vitals</div>
+                <div class="item-desc">Run PageSpeed Insights and aim for 90+ on mobile</div>
+            </div>
+        </li>
+    </ul>
+
+    <h2><span class="icon">2</span> Homepage SEO</h2>
+    <ul class="checklist">
+        <li class="priority-critical">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Optimize homepage title tag</div>
+                <div class="item-desc">Format: Brand Name | Primary Keyword | Secondary Benefit (under 60 chars)</div>
+            </div>
+        </li>
+        <li class="priority-critical">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Write compelling meta description</div>
+                <div class="item-desc">Include primary keyword, value prop, and CTA (under 155 chars)</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Add H1 heading with main keyword</div>
+                <div class="item-desc">Only one H1 per page, should match search intent</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Add descriptive homepage content</div>
+                <div class="item-desc">Include 150-300 words of keyword-rich content below the fold</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Internal link to key collections</div>
+                <div class="item-desc">Add prominent links to your main product categories</div>
+            </div>
+        </li>
+    </ul>
+
+    <h2><span class="icon">3</span> Product Page SEO</h2>
+    <ul class="checklist">
+        <li class="priority-critical">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Unique title tags for each product</div>
+                <div class="item-desc">Format: Product Name - Key Feature | Brand (include target keyword)</div>
+            </div>
+        </li>
+        <li class="priority-critical">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Unique meta descriptions for products</div>
+                <div class="item-desc">Highlight benefits, include keyword, add urgency or social proof</div>
+            </div>
+        </li>
+        <li class="priority-critical">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Write unique product descriptions</div>
+                <div class="item-desc">300+ words, avoid manufacturer copy, focus on benefits and use cases</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Add keyword-rich H1 for product title</div>
+                <div class="item-desc">Include primary keyword naturally in product name</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Optimize image alt text</div>
+                <div class="item-desc">Describe product + color/variant + brand in each image alt tag</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Add product reviews/ratings</div>
+                <div class="item-desc">Enable reviews for rich snippet eligibility (star ratings in search)</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Add FAQ section to products</div>
+                <div class="item-desc">Answer common questions with FAQ schema markup</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Optimize product URL handles</div>
+                <div class="item-desc">Use keyword-rich, hyphenated URLs (products/blue-widget-set)</div>
+            </div>
+        </li>
+        <li class="priority-low">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Add related products section</div>
+                <div class="item-desc">Cross-link to related items for internal linking juice</div>
+            </div>
+        </li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <h2><span class="icon">4</span> Collection Page SEO</h2>
+    <ul class="checklist">
+        <li class="priority-critical">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Optimize collection title tags</div>
+                <div class="item-desc">Target category keywords: "Shop [Category] | Brand Name"</div>
+            </div>
+        </li>
+        <li class="priority-critical">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Write collection meta descriptions</div>
+                <div class="item-desc">Include category keyword, number of products, key benefits</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Add collection description (above products)</div>
+                <div class="item-desc">150-300 words explaining the collection with target keywords</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Optimize collection URL handles</div>
+                <div class="item-desc">Use descriptive URLs: collections/mens-running-shoes</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Add featured image with alt text</div>
+                <div class="item-desc">Collection image should have keyword-rich alt text</div>
+            </div>
+        </li>
+        <li class="priority-low">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Add bottom-of-page collection content</div>
+                <div class="item-desc">Additional 200+ words after product grid for more keyword coverage</div>
+            </div>
+        </li>
+    </ul>
+
+    <h2><span class="icon">5</span> Image Optimization</h2>
+    <ul class="checklist">
+        <li class="priority-critical">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Compress all images</div>
+                <div class="item-desc">Use TinyPNG or Shopify's auto-compression; aim for under 200KB per image</div>
+            </div>
+        </li>
+        <li class="priority-critical">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Add descriptive alt text to all images</div>
+                <div class="item-desc">Describe what's in the image + include relevant keywords naturally</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Use descriptive file names</div>
+                <div class="item-desc">Before upload: blue-running-shoes-nike.jpg (not IMG_12345.jpg)</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Use WebP format where possible</div>
+                <div class="item-desc">Shopify auto-converts, but upload high-quality originals</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Implement lazy loading</div>
+                <div class="item-desc">Most modern themes have this; verify in theme settings</div>
+            </div>
+        </li>
+    </ul>
+
+    <h2><span class="icon">6</span> Site Structure & Navigation</h2>
+    <ul class="checklist">
+        <li class="priority-critical">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Create logical navigation hierarchy</div>
+                <div class="item-desc">All products reachable within 3 clicks from homepage</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Add breadcrumb navigation</div>
+                <div class="item-desc">Enable breadcrumbs in theme for better UX and schema markup</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Link to collections from main menu</div>
+                <div class="item-desc">All main collections should be accessible from header navigation</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Add footer links to key pages</div>
+                <div class="item-desc">Include links to policies, about, contact, and popular collections</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Create a sitemap page for users</div>
+                <div class="item-desc">HTML sitemap page linking to all categories and key pages</div>
+            </div>
+        </li>
+    </ul>
+
+    <h2><span class="icon">7</span> Content & Blog SEO</h2>
+    <ul class="checklist">
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Create blog with keyword-targeted posts</div>
+                <div class="item-desc">Enable blog and plan content around buyer keywords</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Write 1500+ word pillar content</div>
+                <div class="item-desc">In-depth guides targeting main category keywords</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Optimize blog post titles and meta</div>
+                <div class="item-desc">Include target keyword in title, URL, and meta description</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Add internal links in blog posts</div>
+                <div class="item-desc">Link to relevant products and collections within content</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Create how-to and buyer guide content</div>
+                <div class="item-desc">"How to choose [product]" and "Best [product] for [use case]"</div>
+            </div>
+        </li>
+        <li class="priority-low">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Publish consistently (2-4x/month minimum)</div>
+                <div class="item-desc">Regular content signals freshness to Google</div>
+            </div>
+        </li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <h2><span class="icon">8</span> Schema & Structured Data</h2>
+    <ul class="checklist">
+        <li class="priority-critical">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Verify Product schema is working</div>
+                <div class="item-desc">Test with Google's Rich Results Test - should show price, availability</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Add Organization schema</div>
+                <div class="item-desc">Include logo, contact info, social profiles in site-wide schema</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Enable Review schema</div>
+                <div class="item-desc">Product reviews with proper schema for star ratings in SERPs</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Add FAQ schema to relevant pages</div>
+                <div class="item-desc">FAQ sections with proper JSON-LD markup</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Add Breadcrumb schema</div>
+                <div class="item-desc">Most themes include this; verify with structured data testing tool</div>
+            </div>
+        </li>
+        <li class="priority-low">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Add LocalBusiness schema (if applicable)</div>
+                <div class="item-desc">For stores with physical locations</div>
+            </div>
+        </li>
+    </ul>
+
+    <h2><span class="icon">9</span> Page Speed Optimization</h2>
+    <ul class="checklist">
+        <li class="priority-critical">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Remove unused apps</div>
+                <div class="item-desc">Audit and remove apps you don't use - they add code bloat</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Minimize third-party scripts</div>
+                <div class="item-desc">Each tracking pixel/chat widget slows your site</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Use a fast, lightweight theme</div>
+                <div class="item-desc">Dawn or OS 2.0 themes are optimized for speed</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Limit homepage sections</div>
+                <div class="item-desc">More sections = slower load; keep homepage focused</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Use system fonts or limit custom fonts</div>
+                <div class="item-desc">Each font file adds load time; max 2 font families</div>
+            </div>
+        </li>
+    </ul>
+
+    <h2><span class="icon">10</span> Local SEO (If Applicable)</h2>
+    <ul class="checklist">
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Create Google Business Profile</div>
+                <div class="item-desc">Claim and optimize your GMB listing with photos and info</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Add NAP (Name, Address, Phone) consistently</div>
+                <div class="item-desc">Same format across website, GMB, and all directories</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Get listed in local directories</div>
+                <div class="item-desc">Yelp, Yellow Pages, industry-specific directories</div>
+            </div>
+        </li>
+        <li class="priority-low">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Encourage Google reviews</div>
+                <div class="item-desc">Send follow-up emails asking for GMB reviews</div>
+            </div>
+        </li>
+    </ul>
+
+    <h2><span class="icon">11</span> Off-Page SEO & Link Building</h2>
+    <ul class="checklist">
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Set up social profiles</div>
+                <div class="item-desc">Create branded profiles on major platforms with link to site</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Submit to relevant directories</div>
+                <div class="item-desc">Industry directories, "best of" lists, local business listings</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Reach out for product reviews</div>
+                <div class="item-desc">Contact bloggers/influencers for product coverage and backlinks</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Guest post on industry blogs</div>
+                <div class="item-desc">Write valuable content for relevant sites with link back</div>
+            </div>
+        </li>
+        <li class="priority-low">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Create shareable resources</div>
+                <div class="item-desc">Infographics, tools, or guides that earn natural backlinks</div>
+            </div>
+        </li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <h2><span class="icon">12</span> Ongoing SEO Maintenance</h2>
+    <ul class="checklist">
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Monitor Google Search Console weekly</div>
+                <div class="item-desc">Check for crawl errors, indexing issues, and search performance</div>
+            </div>
+        </li>
+        <li class="priority-high">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Track keyword rankings</div>
+                <div class="item-desc">Use a rank tracker to monitor your target keywords monthly</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Fix broken links quarterly</div>
+                <div class="item-desc">Use Screaming Frog or similar to find and fix 404s</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Update old content</div>
+                <div class="item-desc">Refresh blog posts and product descriptions annually</div>
+            </div>
+        </li>
+        <li class="priority-medium">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Audit site speed quarterly</div>
+                <div class="item-desc">Re-run PageSpeed Insights and fix new issues</div>
+            </div>
+        </li>
+        <li class="priority-low">
+            <div class="checkbox"></div>
+            <div class="item-content">
+                <div class="item-title">Analyze competitor strategies</div>
+                <div class="item-desc">Check what's working for competitors and adapt</div>
+            </div>
+        </li>
+    </ul>
+
+    <div class="tip">
+        <strong>Pro Tip:</strong> SEO is a marathon, not a sprint. Focus on completing all critical items first, then work through high priority items. Expect to see results in 3-6 months with consistent effort. Track your progress in Google Search Console and celebrate small wins along the way!
+    </div>
+
+    <div class="footer">
+        <p>Shopify Branding Blueprint | shopifycourse.advancedmarketing.co</p>
+        <p style="margin-top: 8px; color: #c9a962; font-weight: 600;">This premium checklist is for course members only. Do not distribute.</p>
+    </div>
+</body>
+</html>

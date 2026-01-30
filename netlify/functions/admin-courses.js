@@ -1,23 +1,28 @@
-const { createClient } = require('@supabase/supabase-js');
+// Admin courses with Neon database
+const { neon } = require('@neondatabase/serverless');
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const sql = neon(process.env.DATABASE_URL);
 
 async function validateAdminSession(authHeader) {
     if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
     const sessionToken = authHeader.replace('Bearer ', '');
 
-    const { data: session } = await supabase
-        .from('sessions')
-        .select('*, admin_users(*)')
-        .eq('session_token', sessionToken)
-        .gt('expires_at', new Date().toISOString())
-        .not('admin_id', 'is', null)
-        .single();
+    const sessions = await sql`
+        SELECT s.*, a.id as admin_id, a.email, a.full_name, a.role
+        FROM sessions s
+        JOIN admin_users a ON s.admin_id = a.id
+        WHERE s.session_token = ${sessionToken}
+        AND s.expires_at > NOW()
+        AND s.admin_id IS NOT NULL
+    `;
 
-    return session?.admin_users || null;
+    if (sessions.length === 0) return null;
+    return {
+        id: sessions[0].admin_id,
+        email: sessions[0].email,
+        full_name: sessions[0].full_name,
+        role: sessions[0].role
+    };
 }
 
 exports.handler = async (event) => {
@@ -48,72 +53,92 @@ exports.handler = async (event) => {
             const params = event.queryStringParameters || {};
 
             if (params.id) {
-                // Get single course with modules
-                const { data: course, error } = await supabase
-                    .from('courses')
-                    .select('*, modules(*, lessons(*))')
-                    .eq('id', params.id)
-                    .single();
+                // Get single course
+                const courses = await sql`
+                    SELECT * FROM courses WHERE id = ${params.id}
+                `;
 
-                if (error) throw error;
+                if (courses.length === 0) {
+                    return {
+                        statusCode: 404,
+                        headers,
+                        body: JSON.stringify({ error: 'Course not found' })
+                    };
+                }
+
+                const course = courses[0];
+
+                // Get modules with lessons
+                const modules = await sql`
+                    SELECT * FROM modules
+                    WHERE course_id = ${params.id}
+                    ORDER BY sort_order ASC
+                `;
+
+                for (const module of modules) {
+                    const lessons = await sql`
+                        SELECT * FROM lessons
+                        WHERE module_id = ${module.id}
+                        ORDER BY sort_order ASC
+                    `;
+                    module.lessons = lessons;
+                }
+
+                course.modules = modules;
                 return { statusCode: 200, headers, body: JSON.stringify(course) };
             }
 
             // List all courses
-            const { data: courses, error } = await supabase
-                .from('courses')
-                .select('*, modules(count)')
-                .order('sort_order', { ascending: true });
+            const courses = await sql`
+                SELECT c.*,
+                    (SELECT COUNT(*) FROM modules WHERE course_id = c.id) as module_count
+                FROM courses c
+                ORDER BY created_at DESC
+            `;
 
-            if (error) throw error;
             return { statusCode: 200, headers, body: JSON.stringify(courses) };
         }
 
         // POST - Create, update, or delete
         if (event.httpMethod === 'POST') {
             const body = JSON.parse(event.body);
-            const { action, id, ...courseData } = body;
+            const { action, id, title, subtitle, description, thumbnail_url, price_cents, is_published } = body;
 
             if (action === 'create') {
-                // Generate slug if not provided
-                if (!courseData.slug) {
-                    courseData.slug = courseData.title
-                        .toLowerCase()
-                        .replace(/[^a-z0-9]+/g, '-')
-                        .replace(/(^-|-$)/g, '');
-                }
+                // Generate slug
+                const slug = title
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/(^-|-$)/g, '');
 
-                const { data, error } = await supabase
-                    .from('courses')
-                    .insert(courseData)
-                    .select()
-                    .single();
+                const newCourses = await sql`
+                    INSERT INTO courses (slug, title, subtitle, description, thumbnail_url, price_cents, is_published)
+                    VALUES (${slug}, ${title}, ${subtitle || null}, ${description || null}, ${thumbnail_url || null}, ${price_cents || 0}, ${is_published || false})
+                    RETURNING *
+                `;
 
-                if (error) throw error;
-                return { statusCode: 201, headers, body: JSON.stringify(data) };
+                return { statusCode: 201, headers, body: JSON.stringify(newCourses[0]) };
             }
 
             if (action === 'update' && id) {
-                courseData.updated_at = new Date().toISOString();
+                const updated = await sql`
+                    UPDATE courses
+                    SET title = COALESCE(${title}, title),
+                        subtitle = COALESCE(${subtitle}, subtitle),
+                        description = COALESCE(${description}, description),
+                        thumbnail_url = COALESCE(${thumbnail_url}, thumbnail_url),
+                        price_cents = COALESCE(${price_cents}, price_cents),
+                        is_published = COALESCE(${is_published}, is_published),
+                        updated_at = NOW()
+                    WHERE id = ${id}
+                    RETURNING *
+                `;
 
-                const { data, error } = await supabase
-                    .from('courses')
-                    .update(courseData)
-                    .eq('id', id)
-                    .select()
-                    .single();
-
-                if (error) throw error;
-                return { statusCode: 200, headers, body: JSON.stringify(data) };
+                return { statusCode: 200, headers, body: JSON.stringify(updated[0]) };
             }
 
             if (action === 'delete' && id) {
-                const { error } = await supabase
-                    .from('courses')
-                    .delete()
-                    .eq('id', id);
-
-                if (error) throw error;
+                await sql`DELETE FROM courses WHERE id = ${id}`;
                 return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
             }
 

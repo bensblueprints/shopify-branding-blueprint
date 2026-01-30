@@ -13,8 +13,14 @@
     <!-- Header -->
     <header class="portal-header">
         <a href="/portal/" class="portal-logo">Shopify Branding Blueprint</a>
-        <nav class="portal-nav">
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+        <nav class="portal-nav" id="portalNav">
             <a href="/portal/">My Courses</a>
+            <a href="/portal/resources.html">Resources & Downloads</a>
             <a href="#" id="backToCourse">Back to Course</a>
             <div class="user-menu">
                 <a href="#" onclick="handleLogout()" style="color: var(--gold);">Logout</a>
@@ -73,11 +79,19 @@
 
             // Video embed
             let videoHtml = '';
-            if (lesson.video_id && lesson.video_provider === 'youtube') {
+            // Check for video_id (YouTube) or extract from video_url
+            let videoId = lesson.video_id;
+            if (!videoId && lesson.video_url) {
+                // Try to extract YouTube video ID from URL
+                const ytMatch = lesson.video_url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+                if (ytMatch) videoId = ytMatch[1];
+            }
+
+            if (videoId) {
                 videoHtml = `
                     <div class="video-container">
                         <iframe
-                            src="https://www.youtube.com/embed/${lesson.video_id}?rel=0&modestbranding=1"
+                            src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1"
                             frameborder="0"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowfullscreen
@@ -155,6 +169,8 @@
                         ${lesson.content_html}
                     </div>
                 ` : ''}
+
+                ${getDownloadsForLesson(lesson)}
             `;
 
             // Load sidebar with all lessons in this module (placeholder - would need more data)
@@ -208,11 +224,89 @@
             }
         }
 
+        // Worksheet mappings based on lesson content
+        const worksheetMap = {
+            'brand-vision': {
+                title: '3-Year Brand Vision Worksheet',
+                description: 'Define your brand vision, metrics, and success criteria',
+                url: '/downloads/brand-vision-worksheet.html',
+                keywords: ['vision', 'day 2', '3-year', 'brand vision']
+            },
+            'brand-story': {
+                title: 'Brand Story Template',
+                description: 'Craft your compelling brand narrative with this framework',
+                url: '/downloads/brand-story-template.html',
+                keywords: ['story', 'day 3', 'brand story', 'narrative', 'about']
+            },
+            'pre-launch': {
+                title: 'Pre-Launch Checklist',
+                description: 'Everything you need to verify before going live',
+                url: '/downloads/pre-launch-checklist.html',
+                keywords: ['launch', 'checklist', 'day 7', 'pre-launch', 'go live']
+            },
+            'launch-plan': {
+                title: '30-Day Launch Plan',
+                description: 'Your step-by-step launch roadmap',
+                url: '/downloads/30-day-launch-plan.html',
+                keywords: ['30-day', 'launch plan', 'roadmap', 'day 7', '30 day']
+            }
+        };
+
+        function getDownloadsForLesson(lesson) {
+            const lessonTitle = lesson.title.toLowerCase();
+            const moduleTitle = lesson.module?.title?.toLowerCase() || '';
+            const searchText = `${lessonTitle} ${moduleTitle}`;
+
+            const matchingDownloads = [];
+
+            for (const [key, worksheet] of Object.entries(worksheetMap)) {
+                const matches = worksheet.keywords.some(kw => searchText.includes(kw));
+                if (matches) {
+                    matchingDownloads.push(worksheet);
+                }
+            }
+
+            if (matchingDownloads.length === 0) return '';
+
+            return `
+                <div class="lesson-downloads">
+                    <div class="lesson-downloads-header">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <h3>Lesson Worksheets</h3>
+                    </div>
+                    <div class="download-cards">
+                        ${matchingDownloads.map(dl => `
+                            <a href="${dl.url}" target="_blank" class="download-card">
+                                <div class="download-card-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                </div>
+                                <div class="download-card-info">
+                                    <div class="download-card-title">${dl.title}</div>
+                                    <div class="download-card-desc">${dl.description}</div>
+                                </div>
+                                <svg class="download-card-arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                </svg>
+                            </a>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
         loadLesson();
 
         function handleLogout() {
             auth.logout();
             window.location.href = '/portal/login.html';
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('portalNav').classList.toggle('active');
         }
     </script>
 </body>

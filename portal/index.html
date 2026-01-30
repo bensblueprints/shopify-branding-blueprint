@@ -13,8 +13,14 @@
     <!-- Header -->
     <header class="portal-header">
         <a href="/portal/" class="portal-logo">Shopify Branding Blueprint</a>
-        <nav class="portal-nav">
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+        <nav class="portal-nav" id="portalNav">
             <a href="/portal/" class="active">My Courses</a>
+            <a href="/portal/resources.html">Resources & Downloads</a>
             <div class="user-menu">
                 <span id="userName" style="color: var(--text-secondary); font-size: 0.875rem;"></span>
                 <a href="#" onclick="handleLogout()" style="color: var(--gold);">Logout</a>
@@ -32,7 +38,36 @@
         <div id="coursesContainer">
             <div class="loading"><div class="spinner"></div></div>
         </div>
+
+        <!-- Resources CTA Banner -->
+        <div class="resources-cta-banner" style="margin-top: 40px;">
+            <div class="resources-cta-content">
+                <div class="resources-cta-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <div class="resources-cta-text">
+                    <h3>Premium Resources & Downloads</h3>
+                    <p>Access worksheets, templates, checklists, and bonus add-ons to supercharge your brand building.</p>
+                </div>
+                <a href="/portal/resources.html" class="resources-cta-btn">
+                    Explore Resources
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                </a>
+            </div>
+        </div>
     </div>
+
+    <!-- Floating Resources Button -->
+    <button class="floating-resources-btn" onclick="window.location.href='/portal/resources.html'">
+        <span class="floating-resources-tooltip">Resources & Downloads</span>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+    </button>
 
     <script src="../js/auth.js"></script>
     <script src="../js/api.js"></script>
@@ -116,6 +151,10 @@
         function handleLogout() {
             auth.logout();
             window.location.href = '/portal/login.html';
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('portalNav').classList.toggle('active');
         }
     </script>
 </body>

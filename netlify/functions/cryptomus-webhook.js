@@ -1,5 +1,8 @@
-// Cryptomus Webhook Handler
+// Cryptomus Webhook Handler with Neon database
 const crypto = require('crypto');
+const { neon } = require('@neondatabase/serverless');
+
+const sql = neon(process.env.DATABASE_URL);
 
 function verifySign(data, receivedSign, apiKey) {
     const dataWithoutSign = { ...data };
@@ -49,39 +52,62 @@ exports.handler = async (event) => {
         if (status === 'paid' || status === 'paid_over') {
             console.log(`Payment successful for order ${order_id}`);
 
-            // Create customer in Supabase (similar to Stripe webhook)
-            const { createClient } = require('@supabase/supabase-js');
-            const supabase = createClient(
-                process.env.SUPABASE_URL,
-                process.env.SUPABASE_SERVICE_ROLE_KEY
-            );
+            if (customerEmail) {
+                const normalizedEmail = customerEmail.toLowerCase().trim();
 
-            // Check if customer exists
-            const { data: existingCustomer } = await supabase
-                .from('customers')
-                .select('*')
-                .eq('email', customerEmail)
-                .single();
+                // Check if customer exists
+                const existingCustomers = await sql`
+                    SELECT * FROM customers WHERE email = ${normalizedEmail}
+                `;
 
-            if (!existingCustomer && customerEmail) {
-                // Create new customer
-                await supabase.from('customers').insert({
-                    email: customerEmail,
-                    payment_provider: 'cryptomus',
-                    payment_id: txid,
-                    order_id: order_id,
-                    amount_paid: parseFloat(amount),
-                    currency: currency,
-                    products_purchased: [product],
-                    created_at: new Date().toISOString()
-                });
-            } else if (existingCustomer) {
-                // Update existing customer
-                const updatedProducts = [...(existingCustomer.products_purchased || []), product];
-                await supabase.from('customers').update({
-                    products_purchased: updatedProducts,
-                    updated_at: new Date().toISOString()
-                }).eq('email', customerEmail);
+                if (existingCustomers.length === 0) {
+                    // Create new customer
+                    await sql`
+                        INSERT INTO customers (email, payment_provider, payment_id, order_id, amount_paid, currency, products_purchased)
+                        VALUES (${normalizedEmail}, 'cryptomus', ${txid}, ${order_id}, ${parseFloat(amount)}, ${currency}, ARRAY[${product}])
+                    `;
+                } else {
+                    // Update existing customer
+                    const existingCustomer = existingCustomers[0];
+                    const updatedProducts = [...(existingCustomer.products_purchased || []), product];
+                    await sql`
+                        UPDATE customers
+                        SET products_purchased = ${updatedProducts}, updated_at = NOW()
+                        WHERE email = ${normalizedEmail}
+                    `;
+                }
+
+                // Also create/update user for portal access
+                const existingUsers = await sql`
+                    SELECT * FROM users WHERE email = ${normalizedEmail}
+                `;
+
+                if (existingUsers.length === 0) {
+                    await sql`
+                        INSERT INTO users (email, full_name)
+                        VALUES (${normalizedEmail}, ${normalizedEmail.split('@')[0]})
+                    `;
+                }
+
+                // Create enrollment
+                const users = await sql`SELECT id FROM users WHERE email = ${normalizedEmail}`;
+                const courses = await sql`SELECT id FROM courses LIMIT 1`;
+
+                if (users.length > 0 && courses.length > 0) {
+                    const userId = users[0].id;
+                    const courseId = courses[0].id;
+
+                    const existingEnrollment = await sql`
+                        SELECT id FROM enrollments WHERE user_id = ${userId} AND course_id = ${courseId}
+                    `;
+
+                    if (existingEnrollment.length === 0) {
+                        await sql`
+                            INSERT INTO enrollments (user_id, course_id, status)
+                            VALUES (${userId}, ${courseId}, 'active')
+                        `;
+                    }
+                }
             }
 
             // Trigger GHL webhook if configured

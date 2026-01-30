@@ -1278,6 +1278,8 @@
         .delay-4 { animation-delay: 0.4s; }
         .delay-5 { animation-delay: 0.5s; }
     </style>
+    <!-- Airwallex SDK -->
+    <script src="https://static.airwallex.com/components/sdk/v1/index.js"></script>
 </head>
 <body>
     <!-- Announcement Bar -->
@@ -1948,10 +1950,29 @@
             const data = await response.json();
 
             if (data.success && data.intentId) {
-                // Build checkout URL and redirect
-                const env = data.env === 'prod' ? '' : '-demo';
-                const checkoutUrl = `https://checkout${env}.airwallex.com/pay/${data.intentId}?client_secret=${encodeURIComponent(data.clientSecret)}&successUrl=${encodeURIComponent(data.successUrl)}&failUrl=${encodeURIComponent(data.failUrl)}`;
-                window.location.href = checkoutUrl;
+                // Initialize Airwallex SDK and redirect to checkout
+                const env = data.env === 'prod' ? 'prod' : 'demo';
+
+                try {
+                    const { payments } = await window.AirwallexComponentsSDK.init({
+                        env: env,
+                        enabledElements: ['payments']
+                    });
+
+                    await payments.redirectToCheckout({
+                        env: env,
+                        mode: 'payment',
+                        intent_id: data.intentId,
+                        client_secret: data.clientSecret,
+                        currency: data.currency || 'USD',
+                        country_code: 'US',
+                        successUrl: data.successUrl,
+                        failUrl: data.failUrl
+                    });
+                } catch (sdkError) {
+                    console.error('Airwallex SDK error:', sdkError);
+                    throw new Error('Failed to initialize payment checkout');
+                }
             } else {
                 throw new Error(data.error || 'Failed to create payment');
             }

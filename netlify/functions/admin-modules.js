@@ -1,23 +1,28 @@
-const { createClient } = require('@supabase/supabase-js');
+// Admin modules with Neon database
+const { neon } = require('@neondatabase/serverless');
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const sql = neon(process.env.DATABASE_URL);
 
 async function validateAdminSession(authHeader) {
     if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
     const sessionToken = authHeader.replace('Bearer ', '');
 
-    const { data: session } = await supabase
-        .from('sessions')
-        .select('*, admin_users(*)')
-        .eq('session_token', sessionToken)
-        .gt('expires_at', new Date().toISOString())
-        .not('admin_id', 'is', null)
-        .single();
+    const sessions = await sql`
+        SELECT s.*, a.id as admin_id, a.email, a.full_name, a.role
+        FROM sessions s
+        JOIN admin_users a ON s.admin_id = a.id
+        WHERE s.session_token = ${sessionToken}
+        AND s.expires_at > NOW()
+        AND s.admin_id IS NOT NULL
+    `;
 
-    return session?.admin_users || null;
+    if (sessions.length === 0) return null;
+    return {
+        id: sessions[0].admin_id,
+        email: sessions[0].email,
+        full_name: sessions[0].full_name,
+        role: sessions[0].role
+    };
 }
 
 exports.handler = async (event) => {
@@ -55,73 +60,66 @@ exports.handler = async (event) => {
                 };
             }
 
-            const { data: modules, error } = await supabase
-                .from('modules')
-                .select('*, lessons(count)')
-                .eq('course_id', params.courseId)
-                .order('sort_order', { ascending: true });
+            const modules = await sql`
+                SELECT m.*,
+                    (SELECT COUNT(*) FROM lessons WHERE module_id = m.id) as lesson_count
+                FROM modules m
+                WHERE m.course_id = ${params.courseId}
+                ORDER BY m.sort_order ASC
+            `;
 
-            if (error) throw error;
             return { statusCode: 200, headers, body: JSON.stringify(modules) };
         }
 
         // POST - Create, update, or delete
         if (event.httpMethod === 'POST') {
             const body = JSON.parse(event.body);
-            const { action, id, ...moduleData } = body;
+            const { action, id, course_id, title, description, sort_order, is_published } = body;
 
             if (action === 'create') {
-                // Generate slug if not provided
-                if (!moduleData.slug) {
-                    moduleData.slug = moduleData.title
-                        .toLowerCase()
-                        .replace(/[^a-z0-9]+/g, '-')
-                        .replace(/(^-|-$)/g, '');
+                // Generate slug
+                const slug = title
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/(^-|-$)/g, '');
+
+                // Get next sort order if not provided
+                let finalSortOrder = sort_order;
+                if (!finalSortOrder) {
+                    const existing = await sql`
+                        SELECT sort_order FROM modules
+                        WHERE course_id = ${course_id}
+                        ORDER BY sort_order DESC
+                        LIMIT 1
+                    `;
+                    finalSortOrder = existing.length ? existing[0].sort_order + 1 : 1;
                 }
 
-                // Get next sort order
-                if (!moduleData.sort_order) {
-                    const { data: existing } = await supabase
-                        .from('modules')
-                        .select('sort_order')
-                        .eq('course_id', moduleData.course_id)
-                        .order('sort_order', { ascending: false })
-                        .limit(1);
+                const newModules = await sql`
+                    INSERT INTO modules (course_id, slug, title, description, sort_order, is_published)
+                    VALUES (${course_id}, ${slug}, ${title}, ${description || null}, ${finalSortOrder}, ${is_published !== false})
+                    RETURNING *
+                `;
 
-                    moduleData.sort_order = existing?.length ? existing[0].sort_order + 1 : 1;
-                }
-
-                const { data, error } = await supabase
-                    .from('modules')
-                    .insert(moduleData)
-                    .select()
-                    .single();
-
-                if (error) throw error;
-                return { statusCode: 201, headers, body: JSON.stringify(data) };
+                return { statusCode: 201, headers, body: JSON.stringify(newModules[0]) };
             }
 
             if (action === 'update' && id) {
-                moduleData.updated_at = new Date().toISOString();
+                const updated = await sql`
+                    UPDATE modules
+                    SET title = COALESCE(${title}, title),
+                        description = COALESCE(${description}, description),
+                        sort_order = COALESCE(${sort_order}, sort_order),
+                        is_published = COALESCE(${is_published}, is_published)
+                    WHERE id = ${id}
+                    RETURNING *
+                `;
 
-                const { data, error } = await supabase
-                    .from('modules')
-                    .update(moduleData)
-                    .eq('id', id)
-                    .select()
-                    .single();
-
-                if (error) throw error;
-                return { statusCode: 200, headers, body: JSON.stringify(data) };
+                return { statusCode: 200, headers, body: JSON.stringify(updated[0]) };
             }
 
             if (action === 'delete' && id) {
-                const { error } = await supabase
-                    .from('modules')
-                    .delete()
-                    .eq('id', id);
-
-                if (error) throw error;
+                await sql`DELETE FROM modules WHERE id = ${id}`;
                 return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
             }
 

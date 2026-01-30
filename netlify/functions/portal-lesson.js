@@ -1,23 +1,27 @@
-const { createClient } = require('@supabase/supabase-js');
+// Portal lesson with Neon database
+const { neon } = require('@neondatabase/serverless');
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const sql = neon(process.env.DATABASE_URL);
 
 async function validateUserSession(authHeader) {
     if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
     const sessionToken = authHeader.replace('Bearer ', '');
 
-    const { data: session } = await supabase
-        .from('sessions')
-        .select('*, users(*)')
-        .eq('session_token', sessionToken)
-        .gt('expires_at', new Date().toISOString())
-        .not('user_id', 'is', null)
-        .single();
+    const sessions = await sql`
+        SELECT s.*, u.id as user_id, u.email, u.full_name
+        FROM sessions s
+        JOIN users u ON s.user_id = u.id
+        WHERE s.session_token = ${sessionToken}
+        AND s.expires_at > NOW()
+        AND s.user_id IS NOT NULL
+    `;
 
-    return session?.users || null;
+    if (sessions.length === 0) return null;
+    return {
+        id: sessions[0].user_id,
+        email: sessions[0].email,
+        full_name: sessions[0].full_name
+    };
 }
 
 exports.handler = async (event) => {
@@ -55,25 +59,16 @@ exports.handler = async (event) => {
         }
 
         // Get lesson with module and course info
-        const { data: lesson, error: lessonError } = await supabase
-            .from('lessons')
-            .select(`
-                *,
-                modules (
-                    id,
-                    title,
-                    course_id,
-                    courses (
-                        id,
-                        slug,
-                        title
-                    )
-                )
-            `)
-            .eq('id', id)
-            .single();
+        const lessons = await sql`
+            SELECT l.*, m.id as module_id, m.title as module_title, m.course_id,
+                   c.id as course_id, c.slug as course_slug, c.title as course_title
+            FROM lessons l
+            JOIN modules m ON l.module_id = m.id
+            JOIN courses c ON m.course_id = c.id
+            WHERE l.id = ${id}
+        `;
 
-        if (lessonError || !lesson) {
+        if (lessons.length === 0) {
             return {
                 statusCode: 404,
                 headers,
@@ -81,18 +76,18 @@ exports.handler = async (event) => {
             };
         }
 
-        const courseId = lesson.modules.course_id;
+        const lesson = lessons[0];
+        const courseId = lesson.course_id;
 
         // Check enrollment
-        const { data: enrollment } = await supabase
-            .from('enrollments')
-            .select('*')
-            .eq('user_id', user.id)
-            .eq('course_id', courseId)
-            .eq('status', 'active')
-            .single();
+        const enrollments = await sql`
+            SELECT * FROM enrollments
+            WHERE user_id = ${user.id}
+            AND course_id = ${courseId}
+            AND status = 'active'
+        `;
 
-        if (!enrollment) {
+        if (enrollments.length === 0) {
             return {
                 statusCode: 403,
                 headers,
@@ -100,33 +95,30 @@ exports.handler = async (event) => {
             };
         }
 
-        // Get or create lesson progress
-        let { data: progress } = await supabase
-            .from('lesson_progress')
-            .select('*')
-            .eq('user_id', user.id)
-            .eq('lesson_id', id)
-            .single();
+        const enrollment = enrollments[0];
 
-        if (!progress) {
-            const { data: newProgress } = await supabase
-                .from('lesson_progress')
-                .insert({
-                    user_id: user.id,
-                    lesson_id: id,
-                    enrollment_id: enrollment.id
-                })
-                .select()
-                .single();
-            progress = newProgress;
+        // Get or create lesson progress
+        let progress = await sql`
+            SELECT * FROM lesson_progress
+            WHERE user_id = ${user.id}
+            AND lesson_id = ${id}
+        `;
+
+        if (progress.length === 0) {
+            progress = await sql`
+                INSERT INTO lesson_progress (user_id, lesson_id)
+                VALUES (${user.id}, ${id})
+                RETURNING *
+            `;
         }
 
         // Get next and previous lessons
-        const { data: allLessons } = await supabase
-            .from('lessons')
-            .select('id, title, sort_order, module_id')
-            .eq('module_id', lesson.module_id)
-            .order('sort_order', { ascending: true });
+        const allLessons = await sql`
+            SELECT id, title, sort_order, module_id
+            FROM lessons
+            WHERE module_id = ${lesson.module_id}
+            ORDER BY sort_order ASC
+        `;
 
         const currentIndex = allLessons.findIndex(l => l.id === id);
         const prevLesson = currentIndex > 0 ? allLessons[currentIndex - 1] : null;
@@ -137,14 +129,27 @@ exports.handler = async (event) => {
             headers,
             body: JSON.stringify({
                 lesson: {
-                    ...lesson,
-                    course: lesson.modules.courses,
+                    id: lesson.id,
+                    slug: lesson.slug,
+                    title: lesson.title,
+                    description: lesson.description,
+                    video_url: lesson.video_url,
+                    video_id: lesson.video_id,
+                    duration_minutes: lesson.duration_minutes,
+                    content_html: lesson.content_html,
+                    is_preview: lesson.is_preview,
+                    sort_order: lesson.sort_order,
+                    course: {
+                        id: lesson.course_id,
+                        slug: lesson.course_slug,
+                        title: lesson.course_title
+                    },
                     module: {
-                        id: lesson.modules.id,
-                        title: lesson.modules.title
+                        id: lesson.module_id,
+                        title: lesson.module_title
                     }
                 },
-                progress,
+                progress: progress[0] || null,
                 navigation: {
                     prev: prevLesson,
                     next: nextLesson

@@ -1,23 +1,28 @@
-const { createClient } = require('@supabase/supabase-js');
+// Admin lessons with Neon database
+const { neon } = require('@neondatabase/serverless');
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const sql = neon(process.env.DATABASE_URL);
 
 async function validateAdminSession(authHeader) {
     if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
     const sessionToken = authHeader.replace('Bearer ', '');
 
-    const { data: session } = await supabase
-        .from('sessions')
-        .select('*, admin_users(*)')
-        .eq('session_token', sessionToken)
-        .gt('expires_at', new Date().toISOString())
-        .not('admin_id', 'is', null)
-        .single();
+    const sessions = await sql`
+        SELECT s.*, a.id as admin_id, a.email, a.full_name, a.role
+        FROM sessions s
+        JOIN admin_users a ON s.admin_id = a.id
+        WHERE s.session_token = ${sessionToken}
+        AND s.expires_at > NOW()
+        AND s.admin_id IS NOT NULL
+    `;
 
-    return session?.admin_users || null;
+    if (sessions.length === 0) return null;
+    return {
+        id: sessions[0].admin_id,
+        email: sessions[0].email,
+        full_name: sessions[0].full_name,
+        role: sessions[0].role
+    };
 }
 
 // Extract YouTube video ID from various URL formats
@@ -65,103 +70,112 @@ exports.handler = async (event) => {
             const params = event.queryStringParameters || {};
 
             if (params.id) {
-                const { data: lesson, error } = await supabase
-                    .from('lessons')
-                    .select('*, modules(title, course_id, courses(title))')
-                    .eq('id', params.id)
-                    .single();
+                const lessons = await sql`
+                    SELECT l.*, m.title as module_title, m.course_id, c.title as course_title
+                    FROM lessons l
+                    JOIN modules m ON l.module_id = m.id
+                    JOIN courses c ON m.course_id = c.id
+                    WHERE l.id = ${params.id}
+                `;
 
-                if (error) throw error;
+                if (lessons.length === 0) {
+                    return {
+                        statusCode: 404,
+                        headers,
+                        body: JSON.stringify({ error: 'Lesson not found' })
+                    };
+                }
+
+                const lesson = lessons[0];
+                lesson.modules = {
+                    title: lesson.module_title,
+                    course_id: lesson.course_id,
+                    courses: { title: lesson.course_title }
+                };
+
                 return { statusCode: 200, headers, body: JSON.stringify(lesson) };
             }
 
             if (params.moduleId) {
-                const { data: lessons, error } = await supabase
-                    .from('lessons')
-                    .select('*')
-                    .eq('module_id', params.moduleId)
-                    .order('sort_order', { ascending: true });
-
-                if (error) throw error;
+                const lessons = await sql`
+                    SELECT * FROM lessons
+                    WHERE module_id = ${params.moduleId}
+                    ORDER BY sort_order ASC
+                `;
                 return { statusCode: 200, headers, body: JSON.stringify(lessons) };
             }
 
             // Get all lessons with module info
-            const { data: lessons, error } = await supabase
-                .from('lessons')
-                .select('*, modules(title, course_id)')
-                .order('sort_order', { ascending: true });
+            const lessons = await sql`
+                SELECT l.*, m.title as module_title, m.course_id
+                FROM lessons l
+                JOIN modules m ON l.module_id = m.id
+                ORDER BY l.sort_order ASC
+            `;
 
-            if (error) throw error;
             return { statusCode: 200, headers, body: JSON.stringify(lessons) };
         }
 
         // POST - Create, update, or delete
         if (event.httpMethod === 'POST') {
             const body = JSON.parse(event.body);
-            const { action, id, ...lessonData } = body;
+            const { action, id, module_id, title, description, video_url, duration_minutes, content_html, is_preview, is_published, sort_order } = body;
 
             // Extract YouTube video ID if URL provided
-            if (lessonData.video_url) {
-                const videoId = extractYouTubeId(lessonData.video_url);
-                if (videoId) {
-                    lessonData.video_id = videoId;
-                    lessonData.video_provider = 'youtube';
-                }
+            let video_id = null;
+            if (video_url) {
+                video_id = extractYouTubeId(video_url);
             }
 
             if (action === 'create') {
-                // Generate slug if not provided
-                if (!lessonData.slug) {
-                    lessonData.slug = lessonData.title
-                        .toLowerCase()
-                        .replace(/[^a-z0-9]+/g, '-')
-                        .replace(/(^-|-$)/g, '');
+                // Generate slug
+                const slug = title
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/(^-|-$)/g, '');
+
+                // Get next sort order if not provided
+                let finalSortOrder = sort_order;
+                if (!finalSortOrder) {
+                    const existing = await sql`
+                        SELECT sort_order FROM lessons
+                        WHERE module_id = ${module_id}
+                        ORDER BY sort_order DESC
+                        LIMIT 1
+                    `;
+                    finalSortOrder = existing.length ? existing[0].sort_order + 1 : 1;
                 }
 
-                // Get next sort order
-                if (!lessonData.sort_order) {
-                    const { data: existing } = await supabase
-                        .from('lessons')
-                        .select('sort_order')
-                        .eq('module_id', lessonData.module_id)
-                        .order('sort_order', { ascending: false })
-                        .limit(1);
+                const newLessons = await sql`
+                    INSERT INTO lessons (module_id, slug, title, description, video_url, video_id, duration_minutes, content_html, is_preview, is_published, sort_order)
+                    VALUES (${module_id}, ${slug}, ${title}, ${description || null}, ${video_url || null}, ${video_id}, ${duration_minutes || 0}, ${content_html || null}, ${is_preview || false}, ${is_published !== false}, ${finalSortOrder})
+                    RETURNING *
+                `;
 
-                    lessonData.sort_order = existing?.length ? existing[0].sort_order + 1 : 1;
-                }
-
-                const { data, error } = await supabase
-                    .from('lessons')
-                    .insert(lessonData)
-                    .select()
-                    .single();
-
-                if (error) throw error;
-                return { statusCode: 201, headers, body: JSON.stringify(data) };
+                return { statusCode: 201, headers, body: JSON.stringify(newLessons[0]) };
             }
 
             if (action === 'update' && id) {
-                lessonData.updated_at = new Date().toISOString();
+                const updated = await sql`
+                    UPDATE lessons
+                    SET title = COALESCE(${title}, title),
+                        description = COALESCE(${description}, description),
+                        video_url = COALESCE(${video_url}, video_url),
+                        video_id = COALESCE(${video_id}, video_id),
+                        duration_minutes = COALESCE(${duration_minutes}, duration_minutes),
+                        content_html = COALESCE(${content_html}, content_html),
+                        is_preview = COALESCE(${is_preview}, is_preview),
+                        is_published = COALESCE(${is_published}, is_published),
+                        sort_order = COALESCE(${sort_order}, sort_order)
+                    WHERE id = ${id}
+                    RETURNING *
+                `;
 
-                const { data, error } = await supabase
-                    .from('lessons')
-                    .update(lessonData)
-                    .eq('id', id)
-                    .select()
-                    .single();
-
-                if (error) throw error;
-                return { statusCode: 200, headers, body: JSON.stringify(data) };
+                return { statusCode: 200, headers, body: JSON.stringify(updated[0]) };
             }
 
             if (action === 'delete' && id) {
-                const { error } = await supabase
-                    .from('lessons')
-                    .delete()
-                    .eq('id', id);
-
-                if (error) throw error;
+                await sql`DELETE FROM lessons WHERE id = ${id}`;
                 return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
             }
 

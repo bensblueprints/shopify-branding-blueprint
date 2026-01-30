@@ -1,23 +1,27 @@
-const { createClient } = require('@supabase/supabase-js');
+// Portal progress with Neon database
+const { neon } = require('@neondatabase/serverless');
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const sql = neon(process.env.DATABASE_URL);
 
 async function validateUserSession(authHeader) {
     if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
     const sessionToken = authHeader.replace('Bearer ', '');
 
-    const { data: session } = await supabase
-        .from('sessions')
-        .select('*, users(*)')
-        .eq('session_token', sessionToken)
-        .gt('expires_at', new Date().toISOString())
-        .not('user_id', 'is', null)
-        .single();
+    const sessions = await sql`
+        SELECT s.*, u.id as user_id, u.email, u.full_name
+        FROM sessions s
+        JOIN users u ON s.user_id = u.id
+        WHERE s.session_token = ${sessionToken}
+        AND s.expires_at > NOW()
+        AND s.user_id IS NOT NULL
+    `;
 
-    return session?.users || null;
+    if (sessions.length === 0) return null;
+    return {
+        id: sessions[0].user_id,
+        email: sessions[0].email,
+        full_name: sessions[0].full_name
+    };
 }
 
 exports.handler = async (event) => {
@@ -62,14 +66,15 @@ exports.handler = async (event) => {
             };
         }
 
-        // Get lesson to find enrollment
-        const { data: lesson } = await supabase
-            .from('lessons')
-            .select('*, modules(course_id)')
-            .eq('id', lessonId)
-            .single();
+        // Get lesson to find course
+        const lessons = await sql`
+            SELECT l.*, m.course_id
+            FROM lessons l
+            JOIN modules m ON l.module_id = m.id
+            WHERE l.id = ${lessonId}
+        `;
 
-        if (!lesson) {
+        if (lessons.length === 0) {
             return {
                 statusCode: 404,
                 headers,
@@ -77,16 +82,17 @@ exports.handler = async (event) => {
             };
         }
 
-        // Get enrollment
-        const { data: enrollment } = await supabase
-            .from('enrollments')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('course_id', lesson.modules.course_id)
-            .eq('status', 'active')
-            .single();
+        const lesson = lessons[0];
 
-        if (!enrollment) {
+        // Get enrollment
+        const enrollments = await sql`
+            SELECT id FROM enrollments
+            WHERE user_id = ${user.id}
+            AND course_id = ${lesson.course_id}
+            AND status = 'active'
+        `;
+
+        if (enrollments.length === 0) {
             return {
                 statusCode: 403,
                 headers,
@@ -94,49 +100,71 @@ exports.handler = async (event) => {
             };
         }
 
-        // Build update data
-        const updateData = {
-            updated_at: new Date().toISOString()
-        };
+        // Check if progress exists
+        const existingProgress = await sql`
+            SELECT * FROM lesson_progress
+            WHERE user_id = ${user.id}
+            AND lesson_id = ${lessonId}
+        `;
 
-        if (typeof progress_percent === 'number') {
-            updateData.progress_percent = Math.min(100, Math.max(0, progress_percent));
+        let progress;
+
+        if (existingProgress.length > 0) {
+            // Update existing progress
+            const updates = [];
+            const values = [];
+
+            if (typeof progress_percent === 'number') {
+                const clampedPercent = Math.min(100, Math.max(0, progress_percent));
+                progress = await sql`
+                    UPDATE lesson_progress
+                    SET progress_percent = ${clampedPercent}
+                    WHERE user_id = ${user.id} AND lesson_id = ${lessonId}
+                    RETURNING *
+                `;
+            }
+
+            if (is_completed === true) {
+                progress = await sql`
+                    UPDATE lesson_progress
+                    SET is_completed = true, completed_at = NOW(), progress_percent = 100
+                    WHERE user_id = ${user.id} AND lesson_id = ${lessonId}
+                    RETURNING *
+                `;
+            } else if (progress_percent !== undefined) {
+                const clampedPercent = Math.min(100, Math.max(0, progress_percent));
+                progress = await sql`
+                    UPDATE lesson_progress
+                    SET progress_percent = ${clampedPercent}
+                    WHERE user_id = ${user.id} AND lesson_id = ${lessonId}
+                    RETURNING *
+                `;
+            } else {
+                progress = existingProgress;
+            }
+        } else {
+            // Insert new progress
+            const clampedPercent = typeof progress_percent === 'number'
+                ? Math.min(100, Math.max(0, progress_percent))
+                : 0;
+
+            progress = await sql`
+                INSERT INTO lesson_progress (user_id, lesson_id, progress_percent, is_completed, completed_at)
+                VALUES (
+                    ${user.id},
+                    ${lessonId},
+                    ${is_completed ? 100 : clampedPercent},
+                    ${is_completed || false},
+                    ${is_completed ? new Date().toISOString() : null}
+                )
+                RETURNING *
+            `;
         }
-
-        if (typeof watch_time_seconds === 'number') {
-            updateData.watch_time_seconds = watch_time_seconds;
-        }
-
-        if (typeof last_position_seconds === 'number') {
-            updateData.last_position_seconds = last_position_seconds;
-        }
-
-        if (is_completed === true) {
-            updateData.is_completed = true;
-            updateData.completed_at = new Date().toISOString();
-            updateData.progress_percent = 100;
-        }
-
-        // Upsert progress
-        const { data: progress, error } = await supabase
-            .from('lesson_progress')
-            .upsert({
-                user_id: user.id,
-                lesson_id: lessonId,
-                enrollment_id: enrollment.id,
-                ...updateData
-            }, {
-                onConflict: 'user_id,lesson_id'
-            })
-            .select()
-            .single();
-
-        if (error) throw error;
 
         return {
             statusCode: 200,
             headers,
-            body: JSON.stringify({ success: true, progress })
+            body: JSON.stringify({ success: true, progress: progress[0] || progress })
         };
 
     } catch (error) {

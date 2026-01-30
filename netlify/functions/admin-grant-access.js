@@ -1,5 +1,29 @@
-// Admin Grant Course Access
-const { createClient } = require('@supabase/supabase-js');
+// Admin Grant Course Access with Neon database
+const { neon } = require('@neondatabase/serverless');
+
+const sql = neon(process.env.DATABASE_URL);
+
+async function validateAdminSession(authHeader) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+    const sessionToken = authHeader.replace('Bearer ', '');
+
+    const sessions = await sql`
+        SELECT s.*, a.id as admin_id, a.email, a.full_name, a.role
+        FROM sessions s
+        JOIN admin_users a ON s.admin_id = a.id
+        WHERE s.session_token = ${sessionToken}
+        AND s.expires_at > NOW()
+        AND s.admin_id IS NOT NULL
+    `;
+
+    if (sessions.length === 0) return null;
+    return {
+        id: sessions[0].admin_id,
+        email: sessions[0].email,
+        full_name: sessions[0].full_name,
+        role: sessions[0].role
+    };
+}
 
 exports.handler = async (event) => {
     const headers = {
@@ -17,28 +41,11 @@ exports.handler = async (event) => {
     }
 
     try {
-        // Verify admin session from Authorization header
-        const authHeader = event.headers.authorization;
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        const authHeader = event.headers.authorization || event.headers.Authorization;
+        const admin = await validateAdminSession(authHeader);
+
+        if (!admin) {
             return { statusCode: 401, headers, body: JSON.stringify({ error: 'Unauthorized' }) };
-        }
-
-        const token = authHeader.substring(7);
-        const supabase = createClient(
-            process.env.SUPABASE_URL,
-            process.env.SUPABASE_SERVICE_ROLE_KEY
-        );
-
-        // Verify admin session
-        const { data: session, error: sessionError } = await supabase
-            .from('admin_sessions')
-            .select('*, admins(*)')
-            .eq('token', token)
-            .gt('expires_at', new Date().toISOString())
-            .single();
-
-        if (sessionError || !session) {
-            return { statusCode: 401, headers, body: JSON.stringify({ error: 'Invalid or expired session' }) };
         }
 
         const { userId, courseId } = JSON.parse(event.body);
@@ -48,34 +55,24 @@ exports.handler = async (event) => {
         }
 
         // Check if enrollment already exists
-        const { data: existing } = await supabase
-            .from('enrollments')
-            .select('id')
-            .eq('user_id', userId)
-            .eq('course_id', courseId)
-            .single();
+        const existing = await sql`
+            SELECT id FROM enrollments
+            WHERE user_id = ${userId} AND course_id = ${courseId}
+        `;
 
-        if (existing) {
+        if (existing.length > 0) {
             // Update existing enrollment to active
-            await supabase
-                .from('enrollments')
-                .update({ status: 'active', updated_at: new Date().toISOString() })
-                .eq('id', existing.id);
+            await sql`
+                UPDATE enrollments
+                SET status = 'active'
+                WHERE id = ${existing[0].id}
+            `;
         } else {
             // Create new enrollment
-            const { error: insertError } = await supabase
-                .from('enrollments')
-                .insert({
-                    user_id: userId,
-                    course_id: courseId,
-                    status: 'active',
-                    enrolled_at: new Date().toISOString(),
-                    granted_by: session.admin_id
-                });
-
-            if (insertError) {
-                throw insertError;
-            }
+            await sql`
+                INSERT INTO enrollments (user_id, course_id, status)
+                VALUES (${userId}, ${courseId}, 'active')
+            `;
         }
 
         return {

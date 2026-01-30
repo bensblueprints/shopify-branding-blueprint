@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resources & Add-ons | Shopify Branding Blueprint</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/portal.css">
+    <script src="https://checkout.airwallex.com/assets/elements.bundle.min.js"></script>
+    <style>
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .resource-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .resource-card.purchased {
+            border-color: var(--success);
+        }
+
+        .resource-header {
+            padding: 24px;
+            background: linear-gradient(135deg, rgba(201, 169, 98, 0.1), transparent);
+        }
+
+        .resource-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .badge-download { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .badge-course { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+        .badge-membership { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+        .badge-purchased { background: rgba(34, 197, 94, 0.3); color: #22c55e; }
+
+        .resource-title {
+            font-family: 'Instrument Serif', serif;
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .resource-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .resource-price .original {
+            font-size: 1rem;
+            color: var(--text-muted);
+            text-decoration: line-through;
+            margin-left: 8px;
+            font-weight: 400;
+        }
+
+        .resource-price small {
+            font-size: 0.875rem;
+            font-weight: 400;
+            color: var(--text-secondary);
+        }
+
+        .resource-body {
+            padding: 0 24px 24px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .resource-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .resource-features {
+            list-style: none;
+            margin-bottom: 24px;
+            flex: 1;
+        }
+
+        .resource-features li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .resource-features li::before {
+            content: "✓";
+            color: var(--gold);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .resource-actions {
+            margin-top: auto;
+        }
+
+        .btn-purchase {
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-purchase:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(201, 169, 98, 0.3);
+        }
+
+        .btn-purchase:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-access {
+            width: 100%;
+            padding: 14px 24px;
+            background: var(--success);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-access:hover {
+            transform: translateY(-2px);
+        }
+
+        .section-header {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-family: 'Instrument Serif', serif;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            color: var(--gold);
+        }
+
+        .purchased-section {
+            margin-bottom: 48px;
+        }
+
+        .empty-purchased {
+            background: var(--bg-card);
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            max-width: 480px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-family: 'Instrument Serif', serif;
+            font-size: 1.5rem;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn-secondary {
+            padding: 12px 24px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="portal-header">
+        <a href="/portal/" class="portal-logo">Shopify Branding Blueprint</a>
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+        <nav class="portal-nav" id="portalNav">
+            <a href="/portal/">My Courses</a>
+            <a href="/portal/resources.html" class="active">Resources & Downloads</a>
+            <div class="user-menu">
+                <span id="userName" style="color: var(--text-secondary); font-size: 0.875rem;"></span>
+                <a href="#" onclick="handleLogout()" style="color: var(--gold);">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="portal-container">
+        <div class="page-header">
+            <h1 class="page-title">Resources & Add-ons</h1>
+            <p class="page-subtitle">Boost your brand-building with premium resources</p>
+        </div>
+
+        <!-- Free Worksheets Section -->
+        <div class="purchased-section">
+            <div class="section-header">
+                <h2 class="section-title" style="display: flex; align-items: center; gap: 12px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Free Course Worksheets
+                </h2>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">Printable worksheets included with your course</p>
+            </div>
+            <div class="resources-grid">
+                <div class="resource-card purchased" style="border-color: var(--gold);">
+                    <div class="resource-header">
+                        <span class="resource-badge badge-download">Printable PDF</span>
+                        <h3 class="resource-title">3-Year Brand Vision Worksheet</h3>
+                    </div>
+                    <div class="resource-body">
+                        <p class="resource-description">Define your brand vision, metrics, and success criteria with this comprehensive planning worksheet.</p>
+                        <ul class="resource-features">
+                            <li>Vision statement exercises</li>
+                            <li>Goal-setting framework</li>
+                            <li>Success metrics tracker</li>
+                        </ul>
+                        <div class="resource-actions">
+                            <a href="/downloads/brand-vision-worksheet.html" target="_blank" class="btn-access">
+                                Download Worksheet
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="resource-card purchased" style="border-color: var(--gold);">
+                    <div class="resource-header">
+                        <span class="resource-badge badge-download">Printable PDF</span>
+                        <h3 class="resource-title">Brand Story Template</h3>
+                    </div>
+                    <div class="resource-body">
+                        <p class="resource-description">Craft your compelling brand narrative using our proven storytelling framework.</p>
+                        <ul class="resource-features">
+                            <li>Story framework guide</li>
+                            <li>Building blocks template</li>
+                            <li>Short versions for social</li>
+                        </ul>
+                        <div class="resource-actions">
+                            <a href="/downloads/brand-story-template.html" target="_blank" class="btn-access">
+                                Download Template
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="resource-card purchased" style="border-color: var(--gold);">
+                    <div class="resource-header">
+                        <span class="resource-badge badge-download">Printable PDF</span>
+                        <h3 class="resource-title">Pre-Launch Checklist</h3>
+                    </div>
+                    <div class="resource-body">
+                        <p class="resource-description">Everything you need to verify before going live with your store.</p>
+                        <ul class="resource-features">
+                            <li>Critical items checklist</li>
+                            <li>Priority-coded tasks</li>
+                            <li>Final review guide</li>
+                        </ul>
+                        <div class="resource-actions">
+                            <a href="/downloads/pre-launch-checklist.html" target="_blank" class="btn-access">
+                                Download Checklist
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="resource-card purchased" style="border-color: var(--gold);">
+                    <div class="resource-header">
+                        <span class="resource-badge badge-download">Printable PDF</span>
+                        <h3 class="resource-title">30-Day Launch Plan</h3>
+                    </div>
+                    <div class="resource-body">
+                        <p class="resource-description">Your step-by-step roadmap to launch your brand in 30 days.</p>
+                        <ul class="resource-features">
+                            <li>Day-by-day action items</li>
+                            <li>Weekly focus areas</li>
+                            <li>Progress tracking</li>
+                        </ul>
+                        <div class="resource-actions">
+                            <a href="/downloads/30-day-launch-plan.html" target="_blank" class="btn-access">
+                                Download Plan
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Purchased Resources Section -->
+        <div id="purchasedSection" class="purchased-section" style="display: none;">
+            <div class="section-header">
+                <h2 class="section-title">Your Premium Resources</h2>
+            </div>
+            <div id="purchasedGrid" class="resources-grid"></div>
+        </div>
+
+        <!-- Available Resources Section -->
+        <div id="availableSection">
+            <div class="section-header">
+                <h2 class="section-title">Available Add-ons</h2>
+            </div>
+            <div id="resourcesGrid" class="resources-grid">
+                <div class="loading"><div class="spinner"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Purchase Modal -->
+    <div id="purchaseModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Complete Your Purchase</h3>
+            </div>
+            <div class="modal-body">
+                <div id="modalProductInfo"></div>
+                <div id="paymentForm" style="margin-top: 20px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn-purchase" id="confirmPurchaseBtn" onclick="processPurchase()">
+                    Pay Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        // Check auth
+        if (!auth.requireAuth()) {
+            // Redirected to login
+        }
+
+        // Set user name
+        const userData = auth.getUserData();
+        if (userData) {
+            document.getElementById('userName').textContent = userData.full_name || userData.email;
+        }
+
+        let selectedProduct = null;
+
+        async function loadResources() {
+            try {
+                const token = auth.getSessionToken();
+                console.log('Loading resources with token:', token ? 'present' : 'missing');
+
+                const response = await fetch('/.netlify/functions/portal-upsells', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                console.log('Response status:', response.status);
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error('API Error:', errorData);
+                    throw new Error(errorData.error || 'Failed to load resources');
+                }
+
+                const data = await response.json();
+                console.log('Loaded upsells:', data.upsells?.length || 0);
+                renderResources(data.upsells || []);
+            } catch (error) {
+                console.error('Failed to load resources:', error);
+                document.getElementById('resourcesGrid').innerHTML = `
+                    <div class="alert alert-error">
+                        Failed to load premium add-ons: ${error.message}.
+                        <a href="#" onclick="loadResources(); return false;" style="color: var(--gold);">Try again</a>
+                    </div>
+                `;
+            }
+        }
+
+        function renderResources(upsells) {
+            const purchased = upsells.filter(u => u.is_purchased);
+            const available = upsells.filter(u => !u.is_purchased);
+
+            // Render purchased resources
+            if (purchased.length > 0) {
+                document.getElementById('purchasedSection').style.display = 'block';
+                document.getElementById('purchasedGrid').innerHTML = purchased.map(renderPurchasedCard).join('');
+            }
+
+            // Render available resources
+            if (available.length > 0) {
+                document.getElementById('resourcesGrid').innerHTML = available.map(renderResourceCard).join('');
+            } else {
+                document.getElementById('resourcesGrid').innerHTML = `
+                    <div class="empty-purchased">
+                        <p>You've unlocked all available resources! 🎉</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderResourceCard(product) {
+            const badgeClass = product.product_type === 'download' ? 'badge-download' :
+                             product.product_type === 'course' ? 'badge-course' : 'badge-membership';
+            const badgeText = product.product_type === 'download' ? 'Digital Download' :
+                            product.product_type === 'course' ? 'Video Course' : 'Membership';
+            const features = product.features || [];
+
+            return `
+                <div class="resource-card">
+                    <div class="resource-header">
+                        <span class="resource-badge ${badgeClass}">${badgeText}</span>
+                        <h3 class="resource-title">${product.name}</h3>
+                        <div class="resource-price">
+                            $${(product.price || 0).toFixed(2)}
+                            ${product.is_recurring ? '<small>/month</small>' : ''}
+                        </div>
+                    </div>
+                    <div class="resource-body">
+                        <p class="resource-description">${product.description || ''}</p>
+                        ${features.length > 0 ? `
+                            <ul class="resource-features">
+                                ${features.map(f => `<li>${f}</li>`).join('')}
+                            </ul>
+                        ` : ''}
+                        <div class="resource-actions">
+                            <button class="btn-purchase" onclick="openPurchaseModal('${product.id}', '${encodeURIComponent(product.name)}', ${product.price_cents || 0})">
+                                Get Access
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPurchasedCard(product) {
+            const badgeClass = product.product_type === 'download' ? 'badge-download' :
+                             product.product_type === 'course' ? 'badge-course' : 'badge-membership';
+
+            return `
+                <div class="resource-card purchased">
+                    <div class="resource-header">
+                        <span class="resource-badge badge-purchased">✓ Purchased</span>
+                        <h3 class="resource-title">${product.name}</h3>
+                    </div>
+                    <div class="resource-body">
+                        <p class="resource-description">${product.description || ''}</p>
+                        <div class="resource-actions">
+                            <button class="btn-access" onclick="accessProduct('${product.product_key}', '${product.download_url || ''}')">
+                                ${product.product_type === 'download' ? 'Download Now' :
+                                  product.product_type === 'membership' ? 'Access Community' : 'Start Learning'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openPurchaseModal(productId, productName, priceCents) {
+            selectedProduct = { id: productId, name: decodeURIComponent(productName), price: priceCents };
+
+            document.getElementById('modalProductInfo').innerHTML = `
+                <div style="background: var(--bg-input); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                    <div style="font-weight: 600; margin-bottom: 4px;">${selectedProduct.name}</div>
+                    <div style="font-size: 1.25rem; color: var(--gold); font-weight: 700;">
+                        $${(priceCents / 100).toFixed(2)}
+                    </div>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                    You'll be redirected to complete payment securely.
+                </p>
+            `;
+
+            document.getElementById('purchaseModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('purchaseModal').classList.remove('active');
+            selectedProduct = null;
+        }
+
+        async function processPurchase() {
+            if (!selectedProduct) return;
+
+            const btn = document.getElementById('confirmPurchaseBtn');
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+
+            try {
+                const response = await fetch('/.netlify/functions/create-upsell-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${auth.getSessionToken()}`
+                    },
+                    body: JSON.stringify({
+                        product_id: selectedProduct.id
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    btn.disabled = false;
+                    btn.textContent = 'Pay Now';
+                    return;
+                }
+
+                if (data.intentId && data.clientSecret) {
+                    // Initialize Airwallex and redirect to payment page
+                    const env = data.env === 'prod' ? 'prod' : 'demo';
+
+                    Airwallex.init({
+                        env: env,
+                        origin: window.location.origin
+                    });
+
+                    // Redirect to Airwallex hosted payment page
+                    Airwallex.redirectToCheckout({
+                        env: env,
+                        intent_id: data.intentId,
+                        client_secret: data.clientSecret,
+                        currency: 'USD',
+                        successUrl: data.successUrl,
+                        failUrl: data.failUrl
+                    });
+                } else {
+                    alert('Failed to create payment. Please try again.');
+                    btn.disabled = false;
+                    btn.textContent = 'Pay Now';
+                }
+            } catch (error) {
+                console.error('Purchase error:', error);
+                alert('Failed to process purchase. Please try again.');
+                btn.disabled = false;
+                btn.textContent = 'Pay Now';
+            }
+        }
+
+        function accessProduct(productKey, downloadUrl) {
+            // If download URL is provided, use it
+            if (downloadUrl) {
+                window.open(downloadUrl, '_blank');
+                return;
+            }
+
+            // Handle access to different product types
+            switch(productKey) {
+                case 'canva_kit':
+                    window.open('/downloads/canva-brand-kit.zip', '_blank');
+                    break;
+                case 'email_swipe':
+                    window.open('/downloads/email-swipe-file.zip', '_blank');
+                    break;
+                case 'seo_checklist':
+                    window.open('/downloads/seo-checklist.html', '_blank');
+                    break;
+                case 'fb_ads':
+                    window.location.href = '/portal/course.html?slug=facebook-ads-masterclass';
+                    break;
+                case 'inner_circle':
+                    window.open('https://discord.gg/your-invite-link', '_blank');
+                    break;
+                default:
+                    alert('Resource access coming soon!');
+            }
+        }
+
+        function handleLogout() {
+            auth.logout();
+            window.location.href = '/portal/login.html';
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('portalNav').classList.toggle('active');
+        }
+
+        // Load resources on page load
+        loadResources();
+    </script>
+</body>
+</html>

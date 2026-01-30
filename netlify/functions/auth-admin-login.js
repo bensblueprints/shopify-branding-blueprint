@@ -1,11 +1,9 @@
-const { createClient } = require('@supabase/supabase-js');
+// Admin login with Neon database
+const { neon } = require('@neondatabase/serverless');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const sql = neon(process.env.DATABASE_URL);
 
 exports.handler = async (event) => {
     const headers = {
@@ -40,14 +38,12 @@ exports.handler = async (event) => {
         const normalizedEmail = email.toLowerCase().trim();
 
         // Get admin user
-        const { data: admin, error: adminError } = await supabase
-            .from('admin_users')
-            .select('*')
-            .eq('email', normalizedEmail)
-            .eq('is_active', true)
-            .single();
+        const admins = await sql`
+            SELECT * FROM admin_users
+            WHERE email = ${normalizedEmail} AND is_active = true
+        `;
 
-        if (adminError || !admin) {
+        if (admins.length === 0) {
             return {
                 statusCode: 401,
                 headers,
@@ -55,14 +51,17 @@ exports.handler = async (event) => {
             };
         }
 
+        const admin = admins[0];
+
         // Check if password is set
         if (!admin.password_hash) {
             // First login - set the password
             const hashedPassword = await bcrypt.hash(password, 10);
-            await supabase
-                .from('admin_users')
-                .update({ password_hash: hashedPassword })
-                .eq('id', admin.id);
+            await sql`
+                UPDATE admin_users
+                SET password_hash = ${hashedPassword}
+                WHERE id = ${admin.id}
+            `;
         } else {
             // Verify password
             const validPassword = await bcrypt.compare(password, admin.password_hash);
@@ -76,22 +75,25 @@ exports.handler = async (event) => {
         }
 
         // Update last login
-        await supabase
-            .from('admin_users')
-            .update({ last_login_at: new Date().toISOString() })
-            .eq('id', admin.id);
+        await sql`
+            UPDATE admin_users
+            SET last_login_at = NOW()
+            WHERE id = ${admin.id}
+        `;
 
         // Create session
         const sessionToken = crypto.randomBytes(32).toString('hex');
         const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-        await supabase.from('sessions').insert({
-            admin_id: admin.id,
-            session_token: sessionToken,
-            expires_at: expiresAt.toISOString(),
-            ip_address: event.headers['x-forwarded-for'] || event.headers['client-ip'],
-            user_agent: event.headers['user-agent']
-        });
+        // Get first IP from forwarded list
+        const rawIp = event.headers['x-forwarded-for'] || event.headers['client-ip'] || '';
+        const ipAddress = rawIp.split(',')[0].trim().substring(0, 100);
+        const userAgent = (event.headers['user-agent'] || '').substring(0, 500);
+
+        await sql`
+            INSERT INTO sessions (admin_id, session_token, expires_at, ip_address, user_agent)
+            VALUES (${admin.id}, ${sessionToken}, ${expiresAt.toISOString()}, ${ipAddress}, ${userAgent})
+        `;
 
         return {
             statusCode: 200,
@@ -113,7 +115,7 @@ exports.handler = async (event) => {
         return {
             statusCode: 500,
             headers,
-            body: JSON.stringify({ error: 'Login failed' })
+            body: JSON.stringify({ error: 'Login failed: ' + error.message })
         };
     }
 };

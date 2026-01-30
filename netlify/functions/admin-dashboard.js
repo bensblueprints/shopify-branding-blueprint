@@ -1,23 +1,23 @@
-const { createClient } = require('@supabase/supabase-js');
+// Admin dashboard with Neon database
+const { neon } = require('@neondatabase/serverless');
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const sql = neon(process.env.DATABASE_URL);
 
 async function validateAdminSession(authHeader) {
     if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
     const sessionToken = authHeader.replace('Bearer ', '');
 
-    const { data: session } = await supabase
-        .from('sessions')
-        .select('*, admin_users(*)')
-        .eq('session_token', sessionToken)
-        .gt('expires_at', new Date().toISOString())
-        .not('admin_id', 'is', null)
-        .single();
+    const sessions = await sql`
+        SELECT s.*, a.id as admin_id, a.email, a.full_name, a.role
+        FROM sessions s
+        JOIN admin_users a ON s.admin_id = a.id
+        WHERE s.session_token = ${sessionToken}
+        AND s.expires_at > NOW()
+        AND s.admin_id IS NOT NULL
+    `;
 
-    return session?.admin_users || null;
+    if (sessions.length === 0) return null;
+    return sessions[0];
 }
 
 exports.handler = async (event) => {
@@ -44,48 +44,46 @@ exports.handler = async (event) => {
 
     try {
         // Get counts
-        const [
-            { count: totalUsers },
-            { count: totalCourses },
-            { count: totalLessons },
-            { count: totalPurchases },
-            { data: recentPurchases },
-            { data: recentUsers }
-        ] = await Promise.all([
-            supabase.from('users').select('*', { count: 'exact', head: true }),
-            supabase.from('courses').select('*', { count: 'exact', head: true }),
-            supabase.from('lessons').select('*', { count: 'exact', head: true }),
-            supabase.from('purchases').select('*', { count: 'exact', head: true }),
-            supabase
-                .from('purchases')
-                .select('*, users(email, full_name), products(name)')
-                .order('purchased_at', { ascending: false })
-                .limit(5),
-            supabase
-                .from('users')
-                .select('id, email, full_name, created_at')
-                .order('created_at', { ascending: false })
-                .limit(5)
-        ]);
+        const [userCount] = await sql`SELECT COUNT(*) as count FROM users`;
+        const [courseCount] = await sql`SELECT COUNT(*) as count FROM courses`;
+        const [lessonCount] = await sql`SELECT COUNT(*) as count FROM lessons`;
+        const [purchaseCount] = await sql`SELECT COUNT(*) as count FROM purchases`;
 
-        // Calculate revenue
-        const { data: revenueData } = await supabase
-            .from('purchases')
-            .select('amount_cents')
-            .eq('status', 'completed');
+        // Get revenue
+        const [revenueData] = await sql`
+            SELECT COALESCE(SUM(amount_cents), 0) as total
+            FROM purchases
+            WHERE status = 'completed'
+        `;
 
-        const totalRevenue = (revenueData || []).reduce((sum, p) => sum + p.amount_cents, 0);
+        // Recent purchases
+        const recentPurchases = await sql`
+            SELECT p.*, u.email, u.full_name, pr.name as product_name
+            FROM purchases p
+            LEFT JOIN users u ON p.user_id = u.id
+            LEFT JOIN products pr ON p.product_id = pr.id
+            ORDER BY p.purchased_at DESC
+            LIMIT 5
+        `;
+
+        // Recent users
+        const recentUsers = await sql`
+            SELECT id, email, full_name, created_at
+            FROM users
+            ORDER BY created_at DESC
+            LIMIT 5
+        `;
 
         return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
                 stats: {
-                    totalUsers: totalUsers || 0,
-                    totalCourses: totalCourses || 0,
-                    totalLessons: totalLessons || 0,
-                    totalPurchases: totalPurchases || 0,
-                    totalRevenue: totalRevenue / 100
+                    totalUsers: parseInt(userCount.count) || 0,
+                    totalCourses: parseInt(courseCount.count) || 0,
+                    totalLessons: parseInt(lessonCount.count) || 0,
+                    totalPurchases: parseInt(purchaseCount.count) || 0,
+                    totalRevenue: (parseInt(revenueData.total) || 0) / 100
                 },
                 recentPurchases: recentPurchases || [],
                 recentUsers: recentUsers || []
@@ -97,7 +95,7 @@ exports.handler = async (event) => {
         return {
             statusCode: 500,
             headers,
-            body: JSON.stringify({ error: 'Failed to load dashboard' })
+            body: JSON.stringify({ error: 'Failed to load dashboard: ' + error.message })
         };
     }
 };

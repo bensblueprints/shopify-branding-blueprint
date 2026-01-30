@@ -180,6 +180,19 @@ const adminAPI = {
             method: 'POST',
             body: JSON.stringify({ currentPassword, newPassword })
         });
+    },
+
+    // Get all products
+    async getProducts() {
+        return apiFetch('/.netlify/functions/admin-products');
+    },
+
+    // Grant product access to a user
+    async grantProductAccess(userId, productId) {
+        return apiFetch('/.netlify/functions/admin-grant-product', {
+            method: 'POST',
+            body: JSON.stringify({ userId, productId })
+        });
     }
 };
 

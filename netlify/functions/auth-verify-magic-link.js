@@ -1,10 +1,8 @@
-const { createClient } = require('@supabase/supabase-js');
+// Magic link verification with Neon database (deprecated - use password login instead)
+const { neon } = require('@neondatabase/serverless');
 const crypto = require('crypto');
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const sql = neon(process.env.DATABASE_URL);
 
 exports.handler = async (event) => {
     const headers = {
@@ -39,22 +37,23 @@ exports.handler = async (event) => {
         const normalizedEmail = email.toLowerCase().trim();
 
         // Find the token
-        const { data: authToken, error: tokenError } = await supabase
-            .from('auth_tokens')
-            .select('*')
-            .eq('token', token)
-            .eq('email', normalizedEmail)
-            .eq('token_type', 'magic_link')
-            .is('used_at', null)
-            .single();
+        const authTokens = await sql`
+            SELECT * FROM auth_tokens
+            WHERE token = ${token}
+            AND email = ${normalizedEmail}
+            AND token_type = 'magic_link'
+            AND used_at IS NULL
+        `;
 
-        if (tokenError || !authToken) {
+        if (authTokens.length === 0) {
             return {
                 statusCode: 400,
                 headers,
                 body: JSON.stringify({ error: 'Invalid or expired link' })
             };
         }
+
+        const authToken = authTokens[0];
 
         // Check if token is expired
         if (new Date(authToken.expires_at) < new Date()) {
@@ -66,19 +65,16 @@ exports.handler = async (event) => {
         }
 
         // Mark token as used
-        await supabase
-            .from('auth_tokens')
-            .update({ used_at: new Date().toISOString() })
-            .eq('id', authToken.id);
+        await sql`
+            UPDATE auth_tokens SET used_at = NOW() WHERE id = ${authToken.id}
+        `;
 
         // Get user
-        const { data: user, error: userError } = await supabase
-            .from('users')
-            .select('id, email, full_name, avatar_url')
-            .eq('id', authToken.user_id)
-            .single();
+        const users = await sql`
+            SELECT id, email, full_name, avatar_url FROM users WHERE id = ${authToken.user_id}
+        `;
 
-        if (userError || !user) {
+        if (users.length === 0) {
             return {
                 statusCode: 400,
                 headers,
@@ -86,26 +82,26 @@ exports.handler = async (event) => {
             };
         }
 
-        // Update user's email_verified and last_login
-        await supabase
-            .from('users')
-            .update({
-                email_verified: true,
-                last_login_at: new Date().toISOString()
-            })
-            .eq('id', user.id);
+        const user = users[0];
+
+        // Update user's last_login
+        await sql`
+            UPDATE users SET last_login_at = NOW() WHERE id = ${user.id}
+        `;
 
         // Create session
         const sessionToken = crypto.randomBytes(32).toString('hex');
         const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
-        await supabase.from('sessions').insert({
-            user_id: user.id,
-            session_token: sessionToken,
-            expires_at: expiresAt.toISOString(),
-            ip_address: event.headers['x-forwarded-for'] || event.headers['client-ip'],
-            user_agent: event.headers['user-agent']
-        });
+        // Get first IP from forwarded list
+        const rawIp = event.headers['x-forwarded-for'] || event.headers['client-ip'] || '';
+        const ipAddress = rawIp.split(',')[0].trim().substring(0, 100);
+        const userAgent = (event.headers['user-agent'] || '').substring(0, 500);
+
+        await sql`
+            INSERT INTO sessions (user_id, session_token, expires_at, ip_address, user_agent)
+            VALUES (${user.id}, ${sessionToken}, ${expiresAt.toISOString()}, ${ipAddress}, ${userAgent})
+        `;
 
         return {
             statusCode: 200,

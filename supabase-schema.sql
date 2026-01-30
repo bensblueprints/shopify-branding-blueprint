@@ -23,20 +23,42 @@ CREATE TABLE admin_users (
 );
 
 -- =============================================
--- USERS (CUSTOMERS) TABLE
--- Customers who purchased courses
+-- USERS TABLE
+-- Users who can log into the portal
 -- =============================================
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email VARCHAR(255) UNIQUE NOT NULL,
     full_name VARCHAR(255),
     stripe_customer_id VARCHAR(255),
+    airwallex_customer_id VARCHAR(255),
     ghl_contact_id VARCHAR(255),
     avatar_url TEXT,
     auth_provider VARCHAR(50) DEFAULT 'magic_link',
     password_hash VARCHAR(255),
     email_verified BOOLEAN DEFAULT false,
     last_login_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- =============================================
+-- CUSTOMERS TABLE
+-- Records of all purchases (created by webhooks)
+-- =============================================
+CREATE TABLE customers (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    full_name VARCHAR(255),
+    payment_provider VARCHAR(50),
+    payment_id VARCHAR(255),
+    order_id VARCHAR(255),
+    amount_paid DECIMAL(10,2),
+    currency VARCHAR(10) DEFAULT 'USD',
+    products_purchased TEXT[] DEFAULT '{}',
+    stripe_customer_id VARCHAR(255),
+    airwallex_customer_id VARCHAR(255),
+    airwallex_payment_consent_id VARCHAR(255),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -225,6 +247,8 @@ CREATE TABLE sessions (
 -- =============================================
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_stripe_customer ON users(stripe_customer_id);
+CREATE INDEX idx_customers_email ON customers(email);
+CREATE INDEX idx_customers_airwallex ON customers(airwallex_customer_id);
 CREATE INDEX idx_purchases_user ON purchases(user_id);
 CREATE INDEX idx_purchases_stripe_session ON purchases(stripe_checkout_session_id);
 CREATE INDEX idx_enrollments_user ON enrollments(user_id);
@@ -318,11 +342,13 @@ INSERT INTO products (product_key, name, description, price_cents, compare_price
 ('inner_circle', 'Brand Builders Inner Circle', 'Monthly coaching and community access', 4700, 9700, 'subscription', true, '{"ghl_tag": "purchased_inner_circle", "recurring_interval": "month"}');
 
 -- =============================================
--- SEED DATA: Admin User
+-- SEED DATA: Admin Users
 -- Password will be set on first login
 -- =============================================
 INSERT INTO admin_users (email, full_name, role) VALUES
-('admin@advancedmarketing.co', 'Admin', 'super_admin');
+('admin@advancedmarketing.co', 'Admin', 'super_admin'),
+('ben@justfeatured.com', 'Ben', 'super_admin')
+ON CONFLICT (email) DO NOTHING;
 
 -- =============================================
 -- SEED DATA: Main Course
