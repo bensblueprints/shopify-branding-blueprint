@@ -59,6 +59,39 @@
         </div>
     </div>
 
+    <!-- Grant Course Access Modal -->
+    <div class="modal-overlay" id="grantAccessModal">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Grant Course Access</h3>
+                <button class="modal-close" onclick="closeGrantAccessModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 16px; color: var(--text-secondary);">Select a course to grant access to this customer:</p>
+                <div id="coursesList" style="margin-bottom: 20px;">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+                <div id="grantAccessMessage" style="display: none;"></div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button class="btn btn-secondary" onclick="closeGrantAccessModal()">Cancel</button>
+                    <button class="btn btn-primary" id="grantAccessBtn" onclick="grantCourseAccess()" disabled>Grant Access</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Reset Confirmation Modal -->
+    <div class="modal-overlay" id="passwordResetModal">
+        <div class="modal" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Password Reset</h3>
+                <button class="modal-close" onclick="closePasswordResetModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="passwordResetContent">
+            </div>
+        </div>
+    </div>
+
     <script src="../js/auth.js"></script>
     <script src="../js/api.js"></script>
     <script>
@@ -159,6 +192,9 @@
             try {
                 const customer = await api.admin.getCustomer(id);
 
+                // Store current customer for actions
+                window.currentCustomer = customer;
+
                 document.getElementById('customerDetail').innerHTML = `
                     <div style="margin-bottom: 24px;">
                         <h4 style="color: var(--text-secondary); margin-bottom: 8px; font-size: 0.875rem; text-transform: uppercase;">Customer Info</h4>
@@ -167,6 +203,22 @@
                         <p><strong>Stripe ID:</strong> ${customer.stripe_customer_id || 'N/A'}</p>
                         <p><strong>Joined:</strong> ${new Date(customer.created_at).toLocaleString()}</p>
                         <p><strong>Last Login:</strong> ${customer.last_login_at ? new Date(customer.last_login_at).toLocaleString() : 'Never'}</p>
+                    </div>
+
+                    <!-- Admin Actions -->
+                    <div style="margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn btn-secondary" onclick="openGrantAccessModal('${customer.id}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 16px; height: 16px; margin-right: 6px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                            Grant Course Access
+                        </button>
+                        <button class="btn btn-secondary" onclick="sendPasswordReset('${customer.email}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 16px; height: 16px; margin-right: 6px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                            </svg>
+                            Reset Password
+                        </button>
                     </div>
 
                     <div style="margin-bottom: 24px;">
@@ -217,6 +269,125 @@
         function handleLogout() {
             auth.logout();
             window.location.href = '/admin/login.html';
+        }
+
+        // Grant Course Access Functions
+        let selectedCourseId = null;
+        let currentCustomerId = null;
+
+        async function openGrantAccessModal(customerId) {
+            currentCustomerId = customerId;
+            selectedCourseId = null;
+            document.getElementById('grantAccessModal').classList.add('active');
+            document.getElementById('grantAccessBtn').disabled = true;
+            document.getElementById('grantAccessMessage').style.display = 'none';
+
+            try {
+                const courses = await api.admin.getCourses();
+                renderCoursesList(courses);
+            } catch (error) {
+                document.getElementById('coursesList').innerHTML = '<div class="alert alert-error">Failed to load courses</div>';
+            }
+        }
+
+        function renderCoursesList(courses) {
+            const container = document.getElementById('coursesList');
+
+            if (!courses.length) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No courses available</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    ${courses.map(course => `
+                        <label class="course-option" style="display: flex; align-items: center; padding: 12px 16px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                            <input type="radio" name="course" value="${course.id}" onchange="selectCourse('${course.id}')" style="margin-right: 12px;">
+                            <div>
+                                <div style="font-weight: 500;">${course.title}</div>
+                                <div style="font-size: 0.875rem; color: var(--text-muted);">${course.modules_count || 0} modules</div>
+                            </div>
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function selectCourse(courseId) {
+            selectedCourseId = courseId;
+            document.getElementById('grantAccessBtn').disabled = false;
+        }
+
+        async function grantCourseAccess() {
+            if (!selectedCourseId || !currentCustomerId) return;
+
+            const btn = document.getElementById('grantAccessBtn');
+            const messageEl = document.getElementById('grantAccessMessage');
+            btn.disabled = true;
+            btn.textContent = 'Granting...';
+
+            try {
+                await api.admin.grantCourseAccess(currentCustomerId, selectedCourseId);
+
+                messageEl.className = 'alert alert-success';
+                messageEl.textContent = 'Course access granted successfully!';
+                messageEl.style.display = 'block';
+
+                setTimeout(() => {
+                    closeGrantAccessModal();
+                    viewCustomer(currentCustomerId); // Refresh customer details
+                }, 1500);
+            } catch (error) {
+                messageEl.className = 'alert alert-error';
+                messageEl.textContent = error.message || 'Failed to grant access';
+                messageEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Grant Access';
+            }
+        }
+
+        function closeGrantAccessModal() {
+            document.getElementById('grantAccessModal').classList.remove('active');
+        }
+
+        // Password Reset Functions
+        async function sendPasswordReset(email) {
+            const modal = document.getElementById('passwordResetModal');
+            const content = document.getElementById('passwordResetContent');
+
+            modal.classList.add('active');
+            content.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+            try {
+                await api.admin.sendPasswordReset(email);
+
+                content.innerHTML = `
+                    <div class="alert alert-success" style="margin-bottom: 16px;">
+                        Password reset email sent to <strong>${email}</strong>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                        The customer will receive an email with instructions to reset their password.
+                    </p>
+                    <button class="btn btn-primary" onclick="closePasswordResetModal()" style="width: 100%;">Done</button>
+                `;
+            } catch (error) {
+                content.innerHTML = `
+                    <div class="alert alert-error" style="margin-bottom: 16px;">
+                        Failed to send password reset email
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                        ${error.message || 'Please try again later.'}
+                    </p>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-secondary" onclick="closePasswordResetModal()" style="flex: 1;">Cancel</button>
+                        <button class="btn btn-primary" onclick="sendPasswordReset('${email}')" style="flex: 1;">Retry</button>
+                    </div>
+                `;
+            }
+        }
+
+        function closePasswordResetModal() {
+            document.getElementById('passwordResetModal').classList.remove('active');
         }
     </script>
 </body>

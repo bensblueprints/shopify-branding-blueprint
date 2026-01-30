@@ -156,6 +156,30 @@ const adminAPI = {
             method: 'POST',
             body: JSON.stringify({ action: 'revoke_access', userId, courseId })
         });
+    },
+
+    // Grant course access to a user
+    async grantCourseAccess(userId, courseId) {
+        return apiFetch('/.netlify/functions/admin-grant-access', {
+            method: 'POST',
+            body: JSON.stringify({ userId, courseId })
+        });
+    },
+
+    // Send password reset email
+    async sendPasswordReset(email) {
+        return apiFetch('/.netlify/functions/admin-password-reset', {
+            method: 'POST',
+            body: JSON.stringify({ email })
+        });
+    },
+
+    // Change admin password
+    async changeAdminPassword(currentPassword, newPassword) {
+        return apiFetch('/.netlify/functions/admin-change-password', {
+            method: 'POST',
+            body: JSON.stringify({ currentPassword, newPassword })
+        });
     }
 };
 
@@ -205,6 +229,14 @@ const portalAPI = {
         return apiFetch('/.netlify/functions/portal-profile', {
             method: 'POST',
             body: JSON.stringify(data)
+        });
+    },
+
+    // Change password
+    async changePassword(currentPassword, newPassword) {
+        return apiFetch('/.netlify/functions/portal-change-password', {
+            method: 'POST',
+            body: JSON.stringify({ currentPassword, newPassword })
         });
     }
 };
