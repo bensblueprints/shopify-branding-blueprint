@@ -117,23 +117,19 @@ exports.handler = async (event) => {
             };
         }
 
-        // Construct the hosted checkout URL
-        const checkoutDomain = process.env.AIRWALLEX_ENV === 'production'
-            ? 'https://checkout.airwallex.com'
-            : 'https://checkout-demo.airwallex.com';
-
-        const checkoutUrl = `${checkoutDomain}/pay/${piResult.id}?client_secret=${encodeURIComponent(piResult.client_secret)}&mode=payment&successUrl=${encodeURIComponent(siteUrl + '/thank-you.html?provider=airwallex&order_id=' + orderId)}&failUrl=${encodeURIComponent(siteUrl + '/?payment=failed')}`;
-
-        // Return the checkout URL for redirect
+        // Return data for frontend SDK redirect
         return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
                 success: true,
-                checkoutUrl: checkoutUrl,
-                paymentIntentId: piResult.id,
+                intentId: piResult.id,
+                clientSecret: piResult.client_secret,
+                currency: 'USD',
                 orderId: orderId,
-                env: process.env.AIRWALLEX_ENV || 'demo'
+                env: process.env.AIRWALLEX_ENV === 'production' ? 'prod' : 'demo',
+                successUrl: `${siteUrl}/thank-you.html?provider=airwallex&order_id=${orderId}`,
+                failUrl: `${siteUrl}/?payment=failed`
             })
         };
 
