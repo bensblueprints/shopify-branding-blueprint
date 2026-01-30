@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products | Admin Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/admin.css">
+    <style>
+        .product-grid {
+            display: grid;
+            gap: 20px;
+        }
+        .product-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        .product-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        .product-price {
+            font-size: 1.25rem;
+            color: var(--gold);
+            font-weight: 600;
+        }
+        .product-type {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 8px;
+        }
+        .product-type.membership {
+            background: rgba(168, 85, 247, 0.2);
+            color: #a855f7;
+        }
+        .product-type.digital_download {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+        .download-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+        .download-section h4 {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .download-info {
+            background: rgba(0,0,0,0.2);
+            padding: 16px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .download-info .filename {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        .download-info .filesize {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+        .download-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .no-download {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .upload-form {
+            margin-top: 12px;
+        }
+        .upload-form input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        .upload-form input[type="text"]:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.875rem;
+        }
+        .product-description {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+        .product-features {
+            margin-top: 12px;
+        }
+        .product-features li {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 4px;
+            padding-left: 20px;
+            position: relative;
+        }
+        .product-features li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--gold);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+        }
+        .modal-header {
+            margin-bottom: 24px;
+        }
+        .modal-header h3 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 8px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .modal-actions .btn {
+            flex: 1;
+        }
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        .alert-success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+        .alert-error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <h2>Blueprint</h2>
+                <span>Admin Portal</span>
+            </div>
+            <nav>
+                <ul class="sidebar-nav">
+                    <li>
+                        <a href="/admin/">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/products.html" class="active">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                            </svg>
+                            Products
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/courses.html">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                            Courses
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/customers.html">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            Customers
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="handleLogout()">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Products</h1>
+                    <p class="page-subtitle">Manage your digital products and downloads</p>
+                </div>
+            </div>
+
+            <div id="alertContainer"></div>
+
+            <div class="product-grid" id="productsGrid">
+                <div class="loading"><div class="spinner"></div></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Download Modal -->
+    <div class="modal" id="downloadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Set Download File</h3>
+            </div>
+            <form id="downloadForm">
+                <input type="hidden" id="productId">
+                <div class="form-group">
+                    <label for="downloadUrl">Download URL</label>
+                    <input type="url" id="downloadUrl" placeholder="https://example.com/file.zip" required>
+                    <small style="color: var(--text-muted); display: block; margin-top: 4px;">
+                        Upload your file to Google Drive, Dropbox, or any hosting service and paste the direct download link
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label for="downloadFilename">Filename</label>
+                    <input type="text" id="downloadFilename" placeholder="product-file.zip" required>
+                </div>
+                <div class="form-group">
+                    <label for="downloadSize">File Size (optional)</label>
+                    <input type="text" id="downloadSize" placeholder="2.5 MB">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Download</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        // Check auth
+        if (!auth.requireAdmin()) {
+            // Redirected to login
+        }
+
+        let products = [];
+
+        // Load products
+        async function loadProducts() {
+            try {
+                const response = await fetch('/.netlify/functions/admin-products', {
+                    headers: {
+                        'Authorization': 'Bearer ' + auth.getAdminToken()
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to load products');
+
+                const data = await response.json();
+                products = data.products;
+                renderProducts();
+            } catch (error) {
+                console.error('Error loading products:', error);
+                document.getElementById('productsGrid').innerHTML =
+                    '<div class="alert alert-error">Failed to load products</div>';
+            }
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+
+            if (products.length === 0) {
+                grid.innerHTML = '<div class="empty-state"><p>No products found</p></div>';
+                return;
+            }
+
+            grid.innerHTML = products.map(product => `
+                <div class="product-card">
+                    <div class="product-header">
+                        <div>
+                            <h3 class="product-title">${product.name || product.title}</h3>
+                            <span class="product-type ${product.product_type}">${formatProductType(product.product_type)}</span>
+                        </div>
+                        <div class="product-price">$${(product.price_cents / 100).toFixed(2)}</div>
+                    </div>
+
+                    ${product.body_html ? `<p class="product-description">${stripHtml(product.body_html).substring(0, 150)}...</p>` : ''}
+
+                    ${product.features && product.features.length ? `
+                        <ul class="product-features">
+                            ${product.features.slice(0, 4).map(f => `<li>${f}</li>`).join('')}
+                        </ul>
+                    ` : ''}
+
+                    ${product.product_type === 'digital_download' ? `
+                        <div class="download-section">
+                            <h4>Downloadable File</h4>
+                            ${product.download_url ? `
+                                <div class="download-info">
+                                    <div>
+                                        <div class="filename">${product.download_filename || 'Download file'}</div>
+                                        ${product.download_size ? `<div class="filesize">${product.download_size}</div>` : ''}
+                                    </div>
+                                    <div class="download-actions">
+                                        <a href="${product.download_url}" target="_blank" class="btn btn-secondary btn-small">View</a>
+                                        <button class="btn btn-primary btn-small" onclick="openDownloadModal('${product.id}')">Edit</button>
+                                    </div>
+                                </div>
+                            ` : `
+                                <p class="no-download">No download file set</p>
+                                <button class="btn btn-primary btn-small" style="margin-top: 8px;" onclick="openDownloadModal('${product.id}')">
+                                    Add Download File
+                                </button>
+                            `}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function formatProductType(type) {
+            if (type === 'membership') return 'Membership';
+            if (type === 'digital_download') return 'Digital Download';
+            return type || 'Unknown';
+        }
+
+        function stripHtml(html) {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || '';
+        }
+
+        function openDownloadModal(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            document.getElementById('productId').value = productId;
+            document.getElementById('downloadUrl').value = product.download_url || '';
+            document.getElementById('downloadFilename').value = product.download_filename || '';
+            document.getElementById('downloadSize').value = product.download_size || '';
+
+            document.getElementById('downloadModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('downloadModal').classList.remove('active');
+        }
+
+        // Handle form submission
+        document.getElementById('downloadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const productId = document.getElementById('productId').value;
+            const downloadUrl = document.getElementById('downloadUrl').value;
+            const downloadFilename = document.getElementById('downloadFilename').value;
+            const downloadSize = document.getElementById('downloadSize').value;
+
+            try {
+                const response = await fetch('/.netlify/functions/admin-products', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + auth.getAdminToken()
+                    },
+                    body: JSON.stringify({
+                        id: productId,
+                        download_url: downloadUrl,
+                        download_filename: downloadFilename,
+                        download_size: downloadSize
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to update product');
+
+                showAlert('Download file updated successfully', 'success');
+                closeModal();
+                loadProducts();
+            } catch (error) {
+                showAlert('Failed to update product: ' + error.message, 'error');
+            }
+        });
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => container.innerHTML = '', 5000);
+        }
+
+        function handleLogout() {
+            auth.logout();
+            window.location.href = '/admin/login.html';
+        }
+
+        // Initialize
+        loadProducts();
+    </script>
+</body>
+</html>
