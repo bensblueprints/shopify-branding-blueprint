@@ -115,24 +115,40 @@ exports.handler = async (event) => {
                     .replace(/[^a-z0-9]+/g, '-')
                     .replace(/(^-|-$)/g, '');
 
+                // Note: Using actual columns from courses table
                 const newCourses = await sql`
-                    INSERT INTO courses (slug, title, subtitle, description, thumbnail_url, price_cents, is_published)
-                    VALUES (${slug}, ${title}, ${subtitle || null}, ${description || null}, ${thumbnail_url || null}, ${price_cents || 0}, ${is_published || false})
+                    INSERT INTO courses (id, slug, title, description, thumbnail_url, status, created_at, updated_at)
+                    VALUES (gen_random_uuid(), ${slug}, ${title}, ${description || null}, ${thumbnail_url || null}, 'ACTIVE', NOW(), NOW())
                     RETURNING *
                 `;
 
-                return { statusCode: 201, headers, body: JSON.stringify(newCourses[0]) };
+                const newCourse = newCourses[0];
+
+                // AUTO-ENROLL ben@justfeatured.com in new courses
+                try {
+                    const benUsers = await sql`SELECT id FROM users WHERE email = 'ben@justfeatured.com'`;
+                    if (benUsers.length > 0) {
+                        await sql`
+                            INSERT INTO enrollments (id, user_id, course_id, status, enrolled_at)
+                            VALUES (gen_random_uuid(), ${benUsers[0].id}::uuid, ${newCourse.id}, 'active', NOW())
+                            ON CONFLICT (user_id, course_id) DO UPDATE SET status = 'active'
+                        `;
+                        console.log('Auto-enrolled ben@justfeatured.com in new course:', newCourse.title);
+                    }
+                } catch (enrollError) {
+                    console.error('Failed to auto-enroll ben:', enrollError.message);
+                }
+
+                return { statusCode: 201, headers, body: JSON.stringify(newCourse) };
             }
 
             if (action === 'update' && id) {
+                // Note: Using actual columns from courses table
                 const updated = await sql`
                     UPDATE courses
                     SET title = COALESCE(${title}, title),
-                        subtitle = COALESCE(${subtitle}, subtitle),
                         description = COALESCE(${description}, description),
                         thumbnail_url = COALESCE(${thumbnail_url}, thumbnail_url),
-                        price_cents = COALESCE(${price_cents}, price_cents),
-                        is_published = COALESCE(${is_published}, is_published),
                         updated_at = NOW()
                     WHERE id = ${id}
                     RETURNING *
