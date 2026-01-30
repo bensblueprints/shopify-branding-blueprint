@@ -3,9 +3,9 @@ const crypto = require('crypto');
 
 const CRYPTOMUS_API_URL = 'https://api.cryptomus.com/v1/payment';
 
-function generateSign(data, apiKey) {
-    const jsonData = JSON.stringify(data);
-    const base64Data = Buffer.from(jsonData).toString('base64');
+function generateSign(jsonBody, apiKey) {
+    // Sign = MD5(base64(json_body) + api_key)
+    const base64Data = Buffer.from(jsonBody).toString('base64');
     return crypto.createHash('md5').update(base64Data + apiKey).digest('hex');
 }
 
@@ -61,14 +61,20 @@ exports.handler = async (event) => {
             url_return: `${siteUrl}/thank-you.html?provider=cryptomus&order_id=${orderId}`,
             url_callback: `${siteUrl}/.netlify/functions/cryptomus-webhook`,
             is_payment_multiple: false,
-            lifetime: 3600, // 1 hour
+            lifetime: 3600,
             additional_data: JSON.stringify({
                 email: email,
                 product: 'main_course'
             })
         };
 
-        const sign = generateSign(paymentData, apiKey);
+        // Create JSON body string first, then use it for both signing and sending
+        const jsonBody = JSON.stringify(paymentData);
+        const sign = generateSign(jsonBody, apiKey);
+
+        console.log('Cryptomus request - Merchant UUID:', merchantUuid);
+        console.log('Cryptomus request - API Key (first 8 chars):', apiKey.substring(0, 8));
+        console.log('Cryptomus request - Order ID:', orderId);
 
         const response = await fetch(CRYPTOMUS_API_URL, {
             method: 'POST',
@@ -77,17 +83,21 @@ exports.handler = async (event) => {
                 'merchant': merchantUuid,
                 'sign': sign
             },
-            body: JSON.stringify(paymentData)
+            body: jsonBody
         });
 
         const result = await response.json();
 
-        if (!response.ok) {
-            console.error('Cryptomus API error:', result);
+        if (!response.ok || result.state !== 0) {
+            console.error('Cryptomus API error:', JSON.stringify(result));
+            console.error('Cryptomus response status:', response.status);
             return {
                 statusCode: 500,
                 headers,
-                body: JSON.stringify({ error: result.message || 'Failed to create crypto payment' })
+                body: JSON.stringify({
+                    error: result.message || 'Failed to create crypto payment',
+                    details: result
+                })
             };
         }
 

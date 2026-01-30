@@ -29,15 +29,15 @@ exports.handler = async (event) => {
             process.env.SUPABASE_SERVICE_ROLE_KEY
         );
 
-        // Verify admin session
+        // Verify admin session (auth-admin-login saves to 'sessions' table with 'session_token' field)
         const { data: session, error: sessionError } = await supabase
-            .from('admin_sessions')
-            .select('*, admins(*)')
-            .eq('token', token)
+            .from('sessions')
+            .select('*')
+            .eq('session_token', token)
             .gt('expires_at', new Date().toISOString())
             .single();
 
-        if (sessionError || !session) {
+        if (sessionError || !session || !session.admin_id) {
             return { statusCode: 401, headers, body: JSON.stringify({ error: 'Invalid or expired session' }) };
         }
 
@@ -53,7 +53,7 @@ exports.handler = async (event) => {
 
         // Verify current password
         const { data: admin } = await supabase
-            .from('admins')
+            .from('admin_users')
             .select('password_hash')
             .eq('id', session.admin_id)
             .single();
@@ -68,7 +68,7 @@ exports.handler = async (event) => {
 
         // Update password
         await supabase
-            .from('admins')
+            .from('admin_users')
             .update({
                 password_hash: newPasswordHash,
                 updated_at: new Date().toISOString()

@@ -29,11 +29,11 @@ exports.handler = async (event) => {
             process.env.SUPABASE_SERVICE_ROLE_KEY
         );
 
-        // Verify user session
+        // Verify user session (auth-verify-magic-link saves to 'sessions' with 'session_token' field)
         const { data: session, error: sessionError } = await supabase
             .from('sessions')
             .select('*, users(*)')
-            .eq('token', token)
+            .eq('session_token', token)
             .gt('expires_at', new Date().toISOString())
             .single();
 
