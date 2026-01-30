@@ -1,4 +1,8 @@
 // Admin modules with Neon database
+//
+// ⚠️  IMPORTANT: Module deletion is BLOCKED via API.
+// ⚠️  Modules can ONLY be deleted manually from the admin dashboard.
+//
 const { neon } = require('@neondatabase/serverless');
 
 const sql = neon(process.env.DATABASE_URL);
@@ -118,9 +122,23 @@ exports.handler = async (event) => {
                 return { statusCode: 200, headers, body: JSON.stringify(updated[0]) };
             }
 
+            // DELETE ACTION - BLOCKED
+            // Modules can ONLY be deleted manually from admin dashboard
             if (action === 'delete' && id) {
-                await sql`DELETE FROM modules WHERE id = ${id}`;
-                return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
+                console.error('🚫 BLOCKED: Module deletion attempt via API');
+                console.error('Module ID:', id);
+                console.error('Admin:', admin.email);
+
+                return {
+                    statusCode: 403,
+                    headers,
+                    body: JSON.stringify({
+                        error: 'Module deletion is not permitted via API',
+                        message: 'Modules can only be deleted manually from the admin dashboard. ' +
+                                 'Use "is_published: false" to hide a module instead.',
+                        blocked: true
+                    })
+                };
             }
 
             return {

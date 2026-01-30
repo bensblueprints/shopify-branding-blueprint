@@ -1,22 +1,34 @@
 /**
- * USER PROTECTION UTILITY
+ * DATA PROTECTION UTILITY
  * =======================
  *
  * CRITICAL: This file contains safeguards to prevent accidental or
- * programmatic deletion of users from the database.
+ * programmatic deletion of important data from the database.
  *
- * Users can ONLY be deleted manually from the admin dashboard by Ben.
- * No automated process, webhook, or API should ever delete a user.
+ * PROTECTED DATA includes:
+ * - Users, customers, admin_users (user accounts)
+ * - Courses, modules, lessons (course content)
  *
- * If you need to remove a user's access, use SOFT DELETE methods:
- * - Set status to 'DISABLED'
- * - Revoke enrollments
- * - Clear sessions
+ * All protected data can ONLY be deleted manually from the admin dashboard by Ben.
+ * No automated process, webhook, or API should ever delete this data.
  *
- * NEVER DELETE USER RECORDS PROGRAMMATICALLY.
+ * If you need to "remove" content, use SOFT DELETE methods:
+ * - For users: Set status to 'DISABLED'
+ * - For courses/modules/lessons: Set is_published to false
+ * - Revoke enrollments instead of deleting
+ * - Clear sessions instead of deleting users
+ *
+ * NEVER DELETE PROTECTED RECORDS PROGRAMMATICALLY.
  */
 
-const PROTECTED_TABLES = ['users', 'customers', 'admin_users'];
+// User tables - NEVER delete
+const PROTECTED_USER_TABLES = ['users', 'customers', 'admin_users'];
+
+// Course content tables - NEVER delete via API
+const PROTECTED_CONTENT_TABLES = ['courses', 'modules', 'lessons'];
+
+// All protected tables combined
+const PROTECTED_TABLES = [...PROTECTED_USER_TABLES, ...PROTECTED_CONTENT_TABLES];
 
 /**
  * Validates that a SQL query does not contain user deletion commands

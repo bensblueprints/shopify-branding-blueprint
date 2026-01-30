@@ -1,4 +1,8 @@
 // Admin courses with Neon database
+//
+// ⚠️  IMPORTANT: Course deletion is BLOCKED via API.
+// ⚠️  Courses can ONLY be deleted manually from the admin dashboard.
+//
 const { neon } = require('@neondatabase/serverless');
 
 const sql = neon(process.env.DATABASE_URL);
@@ -137,9 +141,23 @@ exports.handler = async (event) => {
                 return { statusCode: 200, headers, body: JSON.stringify(updated[0]) };
             }
 
+            // DELETE ACTION - BLOCKED
+            // Courses can ONLY be deleted manually from admin dashboard
             if (action === 'delete' && id) {
-                await sql`DELETE FROM courses WHERE id = ${id}`;
-                return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
+                console.error('🚫 BLOCKED: Course deletion attempt via API');
+                console.error('Course ID:', id);
+                console.error('Admin:', admin.email);
+
+                return {
+                    statusCode: 403,
+                    headers,
+                    body: JSON.stringify({
+                        error: 'Course deletion is not permitted via API',
+                        message: 'Courses can only be deleted manually from the admin dashboard. ' +
+                                 'Use "is_published: false" to hide a course instead.',
+                        blocked: true
+                    })
+                };
             }
 
             return {

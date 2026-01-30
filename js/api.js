@@ -1,4 +1,9 @@
 // API Helper Functions
+//
+// ⚠️  IMPORTANT: Delete operations for courses, modules, lessons, and users
+// are BLOCKED at the API level. They will return 403 Forbidden.
+// Content can only be deleted manually from the admin dashboard.
+//
 
 // Base fetch with authentication
 async function apiFetch(endpoint, options = {}) {
@@ -72,7 +77,9 @@ const adminAPI = {
         });
     },
 
+    // ⚠️ DELETION BLOCKED - Courses can only be deleted from admin dashboard
     async deleteCourse(id) {
+        console.warn('⚠️ Course deletion is blocked via API. Use admin dashboard for deletion.');
         return apiFetch('/.netlify/functions/admin-courses', {
             method: 'POST',
             body: JSON.stringify({ action: 'delete', id })
@@ -98,7 +105,9 @@ const adminAPI = {
         });
     },
 
+    // ⚠️ DELETION BLOCKED - Modules can only be deleted from admin dashboard
     async deleteModule(id) {
+        console.warn('⚠️ Module deletion is blocked via API. Use admin dashboard for deletion.');
         return apiFetch('/.netlify/functions/admin-modules', {
             method: 'POST',
             body: JSON.stringify({ action: 'delete', id })
@@ -128,7 +137,9 @@ const adminAPI = {
         });
     },
 
+    // ⚠️ DELETION BLOCKED - Lessons can only be deleted from admin dashboard
     async deleteLesson(id) {
+        console.warn('⚠️ Lesson deletion is blocked via API. Use admin dashboard for deletion.');
         return apiFetch('/.netlify/functions/admin-lessons', {
             method: 'POST',
             body: JSON.stringify({ action: 'delete', id })
