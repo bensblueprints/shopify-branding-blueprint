@@ -1279,7 +1279,7 @@
             });
         });
 
-        // Checkout with Stripe
+        // Checkout with Airwallex
         document.getElementById('checkout-btn').addEventListener('click', async (e) => {
             e.preventDefault();
 
@@ -1297,7 +1297,7 @@
             btn.style.pointerEvents = 'none';
 
             try {
-                const response = await fetch('/.netlify/functions/create-stripe-checkout', {
+                const response = await fetch('/.netlify/functions/create-payment', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1310,9 +1310,16 @@
 
                 const data = await response.json();
 
-                if (data.url) {
-                    // Redirect to Stripe checkout
-                    window.location.href = data.url;
+                if (data.success && data.intentId) {
+                    // Load Airwallex SDK
+                    if (!window.AirwallexComponentsSDK) {
+                        const script = document.createElement('script');
+                        script.src = 'https://static.airwallex.com/components/sdk/v1/index.js';
+                        script.onload = () => initAirwallexCheckout(data);
+                        document.head.appendChild(script);
+                    } else {
+                        await initAirwallexCheckout(data);
+                    }
                 } else {
                     throw new Error(data.error || 'Failed to create checkout');
                 }
@@ -1323,6 +1330,30 @@
                 btn.style.pointerEvents = 'auto';
             }
         });
+
+        async function initAirwallexCheckout(data) {
+            const env = data.env === 'prod' ? 'prod' : 'demo';
+            try {
+                const { payments } = await window.AirwallexComponentsSDK.init({
+                    env: env,
+                    enabledElements: ['payments']
+                });
+
+                await payments.redirectToCheckout({
+                    env: env,
+                    mode: 'payment',
+                    intent_id: data.intentId,
+                    client_secret: data.clientSecret,
+                    currency: 'USD',
+                    country_code: 'US',
+                    successUrl: data.successUrl,
+                    failUrl: data.failUrl
+                });
+            } catch (sdkError) {
+                console.error('Airwallex SDK error:', sdkError);
+                alert('Failed to initialize payment. Please try again.');
+            }
+        }
     </script>
 </body>
 </html>
