@@ -307,25 +307,19 @@
             border-top: 1px solid var(--border-subtle);
             border-bottom: 1px solid var(--border-subtle);
             padding: 40px 0;
-            overflow: hidden;
         }
 
         .proof-scroll {
             display: flex;
-            gap: 60px;
-            animation: scroll 30s linear infinite;
-        }
-
-        @keyframes scroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
+            justify-content: center;
+            gap: 48px;
+            flex-wrap: wrap;
         }
 
         .proof-item {
             display: flex;
             align-items: center;
-            gap: 16px;
-            white-space: nowrap;
+            gap: 12px;
             color: var(--text-muted);
             font-size: 14px;
         }
@@ -1339,7 +1333,7 @@
 
         .exit-popup-header {
             background: linear-gradient(135deg, #e74c3c, #c0392b);
-            padding: 20px 24px;
+            padding: 16px 20px;
             text-align: center;
             position: relative;
         }
@@ -1362,7 +1356,7 @@
 
         .exit-popup-header h2 {
             font-family: 'Instrument Serif', serif;
-            font-size: 28px;
+            font-size: 24px;
             color: white;
             margin: 0;
             position: relative;
@@ -1394,26 +1388,26 @@
         }
 
         .exit-popup-body {
-            padding: 32px;
+            padding: 24px 28px 28px;
             text-align: center;
         }
 
         .exit-timer-container {
             background: var(--bg-tertiary);
             border: 1px solid var(--red-accent);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 24px;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
             animation: urgentPulse 2s infinite;
         }
 
         .exit-timer-label {
-            font-size: 14px;
+            font-size: 12px;
             color: var(--red-accent);
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 2px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .exit-timer {
@@ -1424,13 +1418,13 @@
 
         .exit-timer-unit {
             background: var(--bg-primary);
-            border-radius: 12px;
-            padding: 12px 16px;
-            min-width: 70px;
+            border-radius: 10px;
+            padding: 10px 14px;
+            min-width: 60px;
         }
 
         .exit-timer-number {
-            font-size: 36px;
+            font-size: 32px;
             font-weight: 700;
             color: var(--red-accent);
             line-height: 1;
@@ -1449,19 +1443,19 @@
             display: inline-block;
             background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
             color: var(--bg-primary);
-            padding: 6px 16px;
+            padding: 5px 14px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .exit-popup-title {
             font-family: 'Instrument Serif', serif;
-            font-size: 32px;
-            margin-bottom: 8px;
+            font-size: 28px;
+            margin-bottom: 6px;
             color: var(--text-primary);
         }
 
@@ -1471,52 +1465,52 @@
         }
 
         .exit-popup-subtitle {
-            font-size: 16px;
+            font-size: 14px;
             color: var(--text-secondary);
-            margin-bottom: 24px;
+            margin-bottom: 16px;
         }
 
         .exit-price-container {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 16px;
-            margin-bottom: 24px;
+            gap: 12px;
+            margin-bottom: 16px;
         }
 
         .exit-price-old {
-            font-size: 28px;
+            font-size: 24px;
             color: var(--text-muted);
             text-decoration: line-through;
         }
 
         .exit-price-new {
-            font-size: 56px;
+            font-size: 48px;
             font-weight: 700;
             color: var(--green-accent);
         }
 
         .exit-price-new sup {
-            font-size: 24px;
+            font-size: 20px;
             vertical-align: super;
         }
 
         .exit-savings {
             background: rgba(39, 174, 96, 0.15);
             color: var(--green-accent);
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
             font-weight: 600;
         }
 
         .exit-form {
-            margin-top: 24px;
+            margin-top: 16px;
         }
 
         .exit-email-input {
             width: 100%;
-            padding: 16px 20px;
+            padding: 14px 16px;
             border: 2px solid var(--border-subtle);
             border-radius: 12px;
             background: var(--bg-tertiary);
@@ -1538,12 +1532,12 @@
 
         .exit-cta-button {
             width: 100%;
-            padding: 18px 24px;
+            padding: 14px 20px;
             background: linear-gradient(135deg, var(--green-accent), #219a52);
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             color: white;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -1575,11 +1569,11 @@
         }
 
         .exit-no-thanks {
-            margin-top: 16px;
+            margin-top: 12px;
             background: none;
             border: none;
             color: var(--text-muted);
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             text-decoration: underline;
             transition: color 0.3s ease;
@@ -1593,9 +1587,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            margin-top: 20px;
-            font-size: 13px;
+            gap: 6px;
+            margin-top: 14px;
+            font-size: 12px;
             color: var(--text-secondary);
         }
 
@@ -1704,15 +1698,13 @@
 
     <!-- Social Proof Strip -->
     <div class="social-proof-strip">
-        <div class="proof-scroll">
-            <div class="proof-item"><strong>$2.3M+</strong> in student brand revenue</div>
-            <div class="proof-item"><strong>500+</strong> brands launched</div>
-            <div class="proof-item"><strong>4.9★</strong> average rating</div>
-            <div class="proof-item"><strong>47</strong> countries</div>
-            <div class="proof-item"><strong>$2.3M+</strong> in student brand revenue</div>
-            <div class="proof-item"><strong>500+</strong> brands launched</div>
-            <div class="proof-item"><strong>4.9★</strong> average rating</div>
-            <div class="proof-item"><strong>47</strong> countries</div>
+        <div class="container">
+            <div class="proof-scroll">
+                <div class="proof-item"><strong>$2.3M+</strong> in student brand revenue</div>
+                <div class="proof-item"><strong>500+</strong> brands launched</div>
+                <div class="proof-item"><strong>4.9★</strong> average rating</div>
+                <div class="proof-item"><strong>47</strong> countries</div>
+            </div>
         </div>
     </div>
 
