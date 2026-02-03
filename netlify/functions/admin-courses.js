@@ -85,7 +85,13 @@ exports.handler = async (event) => {
                         WHERE module_id = ${module.id}
                         ORDER BY sort_order ASC
                     `;
-                    module.lessons = lessons;
+                    // Add aliased fields for UI compatibility
+                    module.lessons = lessons.map(lesson => ({
+                        ...lesson,
+                        content_html: lesson.content,
+                        duration_minutes: lesson.video_duration,
+                        video_provider: lesson.video_id ? 'youtube' : null
+                    }));
                 }
 
                 course.modules = modules;

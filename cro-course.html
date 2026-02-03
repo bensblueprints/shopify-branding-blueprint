@@ -1279,33 +1279,83 @@
             });
         });
 
-        // Checkout button
+        // Checkout with Airwallex
         document.getElementById('checkout-btn').addEventListener('click', async (e) => {
             e.preventDefault();
 
-            // You can integrate with your existing checkout system here
-            // For now, redirect to a checkout page
+            const btn = e.target;
+            const originalText = btn.textContent;
+
+            // Prompt for email
+            const email = prompt('Enter your email address to continue:');
+            if (!email || !email.includes('@')) {
+                alert('Please enter a valid email address');
+                return;
+            }
+
+            btn.textContent = 'Processing...';
+            btn.style.pointerEvents = 'none';
+
             try {
-                const response = await fetch('/.netlify/functions/create-checkout', {
+                const response = await fetch('/.netlify/functions/create-payment', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        product: 'cro_blueprint',
-                        price: 1900
+                        email: email,
+                        product_key: 'cro_blueprint'
                     })
                 });
 
                 const data = await response.json();
-                if (data.url) {
-                    window.location.href = data.url;
+
+                if (data.success && data.intentId) {
+                    // Initialize Airwallex SDK and redirect to checkout
+                    const env = data.env === 'prod' ? 'prod' : 'demo';
+
+                    // Load Airwallex SDK if not already loaded
+                    if (!window.AirwallexComponentsSDK) {
+                        const script = document.createElement('script');
+                        script.src = 'https://static.airwallex.com/components/sdk/v1/index.js';
+                        script.onload = () => initAirwallex(data, env);
+                        document.head.appendChild(script);
+                    } else {
+                        await initAirwallex(data, env);
+                    }
+                } else {
+                    throw new Error(data.error || 'Failed to create payment');
                 }
             } catch (error) {
                 console.error('Checkout error:', error);
-                alert('There was an error processing your request. Please try again.');
+                alert(error.message || 'There was an error processing your request. Please try again.');
+                btn.textContent = originalText;
+                btn.style.pointerEvents = 'auto';
             }
         });
+
+        async function initAirwallex(data, env) {
+            try {
+                const { payments } = await window.AirwallexComponentsSDK.init({
+                    env: env,
+                    enabledElements: ['payments']
+                });
+
+                await payments.redirectToCheckout({
+                    env: env,
+                    mode: 'payment',
+                    intent_id: data.intentId,
+                    client_secret: data.clientSecret,
+                    currency: data.currency || 'USD',
+                    country_code: 'US',
+                    successUrl: data.successUrl,
+                    failUrl: data.failUrl
+                });
+            } catch (sdkError) {
+                console.error('Airwallex SDK error:', sdkError);
+                alert('Failed to initialize payment. Please try again.');
+            }
+        }
     </script>
 </body>
 </html>

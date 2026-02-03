@@ -91,6 +91,10 @@ exports.handler = async (event) => {
                 }
 
                 const lesson = lessons[0];
+                // Add aliased fields for UI compatibility
+                lesson.content_html = lesson.content;
+                lesson.duration_minutes = lesson.video_duration;
+                lesson.video_provider = lesson.video_id ? 'youtube' : null;
                 lesson.modules = {
                     title: lesson.module_title,
                     course_id: lesson.course_id,
@@ -132,12 +136,6 @@ exports.handler = async (event) => {
             }
 
             if (action === 'create') {
-                // Generate slug
-                const slug = title
-                    .toLowerCase()
-                    .replace(/[^a-z0-9]+/g, '-')
-                    .replace(/(^-|-$)/g, '');
-
                 // Get next sort order if not provided
                 let finalSortOrder = sort_order;
                 if (!finalSortOrder) {
@@ -150,9 +148,10 @@ exports.handler = async (event) => {
                     finalSortOrder = existing.length ? existing[0].sort_order + 1 : 1;
                 }
 
+                // Use existing column names (video_duration, content instead of duration_minutes, content_html)
                 const newLessons = await sql`
-                    INSERT INTO lessons (module_id, slug, title, description, video_url, video_id, duration_minutes, content_html, is_preview, is_published, sort_order)
-                    VALUES (${module_id}, ${slug}, ${title}, ${description || null}, ${video_url || null}, ${video_id}, ${duration_minutes || 0}, ${content_html || null}, ${is_preview || false}, ${is_published !== false}, ${finalSortOrder})
+                    INSERT INTO lessons (module_id, title, description, video_url, video_id, video_duration, content, sort_order)
+                    VALUES (${module_id}, ${title}, ${description || null}, ${video_url || null}, ${video_id}, ${duration_minutes || 0}, ${content_html || null}, ${finalSortOrder})
                     RETURNING *
                 `;
 
@@ -160,16 +159,15 @@ exports.handler = async (event) => {
             }
 
             if (action === 'update' && id) {
+                // Use existing column names (video_duration, content)
                 const updated = await sql`
                     UPDATE lessons
                     SET title = COALESCE(${title}, title),
                         description = COALESCE(${description}, description),
                         video_url = COALESCE(${video_url}, video_url),
                         video_id = COALESCE(${video_id}, video_id),
-                        duration_minutes = COALESCE(${duration_minutes}, duration_minutes),
-                        content_html = COALESCE(${content_html}, content_html),
-                        is_preview = COALESCE(${is_preview}, is_preview),
-                        is_published = COALESCE(${is_published}, is_published),
+                        video_duration = COALESCE(${duration_minutes}, video_duration),
+                        content = COALESCE(${content_html}, content),
                         sort_order = COALESCE(${sort_order}, sort_order)
                     WHERE id = ${id}
                     RETURNING *

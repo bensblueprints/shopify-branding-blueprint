@@ -9,6 +9,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/admin.css">
     <style>
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
         .product-grid {
             display: grid;
             gap: 20px;
@@ -36,6 +42,12 @@
             color: var(--gold);
             font-weight: 600;
         }
+        .product-meta {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 8px;
+        }
         .product-type {
             display: inline-block;
             padding: 4px 12px;
@@ -44,7 +56,6 @@
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            margin-top: 8px;
         }
         .product-type.membership {
             background: rgba(168, 85, 247, 0.2);
@@ -54,70 +65,35 @@
             background: rgba(59, 130, 246, 0.2);
             color: #3b82f6;
         }
-        .download-section {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
+        .product-type.course {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
         }
-        .download-section h4 {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+        .product-status {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 12px;
         }
-        .download-info {
-            background: rgba(0,0,0,0.2);
-            padding: 16px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .product-status.active {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
         }
-        .download-info .filename {
-            color: var(--text-primary);
-            font-weight: 500;
-        }
-        .download-info .filesize {
-            color: var(--text-muted);
-            font-size: 0.875rem;
-        }
-        .download-actions {
-            display: flex;
-            gap: 8px;
-        }
-        .no-download {
-            color: var(--text-muted);
-            font-style: italic;
-        }
-        .upload-form {
-            margin-top: 12px;
-        }
-        .upload-form input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-        }
-        .upload-form input[type="text"]:focus {
-            outline: none;
-            border-color: var(--gold);
-        }
-        .btn-small {
-            padding: 8px 16px;
-            font-size: 0.875rem;
+        .product-status.inactive {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
         }
         .product-description {
             color: var(--text-muted);
             font-size: 0.875rem;
-            margin-top: 8px;
-            line-height: 1.5;
+            margin-top: 12px;
+            line-height: 1.6;
+            max-height: 60px;
+            overflow: hidden;
         }
         .product-features {
             margin-top: 12px;
+            padding: 0;
+            list-style: none;
         }
         .product-features li {
             color: var(--text-secondary);
@@ -132,6 +108,56 @@
             left: 0;
             color: var(--gold);
         }
+        .product-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+        .download-section {
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+        .download-section h4 {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .download-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .download-info .filename {
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+        .download-info .filesize {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+        .no-download {
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 0.875rem;
+        }
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.875rem;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+        }
         .modal {
             display: none;
             position: fixed;
@@ -143,6 +169,8 @@
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            overflow-y: auto;
+            padding: 20px;
         }
         .modal.active {
             display: flex;
@@ -152,16 +180,28 @@
             border: 1px solid var(--border-color);
             border-radius: 16px;
             padding: 32px;
-            max-width: 500px;
-            width: 90%;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         .modal-header {
             margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .modal-header h3 {
             font-size: 1.5rem;
             color: var(--text-primary);
             margin: 0;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
         }
         .form-group {
             margin-bottom: 16px;
@@ -172,17 +212,42 @@
             font-size: 0.875rem;
             margin-bottom: 8px;
         }
-        .form-group input {
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
             width: 100%;
             padding: 12px;
             background: var(--bg-tertiary);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             color: var(--text-primary);
+            font-size: 0.875rem;
         }
-        .form-group input:focus {
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
             outline: none;
             border-color: var(--gold);
+        }
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .form-group.checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-group.checkbox input {
+            width: auto;
+        }
+        .form-group.checkbox label {
+            margin-bottom: 0;
         }
         .modal-actions {
             display: flex;
@@ -204,6 +269,19 @@
         .alert-error {
             background: rgba(239, 68, 68, 0.2);
             color: #ef4444;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        .product-key {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -266,8 +344,11 @@
             <div class="page-header">
                 <div>
                     <h1 class="page-title">Products</h1>
-                    <p class="page-subtitle">Manage your digital products and downloads</p>
+                    <p class="page-subtitle">Manage your digital products, prices, and downloads</p>
                 </div>
+                <button class="btn btn-primary" onclick="openCreateModal()">
+                    + Add New Product
+                </button>
             </div>
 
             <div id="alertContainer"></div>
@@ -278,39 +359,105 @@
         </main>
     </div>
 
-    <!-- Edit Download Modal -->
-    <div class="modal" id="downloadModal">
+    <!-- Create/Edit Product Modal -->
+    <div class="modal" id="productModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Set Download File</h3>
+                <h3 id="modalTitle">Add New Product</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
-            <form id="downloadForm">
+            <form id="productForm">
                 <input type="hidden" id="productId">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productName">Product Name *</label>
+                        <input type="text" id="productName" placeholder="e.g., SEO Checklist" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productPrice">Price (USD) *</label>
+                        <input type="number" id="productPrice" placeholder="27.00" step="0.01" min="0" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="productTitle">Display Title</label>
+                    <input type="text" id="productTitle" placeholder="Full display title for checkout">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productType">Product Type</label>
+                        <select id="productType">
+                            <option value="digital_download">Digital Download</option>
+                            <option value="course">Course</option>
+                            <option value="membership">Membership</option>
+                        </select>
+                    </div>
+                    <div class="form-group checkbox" style="align-self: flex-end; padding-bottom: 12px;">
+                        <input type="checkbox" id="productActive" checked>
+                        <label for="productActive">Active (visible in portal)</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="productDescription">Description</label>
+                    <textarea id="productDescription" placeholder="Product description shown on checkout and portal..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="productFeatures">Features (one per line)</label>
+                    <textarea id="productFeatures" placeholder="Feature 1&#10;Feature 2&#10;Feature 3"></textarea>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 24px 0;">
+                <h4 style="color: var(--gold); margin-bottom: 16px;">Download File</h4>
+
                 <div class="form-group">
                     <label for="downloadUrl">Download URL</label>
-                    <input type="url" id="downloadUrl" placeholder="https://example.com/file.zip" required>
+                    <input type="url" id="downloadUrl" placeholder="https://drive.google.com/... or direct file URL">
                     <small style="color: var(--text-muted); display: block; margin-top: 4px;">
-                        Upload your file to Google Drive, Dropbox, or any hosting service and paste the direct download link
+                        Upload to Google Drive, Dropbox, or your server and paste the direct download link
                     </small>
                 </div>
-                <div class="form-group">
-                    <label for="downloadFilename">Filename</label>
-                    <input type="text" id="downloadFilename" placeholder="product-file.zip" required>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="downloadFilename">Filename</label>
+                        <input type="text" id="downloadFilename" placeholder="product-file.pdf">
+                    </div>
+                    <div class="form-group">
+                        <label for="downloadSize">File Size</label>
+                        <input type="text" id="downloadSize" placeholder="2.5 MB">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="downloadSize">File Size (optional)</label>
-                    <input type="text" id="downloadSize" placeholder="2.5 MB">
-                </div>
+
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Download</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Save Product</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Delete Product?</h3>
+                <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+            </div>
+            <p style="color: var(--text-muted); margin-bottom: 24px;">
+                Are you sure you want to delete "<span id="deleteProductName"></span>"? This action cannot be undone.
+            </p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">Delete Product</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../js/auth.js"></script>
-    <script src="../js/api.js"></script>
     <script>
         // Check auth
         if (!auth.requireAdmin()) {
@@ -318,13 +465,15 @@
         }
 
         let products = [];
+        let editingProductId = null;
+        let deletingProductId = null;
 
         // Load products
         async function loadProducts() {
             try {
                 const response = await fetch('/.netlify/functions/admin-products', {
                     headers: {
-                        'Authorization': 'Bearer ' + auth.getAdminToken()
+                        'Authorization': 'Bearer ' + auth.getSessionToken()
                     }
                 });
 
@@ -336,7 +485,7 @@
             } catch (error) {
                 console.error('Error loading products:', error);
                 document.getElementById('productsGrid').innerHTML =
-                    '<div class="alert alert-error">Failed to load products</div>';
+                    '<div class="alert alert-error">Failed to load products: ' + error.message + '</div>';
             }
         }
 
@@ -344,7 +493,13 @@
             const grid = document.getElementById('productsGrid');
 
             if (products.length === 0) {
-                grid.innerHTML = '<div class="empty-state"><p>No products found</p></div>';
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <p>No products yet</p>
+                        <button class="btn btn-primary" style="margin-top: 16px;" onclick="openCreateModal()">
+                            Add Your First Product
+                        </button>
+                    </div>`;
                 return;
             }
 
@@ -352,42 +507,52 @@
                 <div class="product-card">
                     <div class="product-header">
                         <div>
-                            <h3 class="product-title">${product.name || product.title}</h3>
-                            <span class="product-type ${product.product_type}">${formatProductType(product.product_type)}</span>
+                            <h3 class="product-title">${escapeHtml(product.name || product.title)}</h3>
+                            <div class="product-meta">
+                                <span class="product-type ${product.product_type}">${formatProductType(product.product_type)}</span>
+                                <span class="product-status ${product.is_active ? 'active' : 'inactive'}">
+                                    ${product.is_active ? 'Active' : 'Inactive'}
+                                </span>
+                                <span class="product-key">${product.product_key || product.handle}</span>
+                            </div>
                         </div>
                         <div class="product-price">$${(product.price_cents / 100).toFixed(2)}</div>
                     </div>
 
-                    ${product.body_html ? `<p class="product-description">${stripHtml(product.body_html).substring(0, 150)}...</p>` : ''}
+                    ${product.body_html ? `<p class="product-description">${stripHtml(product.body_html)}</p>` : ''}
 
                     ${product.features && product.features.length ? `
                         <ul class="product-features">
-                            ${product.features.slice(0, 4).map(f => `<li>${f}</li>`).join('')}
+                            ${(Array.isArray(product.features) ? product.features : []).slice(0, 4).map(f => `<li>${escapeHtml(f)}</li>`).join('')}
+                            ${product.features.length > 4 ? `<li style="color: var(--text-muted);">+${product.features.length - 4} more</li>` : ''}
                         </ul>
                     ` : ''}
 
-                    ${product.product_type === 'digital_download' ? `
+                    ${product.product_type !== 'membership' ? `
                         <div class="download-section">
-                            <h4>Downloadable File</h4>
+                            <h4>Download File</h4>
                             ${product.download_url ? `
                                 <div class="download-info">
                                     <div>
-                                        <div class="filename">${product.download_filename || 'Download file'}</div>
-                                        ${product.download_size ? `<div class="filesize">${product.download_size}</div>` : ''}
+                                        <div class="filename">${escapeHtml(product.download_filename || 'Download file')}</div>
+                                        ${product.download_size ? `<div class="filesize">${escapeHtml(product.download_size)}</div>` : ''}
                                     </div>
-                                    <div class="download-actions">
-                                        <a href="${product.download_url}" target="_blank" class="btn btn-secondary btn-small">View</a>
-                                        <button class="btn btn-primary btn-small" onclick="openDownloadModal('${product.id}')">Edit</button>
-                                    </div>
+                                    <a href="${escapeHtml(product.download_url)}" target="_blank" class="btn btn-secondary btn-small">View</a>
                                 </div>
                             ` : `
                                 <p class="no-download">No download file set</p>
-                                <button class="btn btn-primary btn-small" style="margin-top: 8px;" onclick="openDownloadModal('${product.id}')">
-                                    Add Download File
-                                </button>
                             `}
                         </div>
                     ` : ''}
+
+                    <div class="product-actions">
+                        <button class="btn btn-primary btn-small" onclick="openEditModal('${product.id}')">
+                            Edit Product
+                        </button>
+                        <button class="btn btn-secondary btn-small" onclick="openDeleteModal('${product.id}')">
+                            Delete
+                        </button>
+                    </div>
                 </div>
             `).join('');
         }
@@ -395,7 +560,8 @@
         function formatProductType(type) {
             if (type === 'membership') return 'Membership';
             if (type === 'digital_download') return 'Digital Download';
-            return type || 'Unknown';
+            if (type === 'course') return 'Course';
+            return type || 'Product';
         }
 
         function stripHtml(html) {
@@ -404,53 +570,137 @@
             return tmp.textContent || tmp.innerText || '';
         }
 
-        function openDownloadModal(productId) {
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Modal functions
+        function openCreateModal() {
+            editingProductId = null;
+            document.getElementById('modalTitle').textContent = 'Add New Product';
+            document.getElementById('submitBtn').textContent = 'Create Product';
+            document.getElementById('productForm').reset();
+            document.getElementById('productActive').checked = true;
+            document.getElementById('productModal').classList.add('active');
+        }
+
+        function openEditModal(productId) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
 
+            editingProductId = productId;
+            document.getElementById('modalTitle').textContent = 'Edit Product';
+            document.getElementById('submitBtn').textContent = 'Save Changes';
+
             document.getElementById('productId').value = productId;
+            document.getElementById('productName').value = product.name || '';
+            document.getElementById('productTitle').value = product.title || '';
+            document.getElementById('productPrice').value = (product.price_cents / 100).toFixed(2);
+            document.getElementById('productType').value = product.product_type || 'digital_download';
+            document.getElementById('productActive').checked = product.is_active !== false;
+            document.getElementById('productDescription').value = product.body_html || '';
+
+            const features = Array.isArray(product.features) ? product.features.join('\n') : '';
+            document.getElementById('productFeatures').value = features;
+
             document.getElementById('downloadUrl').value = product.download_url || '';
             document.getElementById('downloadFilename').value = product.download_filename || '';
             document.getElementById('downloadSize').value = product.download_size || '';
 
-            document.getElementById('downloadModal').classList.add('active');
+            document.getElementById('productModal').classList.add('active');
         }
 
         function closeModal() {
-            document.getElementById('downloadModal').classList.remove('active');
+            document.getElementById('productModal').classList.remove('active');
+            editingProductId = null;
         }
 
-        // Handle form submission
-        document.getElementById('downloadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        function openDeleteModal(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
 
-            const productId = document.getElementById('productId').value;
-            const downloadUrl = document.getElementById('downloadUrl').value;
-            const downloadFilename = document.getElementById('downloadFilename').value;
-            const downloadSize = document.getElementById('downloadSize').value;
+            deletingProductId = productId;
+            document.getElementById('deleteProductName').textContent = product.name || product.title;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+            deletingProductId = null;
+        }
+
+        async function confirmDelete() {
+            if (!deletingProductId) return;
 
             try {
                 const response = await fetch('/.netlify/functions/admin-products', {
-                    method: 'PUT',
+                    method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + auth.getAdminToken()
+                        'Authorization': 'Bearer ' + auth.getSessionToken()
                     },
-                    body: JSON.stringify({
-                        id: productId,
-                        download_url: downloadUrl,
-                        download_filename: downloadFilename,
-                        download_size: downloadSize
-                    })
+                    body: JSON.stringify({ id: deletingProductId })
                 });
 
-                if (!response.ok) throw new Error('Failed to update product');
+                const data = await response.json();
 
-                showAlert('Download file updated successfully', 'success');
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to delete product');
+                }
+
+                showAlert('Product deleted successfully', 'success');
+                closeDeleteModal();
+                loadProducts();
+            } catch (error) {
+                showAlert('Failed to delete: ' + error.message, 'error');
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const productData = {
+                name: document.getElementById('productName').value,
+                title: document.getElementById('productTitle').value || document.getElementById('productName').value,
+                price_cents: Math.round(parseFloat(document.getElementById('productPrice').value) * 100),
+                product_type: document.getElementById('productType').value,
+                is_active: document.getElementById('productActive').checked,
+                body_html: document.getElementById('productDescription').value,
+                features: document.getElementById('productFeatures').value,
+                download_url: document.getElementById('downloadUrl').value || null,
+                download_filename: document.getElementById('downloadFilename').value || null,
+                download_size: document.getElementById('downloadSize').value || null
+            };
+
+            if (editingProductId) {
+                productData.id = editingProductId;
+            }
+
+            try {
+                const response = await fetch('/.netlify/functions/admin-products', {
+                    method: editingProductId ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + auth.getSessionToken()
+                    },
+                    body: JSON.stringify(productData)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to save product');
+                }
+
+                showAlert(editingProductId ? 'Product updated successfully' : 'Product created successfully', 'success');
                 closeModal();
                 loadProducts();
             } catch (error) {
-                showAlert('Failed to update product: ' + error.message, 'error');
+                showAlert('Failed to save product: ' + error.message, 'error');
             }
         });
 

@@ -249,19 +249,50 @@
     <script>
         // Product mapping
         const PRODUCTS = {
+            main_course: { name: '7-Day Shopify Branding Blueprint', icon: '📚' },
+            cro_blueprint: { name: 'E-commerce CRO Blueprint', icon: '📈' },
             canva_kit: { name: 'Done-For-You Canva Brand Kit', icon: '🎨' },
             email_swipe: { name: 'Email Sequence Swipe File', icon: '📧' },
             fb_ads: { name: 'Facebook Ads Masterclass', icon: '🎯' },
-            inner_circle: { name: "Brand Builder's Inner Circle", icon: '🚀' }
+            inner_circle: { name: "Brand Builder's Inner Circle", icon: '🚀' },
+            seo_checklist: { name: 'Ultimate Shopify SEO Checklist', icon: '🔍' }
         };
 
         // Get purchased products from URL
         const urlParams = new URLSearchParams(window.location.search);
         const purchased = urlParams.get('purchased');
+        const productKey = urlParams.get('product');
+        const orderId = urlParams.get('order_id');
 
-        if (purchased) {
+        const orderItems = document.getElementById('order-items');
+
+        // Handle single product from unified checkout
+        if (productKey) {
+            const product = PRODUCTS[productKey];
+            if (product) {
+                orderItems.innerHTML = `
+                    <div class="order-item">
+                        <div class="name">
+                            <span class="icon">${product.icon}</span>
+                            <span>${product.name}</span>
+                        </div>
+                        <span class="check">✓</span>
+                    </div>
+                `;
+            }
+
+            // Complete the order in backend
+            if (orderId) {
+                fetch('/.netlify/functions/complete-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ order_id: orderId, product_key: productKey })
+                }).catch(console.error);
+            }
+        }
+        // Handle multiple products (legacy format)
+        else if (purchased) {
             const products = purchased.split(',');
-            const orderItems = document.getElementById('order-items');
 
             products.forEach(key => {
                 const product = PRODUCTS[key];
