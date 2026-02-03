@@ -16,6 +16,15 @@ const MAIN_COURSE = {
     is_active: true
 };
 
+// Exit intent offer - $7 flash sale (same product, discounted)
+const EXIT_OFFER = {
+    id: 0,
+    product_key: 'exit_offer',
+    name: '7-Day Shopify Branding Blueprint - Flash Sale',
+    price_cents: 700,
+    is_active: true
+};
+
 async function getAccessToken() {
     const response = await fetch(`${AIRWALLEX_API_URL}/api/v1/authentication/login`, {
         method: 'POST',
@@ -117,6 +126,8 @@ exports.handler = async (event) => {
 
         if (productKey === 'main_course') {
             product = MAIN_COURSE;
+        } else if (productKey === 'exit_offer') {
+            product = EXIT_OFFER;
         } else {
             // Fetch from database
             const products = await sql`
@@ -149,9 +160,9 @@ exports.handler = async (event) => {
 
         // Determine success URL based on product type
         let successUrl;
-        if (productKey === 'main_course') {
-            // Main course goes to upsell page
-            successUrl = `${siteUrl}/upsell.html?provider=airwallex&order_id=${orderId}&cid=${customer.id}`;
+        if (productKey === 'main_course' || productKey === 'exit_offer') {
+            // Main course and exit offer go to upsell page
+            successUrl = `${siteUrl}/upsell.html?provider=airwallex&order_id=${orderId}&cid=${customer.id}&source=${productKey}`;
         } else {
             // Other products go to thank you page
             successUrl = `${siteUrl}/thank-you.html?provider=airwallex&order_id=${orderId}&product=${product.product_key}`;

@@ -1277,6 +1277,363 @@
         .delay-3 { animation-delay: 0.3s; }
         .delay-4 { animation-delay: 0.4s; }
         .delay-5 { animation-delay: 0.5s; }
+
+        /* Exit Intent Popup */
+        .exit-popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .exit-popup-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes urgentPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+            50% { box-shadow: 0 0 0 15px rgba(231, 76, 60, 0); }
+        }
+
+        .exit-popup {
+            background: linear-gradient(145deg, #1a1a1a, #111111);
+            border: 2px solid var(--red-accent);
+            border-radius: 24px;
+            max-width: 520px;
+            width: 90%;
+            padding: 0;
+            position: relative;
+            animation: popIn 0.4s ease;
+            overflow: hidden;
+            box-shadow: 0 25px 80px rgba(231, 76, 60, 0.3);
+        }
+
+        .exit-popup-header {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            padding: 20px 24px;
+            text-align: center;
+            position: relative;
+        }
+
+        .exit-popup-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .exit-popup-header h2 {
+            font-family: 'Instrument Serif', serif;
+            font-size: 28px;
+            color: white;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .exit-popup-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(0,0,0,0.3);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .exit-popup-close:hover {
+            background: rgba(0,0,0,0.5);
+            transform: rotate(90deg);
+        }
+
+        .exit-popup-body {
+            padding: 32px;
+            text-align: center;
+        }
+
+        .exit-timer-container {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--red-accent);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            animation: urgentPulse 2s infinite;
+        }
+
+        .exit-timer-label {
+            font-size: 14px;
+            color: var(--red-accent);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        .exit-timer {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .exit-timer-unit {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 12px 16px;
+            min-width: 70px;
+        }
+
+        .exit-timer-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--red-accent);
+            line-height: 1;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .exit-timer-text {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        .exit-offer-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+            color: var(--bg-primary);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .exit-popup-title {
+            font-family: 'Instrument Serif', serif;
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .exit-popup-title em {
+            color: var(--gold-primary);
+            font-style: italic;
+        }
+
+        .exit-popup-subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .exit-price-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .exit-price-old {
+            font-size: 28px;
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+
+        .exit-price-new {
+            font-size: 56px;
+            font-weight: 700;
+            color: var(--green-accent);
+        }
+
+        .exit-price-new sup {
+            font-size: 24px;
+            vertical-align: super;
+        }
+
+        .exit-savings {
+            background: rgba(39, 174, 96, 0.15);
+            color: var(--green-accent);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .exit-form {
+            margin-top: 24px;
+        }
+
+        .exit-email-input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid var(--border-subtle);
+            border-radius: 12px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 16px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .exit-email-input:focus {
+            outline: none;
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 0 4px rgba(212, 168, 83, 0.15);
+        }
+
+        .exit-email-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .exit-cta-button {
+            width: 100%;
+            padding: 18px 24px;
+            background: linear-gradient(135deg, var(--green-accent), #219a52);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .exit-cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(39, 174, 96, 0.4);
+        }
+
+        .exit-cta-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .exit-cta-button .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .exit-no-thanks {
+            margin-top: 16px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: underline;
+            transition: color 0.3s ease;
+        }
+
+        .exit-no-thanks:hover {
+            color: var(--text-secondary);
+        }
+
+        .exit-guarantee {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .exit-guarantee-icon {
+            color: var(--green-accent);
+        }
+
+        @media (max-width: 600px) {
+            .exit-popup {
+                width: 95%;
+                margin: 16px;
+            }
+
+            .exit-popup-body {
+                padding: 24px 20px;
+            }
+
+            .exit-popup-header h2 {
+                font-size: 22px;
+            }
+
+            .exit-popup-title {
+                font-size: 26px;
+            }
+
+            .exit-price-new {
+                font-size: 44px;
+            }
+
+            .exit-timer-unit {
+                min-width: 60px;
+                padding: 10px 12px;
+            }
+
+            .exit-timer-number {
+                font-size: 28px;
+            }
+        }
     </style>
     <!-- Airwallex SDK -->
     <script src="https://static.airwallex.com/components/sdk/v1/index.js"></script>
@@ -2099,6 +2456,238 @@
             el.style.transition = 'all 0.6s ease';
             observer.observe(el);
         });
+
+        // ==========================================
+        // EXIT INTENT POPUP - $7 Flash Sale
+        // ==========================================
+
+        let exitPopupShown = false;
+        let exitTimerInterval = null;
+        let exitTimeRemaining = 60;
+
+        // Check if popup was already shown in this session
+        if (sessionStorage.getItem('exitPopupShown')) {
+            exitPopupShown = true;
+        }
+
+        // Exit intent detection
+        document.addEventListener('mouseleave', function(e) {
+            // Only trigger when mouse leaves through the top of the page
+            if (e.clientY < 10 && !exitPopupShown) {
+                showExitPopup();
+            }
+        });
+
+        // Also detect on mobile when user scrolls up quickly (trying to leave)
+        let lastScrollTop = 0;
+        let scrollUpCount = 0;
+
+        window.addEventListener('scroll', function() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (scrollTop < lastScrollTop && scrollTop < 100) {
+                scrollUpCount++;
+                if (scrollUpCount > 3 && !exitPopupShown) {
+                    showExitPopup();
+                }
+            } else {
+                scrollUpCount = 0;
+            }
+
+            lastScrollTop = scrollTop;
+        });
+
+        function showExitPopup() {
+            if (exitPopupShown) return;
+
+            exitPopupShown = true;
+            sessionStorage.setItem('exitPopupShown', 'true');
+
+            const popup = document.getElementById('exit-popup-overlay');
+            popup.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            // Start the 60-second countdown
+            startExitTimer();
+        }
+
+        function hideExitPopup() {
+            const popup = document.getElementById('exit-popup-overlay');
+            popup.classList.remove('active');
+            document.body.style.overflow = '';
+
+            // Stop the timer
+            if (exitTimerInterval) {
+                clearInterval(exitTimerInterval);
+            }
+        }
+
+        function startExitTimer() {
+            exitTimeRemaining = 60;
+            updateExitTimerDisplay();
+
+            exitTimerInterval = setInterval(function() {
+                exitTimeRemaining--;
+                updateExitTimerDisplay();
+
+                if (exitTimeRemaining <= 0) {
+                    clearInterval(exitTimerInterval);
+                    hideExitPopup();
+                    // Show a "offer expired" message
+                    alert('Sorry, the flash sale has expired! You can still get the course for $27.');
+                }
+            }, 1000);
+        }
+
+        function updateExitTimerDisplay() {
+            const minutes = Math.floor(exitTimeRemaining / 60);
+            const seconds = exitTimeRemaining % 60;
+
+            document.getElementById('exit-minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('exit-seconds').textContent = seconds.toString().padStart(2, '0');
+        }
+
+        // Handle exit popup checkout
+        async function handleExitCheckout() {
+            const emailInput = document.getElementById('exit-email');
+            const email = emailInput.value.trim();
+            const button = document.getElementById('exit-cta-button');
+            const spinner = button.querySelector('.spinner');
+            const btnText = button.querySelector('.btn-text');
+
+            if (!email || !email.includes('@')) {
+                emailInput.style.borderColor = '#e74c3c';
+                emailInput.focus();
+                return;
+            }
+
+            // Show loading state
+            button.disabled = true;
+            spinner.style.display = 'inline-block';
+            btnText.textContent = 'Processing...';
+
+            try {
+                const response = await fetch('/.netlify/functions/create-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email,
+                        product_key: 'exit_offer'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.intentId) {
+                    const env = data.env === 'prod' ? 'prod' : 'demo';
+
+                    const { payments } = await window.AirwallexComponentsSDK.init({
+                        env: env,
+                        enabledElements: ['payments']
+                    });
+
+                    await payments.redirectToCheckout({
+                        env: env,
+                        mode: 'payment',
+                        intent_id: data.intentId,
+                        client_secret: data.clientSecret,
+                        currency: 'USD',
+                        country_code: 'US',
+                        successUrl: data.successUrl,
+                        failUrl: data.failUrl
+                    });
+                } else {
+                    throw new Error(data.error || 'Failed to create checkout');
+                }
+            } catch (error) {
+                console.error('Exit popup checkout error:', error);
+                alert(error.message || 'Something went wrong. Please try again.');
+                button.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = 'Claim My $7 Deal';
+            }
+        }
+
+        // Close popup on clicking outside
+        document.getElementById('exit-popup-overlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideExitPopup();
+            }
+        });
+
+        // Close on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const exitPopup = document.getElementById('exit-popup-overlay');
+                if (exitPopup.classList.contains('active')) {
+                    hideExitPopup();
+                }
+            }
+        });
+
+        // Allow enter to submit exit form
+        document.getElementById('exit-email').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleExitCheckout();
+            }
+        });
     </script>
+
+    <!-- Exit Intent Popup -->
+    <div id="exit-popup-overlay" class="exit-popup-overlay">
+        <div class="exit-popup">
+            <div class="exit-popup-header">
+                <h2>WAIT! Don't Leave Empty-Handed!</h2>
+                <button class="exit-popup-close" onclick="hideExitPopup()">&times;</button>
+            </div>
+
+            <div class="exit-popup-body">
+                <div class="exit-timer-container">
+                    <div class="exit-timer-label">This offer expires in:</div>
+                    <div class="exit-timer">
+                        <div class="exit-timer-unit">
+                            <div class="exit-timer-number" id="exit-minutes">01</div>
+                            <div class="exit-timer-text">Min</div>
+                        </div>
+                        <div class="exit-timer-unit">
+                            <div class="exit-timer-number" id="exit-seconds">00</div>
+                            <div class="exit-timer-text">Sec</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exit-offer-badge">One-Time Flash Sale</div>
+
+                <h3 class="exit-popup-title">Get the <em>Full Course</em> for Just $7</h3>
+                <p class="exit-popup-subtitle">That's 74% off the regular price. This deal won't be offered again.</p>
+
+                <div class="exit-price-container">
+                    <span class="exit-price-old">$27</span>
+                    <span class="exit-price-new"><sup>$</sup>7</span>
+                    <span class="exit-savings">Save $20!</span>
+                </div>
+
+                <div class="exit-form">
+                    <input
+                        type="email"
+                        id="exit-email"
+                        class="exit-email-input"
+                        placeholder="Enter your email address"
+                        autocomplete="email"
+                    >
+                    <button class="exit-cta-button" id="exit-cta-button" onclick="handleExitCheckout()">
+                        <span class="spinner"></span>
+                        <span class="btn-text">Claim My $7 Deal</span>
+                    </button>
+                    <button class="exit-no-thanks" onclick="hideExitPopup()">No thanks, I'll pass on this deal</button>
+                </div>
+
+                <div class="exit-guarantee">
+                    <span class="exit-guarantee-icon">🔒</span>
+                    <span>30-Day Money Back Guarantee • Instant Access</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
