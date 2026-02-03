@@ -1966,9 +1966,9 @@
             }
         }
 
-        // Airwallex Payment Handler
+        // Card Payment Handler (using Stripe redirect checkout)
         async function handleAirwallexCheckout(email) {
-            const response = await fetch('/.netlify/functions/create-airwallex-payment', {
+            const response = await fetch('/.netlify/functions/create-checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
@@ -1976,32 +1976,11 @@
 
             const data = await response.json();
 
-            if (data.success && data.intentId) {
-                // Initialize Airwallex SDK and redirect to checkout
-                const env = data.env === 'prod' ? 'prod' : 'demo';
-
-                try {
-                    const { payments } = await window.AirwallexComponentsSDK.init({
-                        env: env,
-                        enabledElements: ['payments']
-                    });
-
-                    await payments.redirectToCheckout({
-                        env: env,
-                        mode: 'payment',
-                        intent_id: data.intentId,
-                        client_secret: data.clientSecret,
-                        currency: data.currency || 'USD',
-                        country_code: 'US',
-                        successUrl: data.successUrl,
-                        failUrl: data.failUrl
-                    });
-                } catch (sdkError) {
-                    console.error('Airwallex SDK error:', sdkError);
-                    throw new Error('Failed to initialize payment checkout');
-                }
+            if (data.url) {
+                // Redirect to Stripe checkout
+                window.location.href = data.url;
             } else {
-                throw new Error(data.error || 'Failed to create payment');
+                throw new Error(data.error || 'Failed to create checkout');
             }
         }
 
