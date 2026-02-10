@@ -4,6 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thank You! | Shopify Branding Blueprint</title>
+    <!-- Meta Pixel Code -->
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1228788302168853');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1228788302168853&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Meta Pixel Code -->
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -247,15 +265,15 @@
     </div>
 
     <script>
-        // Product mapping
+        // Product mapping with prices for Meta Pixel tracking
         const PRODUCTS = {
-            main_course: { name: '7-Day Shopify Branding Blueprint', icon: '📚' },
-            cro_blueprint: { name: 'E-commerce CRO Blueprint', icon: '📈' },
-            canva_kit: { name: 'Done-For-You Canva Brand Kit', icon: '🎨' },
-            email_swipe: { name: 'Email Sequence Swipe File', icon: '📧' },
-            fb_ads: { name: 'Facebook Ads Masterclass', icon: '🎯' },
-            inner_circle: { name: "Brand Builder's Inner Circle", icon: '🚀' },
-            seo_checklist: { name: 'Ultimate Shopify SEO Checklist', icon: '🔍' }
+            main_course: { name: '7-Day Shopify Branding Blueprint', icon: '📚', price: 47.00 },
+            cro_blueprint: { name: 'E-commerce CRO Blueprint', icon: '📈', price: 37.00 },
+            canva_kit: { name: 'Done-For-You Canva Brand Kit', icon: '🎨', price: 27.00 },
+            email_swipe: { name: 'Email Sequence Swipe File', icon: '📧', price: 17.00 },
+            fb_ads: { name: 'Facebook Ads Masterclass', icon: '🎯', price: 47.00 },
+            inner_circle: { name: "Brand Builder's Inner Circle", icon: '🚀', price: 97.00 },
+            seo_checklist: { name: 'Ultimate Shopify SEO Checklist', icon: '🔍', price: 17.00 }
         };
 
         // Get purchased products from URL
@@ -309,6 +327,39 @@
                     orderItems.appendChild(item);
                 }
             });
+        }
+
+        // Meta Pixel Purchase Event Tracking
+        if (typeof fbq !== 'undefined') {
+            if (productKey && PRODUCTS[productKey]) {
+                const product = PRODUCTS[productKey];
+                fbq('track', 'Purchase', {
+                    content_name: product.name,
+                    content_ids: [productKey],
+                    content_type: 'product',
+                    value: product.price,
+                    currency: 'USD'
+                });
+            } else if (purchased) {
+                const productKeys = purchased.split(',');
+                let totalValue = 0;
+                const contentIds = [];
+                productKeys.forEach(key => {
+                    if (PRODUCTS[key]) {
+                        totalValue += PRODUCTS[key].price;
+                        contentIds.push(key);
+                    }
+                });
+                if (contentIds.length > 0) {
+                    fbq('track', 'Purchase', {
+                        content_ids: contentIds,
+                        content_type: 'product',
+                        value: totalValue,
+                        currency: 'USD',
+                        num_items: contentIds.length
+                    });
+                }
+            }
         }
     </script>
 </body>
